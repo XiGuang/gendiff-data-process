@@ -1,0 +1,25 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+.vscode/
+yingrenshi*/
+*yingrenshi/
+
+data/
+
+*.png
+*.jpg
+*.npz
+*.pt
+*.obj
+*.yaml
+*.ply
+*.mtl
