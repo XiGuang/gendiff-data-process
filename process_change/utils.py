@@ -26,7 +26,7 @@ def import_obj_files(folder_path):
         # 导入OBJ文件
         bpy.ops.wm.obj_import(filepath=obj_file, use_split_objects=False)
         # 获取刚导入的对象
-        bpy.context.active_object.name = obj_file.split("\\")[-1].split(".")[0]
+        bpy.context.active_object.name = obj_file.split("\\")[-1].split("/")[-1].split(".")[0]
         imported_objects.extend(bpy.context.selected_objects)
     
     return imported_objects
@@ -70,7 +70,7 @@ def perform_boolean_intersection(target_obj, cutter_obj, epsilon = 1e-4):
     # 为目标对象添加布尔修改器
     bool_modifier = target_obj.modifiers.new(name="Boolean", type='BOOLEAN')
     bool_modifier.operation = 'INTERSECT'
-    bool_modifier.solver = 'FAST'
+    bool_modifier.solver = 'EXACT'
     bool_modifier.double_threshold = 0.000001
     bool_modifier.object = cutter_obj
     

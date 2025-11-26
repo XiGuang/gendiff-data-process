@@ -32,7 +32,7 @@ def build_child_cmd(python_exec: str, script_path: str, args, subdirs_file: str,
         script_path,
         "--folder", args.folder,
         "--building_model_folder", args.building_model_folder,
-        # "--ground_model_folder", args.ground_model_folder,
+        "--ground_model_folder", args.ground_model_folder,
         "--sample_points_num", str(args.sample_points_num),
         "--workers", str(inner_workers),
         "--subdirs_file", subdirs_file,
@@ -44,7 +44,7 @@ def main():
     parser = argparse.ArgumentParser(description="Split YAML subfolders across multiple processes to accelerate processing.")
     parser.add_argument("--folder", type=str, required=True, help="包含多个 data.yaml 子目录的父路径")
     parser.add_argument("--building_model_folder", type=str, required=True, help="建筑模型OBJ根目录")
-    # parser.add_argument("--ground_model_folder", type=str, required=True, help="地面模型OBJ根目录")
+    parser.add_argument("--ground_model_folder", type=str, required=True, help="地面模型OBJ根目录")
     parser.add_argument("--sample_points_num", type=int, default=65536, help="每个模型采样的点数")
     parser.add_argument("--procs", type=int, default=2, help="并行的外层进程数（即同时启动的实例数）")
     parser.add_argument("--inner_workers", type=int, default=0, help="传递给子进程的 --workers（<=0 自动=CPU核数/进程数）")
