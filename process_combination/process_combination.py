@@ -13,7 +13,7 @@ def load_change_point_clouds(t1_dir, t2_dir, num_points=65536):
     with open(os.path.join(t2_dir, "data.yaml"), "r") as f:
         t2_data = yaml.safe_load(f)
     new_building=set(t2_data['building_names']) - set(t1_data['building_names'])
-    # new_ground=set(t2_data['ground_names']) - set(t1_data['ground_names'])
+    new_ground=set(t2_data['ground_names']) - set(t1_data['ground_names'])
 
     point_clouds=[]
     for name in new_building:
@@ -22,11 +22,11 @@ def load_change_point_clouds(t1_dir, t2_dir, num_points=65536):
             # 使用内存映射以减少峰值内存
             pc_data = np.load(pc_path, mmap_mode='r')
             point_clouds.append(pc_data['fps_points'])
-    # for name in new_ground:
-    #     pc_path=os.path.join(t2_dir,'ground',f'{name}.npz')
-    #     if os.path.exists(pc_path):
-    #         pc_data = np.load(pc_path, mmap_mode='r')
-    #         point_clouds.append(pc_data['fps_points'])
+    for name in new_ground:
+        pc_path=os.path.join(t2_dir,'ground',f'{name}.npz')
+        if os.path.exists(pc_path):
+            pc_data = np.load(pc_path, mmap_mode='r')
+            point_clouds.append(pc_data['fps_points'])
     if len(point_clouds)==0:
         return None
     point_clouds = np.concatenate(point_clouds, axis=0)  # (M, 3)

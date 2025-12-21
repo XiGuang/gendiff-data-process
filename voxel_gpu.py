@@ -136,7 +136,7 @@ def filter_forward_hits(
 
 
 def build_base_voxel_layer(voxels: trimesh.voxel.VoxelGrid, layer_index: int) -> trimesh.voxel.VoxelGrid:
-    matrix = voxels.matrix.copy()
+    matrix = np.zeros(voxels.matrix.shape,dtype=bool)
     y_index = int(np.clip(layer_index, 0, matrix.shape[1] - 1))
     xz_footprint = matrix.any(axis=1)
     matrix[:, y_index, :] |= xz_footprint

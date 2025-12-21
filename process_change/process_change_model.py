@@ -29,7 +29,7 @@ def get_may_change_models(t1_yaml:str):
         data1 = yaml.safe_load(f)
 
     new_building_models = set(data1['building_names'])
-    new_ground_models = set([f'ground{n}' for n in data1['ground_indices']])
+    new_ground_models = set([n for n in data1['ground_indices']])
 
     position=data1['position']
 
@@ -69,7 +69,7 @@ def process_change_model(yaml: str, save_dir: str, building_models, ground_model
     new_building_models, new_ground_models, position, size = get_may_change_models(yaml)
 
     building_model_objs = [obj for obj in building_models if obj.name in new_building_models]
-    # ground_model_objs = [obj for obj in ground_models if obj.name in new_ground_models]
+    ground_model_objs = [ground_models[n] for n in new_ground_models] # [obj for obj in ground_models if obj.name in new_ground_models]
 
     building_out = os.path.join(save_dir, "building")
     ground_out = os.path.join(save_dir, "ground")
@@ -85,12 +85,12 @@ def process_change_model(yaml: str, save_dir: str, building_models, ground_model
         name, obj_path = exported
         tasks.append((obj_path, building_out, name, sample_points_num))
 
-    # for obj in ground_model_objs:
-    #     exported = export_clipped_obj(obj, ground_out, position, size)
-    #     if exported is None:
-    #         continue
-    #     name, obj_path = exported
-    #     tasks.append((obj_path, ground_out, name, sample_points_num))
+    for obj in ground_model_objs:
+        exported = export_clipped_obj(obj, ground_out, position, size)
+        if exported is None:
+            continue
+        name, obj_path = exported
+        tasks.append((obj_path, ground_out, name, sample_points_num))
 
     if not tasks:
         print(f"无可处理任务，跳过{os.path.basename(save_dir)}")
@@ -131,11 +131,11 @@ if __name__ == "__main__":
     for obj in building_models:
         obj.name = obj.name.split("/")[-1].split(".")[0]  # 仅保留文件名作为对象名
     building_models.sort(key=lambda x: tuple(map(int, re.findall(r'\d+', x.name))))
-    # ground_models = import_obj_files(ground_model_folder)
-    # for obj in ground_models:
-    #     obj.name = obj.name.split("/")[-1].split(".")[0]  # 仅保留文件名作为对象名
-    # ground_models.sort(key=lambda x: tuple(map(int, re.findall(r'\d+', x.name))))
-    ground_models = []
+    ground_models = import_obj_files(ground_model_folder)
+    for obj in ground_models:
+        obj.name = obj.name.split("/")[-1].split(".")[0]  # 仅保留文件名作为对象名
+    ground_models.sort(key=lambda x: tuple(map(int, re.findall(r'\d+', x.name))))
+    # ground_models = []
 
     # 计算要处理的子目录列表
     target_names = None

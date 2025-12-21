@@ -2,8 +2,8 @@ import os
 import yaml
 import random
 
-dataset_folder="/mnt/d/data/data/block/yuehai_building_block_fast"
-condition_folder="/mnt/d/data/data/condition/yuehai_building_fast_combination_rotate"
+dataset_folder="/mnt/d/data/data/block/yuehai_building_block_exact"
+condition_folder="/mnt/d/data/data/condition/yuehai_building_and_ground_combinations_rotate"
 # 可通过环境变量控制验证集比例与随机种子
 VAL_RATIO = float(os.getenv("VAL_RATIO", "0.0"))  # 0~1 之间的小数，默认 10%
 SPLIT_SEED = int(os.getenv("SPLIT_SEED", "42"))
@@ -53,16 +53,18 @@ def generate_pairs_for_group(a, b, max_c):
             with open(f"{dataset_folder}/{a}_{b}_{i}/data.yaml",'r') as f:
                 t1_data=yaml.load(f,Loader=yaml.FullLoader)
                 t1_building=set(t1_data['building_indices'])
+                t1_ground=set(t1_data['ground_indices'])
             with open(f"{dataset_folder}/{a}_{b}_{j}/data.yaml",'r') as f:
                 t2_data=yaml.load(f,Loader=yaml.FullLoader)
                 t2_building=set(t2_data['building_indices'])
+                t2_ground=set(t2_data['ground_indices'])
 
             # if len(t1_building) > 0 and not os.path.exists(f"{dataset_folder}/{a}_{b}_{i}/kl_embed/{a}_{b}_{i}_r0.pt"): # building_normalized
             #     continue
             # if len(t2_building) > 0 and not os.path.exists(f"{dataset_folder}/{a}_{b}_{j}/kl_embed/{a}_{b}_{j}_r0.pt"):
             #     continue
 
-            if len(t2_building - t1_building) > 0 and len(t1_building - t2_building) == 0:
+            if (len(t2_building - t1_building) > 0 and len(t1_building - t2_building) == 0) or (len(t2_ground - t1_ground) > 0 and len(t1_ground - t2_ground) == 0):
                 pairs.append({
                     "t1": f"{dataset_folder}/{a}_{b}_{i}",
                     "t2": f"{dataset_folder}/{a}_{b}_{j}",
@@ -82,5 +84,5 @@ for (a, b), max_c in prefix_to_max_third.items():
 with open("train.yaml", "w") as f:
     yaml.dump(train_combinations, f)
 
-with open("val.yaml", "w") as f:
-    yaml.dump(val_combinations, f)
+# with open("val.yaml", "w") as f:
+#     yaml.dump(val_combinations, f)
