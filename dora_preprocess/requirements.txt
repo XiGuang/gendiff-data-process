@@ -1,0 +1,10 @@
+argparse
+trimesh
+tqdm
+pysdf
+fpsample
+open3d==0.18.0
+bpy==4.0.0
+numpy==1.26.4
+point_cloud_utils
+scikit-image
