@@ -64,6 +64,11 @@ def generate_pairs_for_group(a, b, max_c):
             # if len(t2_building) > 0 and not os.path.exists(f"{dataset_folder}/{a}_{b}_{j}/kl_embed/{a}_{b}_{j}_r0.pt"):
             #     continue
 
+            if i!=0 and not os.path.exists(f"{dataset_folder}/{a}_{b}_{i}/kl_embed/{a}_{b}_{i}_r0.pt"):
+                continue
+            if j!=0 and not os.path.exists(f"{dataset_folder}/{a}_{b}_{j}/kl_embed/{a}_{b}_{j}_r0.pt"):
+                continue
+
             if (len(t2_building - t1_building) > 0 and len(t1_building - t2_building) == 0) or (len(t2_ground - t1_ground) > 0 and len(t1_ground - t2_ground) == 0):
                 pairs.append({
                     "t1": f"{dataset_folder}/{a}_{b}_{i}",
