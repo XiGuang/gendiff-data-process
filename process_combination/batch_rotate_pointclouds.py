@@ -37,9 +37,17 @@ def _process_file(file_path: str, output_dir: str, overwrite: bool) -> Tuple[str
     out_dir = Path(output_dir)
 
     try:
-        tensor = torch.load(path, map_location="cpu")
-        if not isinstance(tensor, torch.Tensor):
-            raise TypeError(f"Expected torch.Tensor, got {type(tensor)!r}")
+        data = torch.load(path, map_location="cpu")
+        if isinstance(data, dict):
+            if 'points' in data:
+                tensor = data['points']
+            else:
+                # 如果字典里没有 points key，抛出异常
+                raise KeyError(f"Loaded dict but 'points' key is missing. Keys found: {list(data.keys())}")
+        elif isinstance(data, torch.Tensor):
+            tensor = data
+        else:
+            raise TypeError(f"Expected torch.Tensor or dict, got {type(data)!r}")
         if tensor.ndim != 2 or tensor.shape[1] != 3:
             raise ValueError(f"Tensor {path.name} must have shape (N, 3), found {tuple(tensor.shape)}")
 
@@ -116,7 +124,8 @@ def main() -> None:
             completed += 1
             ok, msg = future.result()[1:]
             status = "OK" if ok else "ERR"
-            print(f"[{completed}/{len(files)}][{status}] {filename}: {msg}")
+            if status == "ERR":
+                print(f"[{completed}/{len(files)}][{status}] {filename}: {msg}")
 
 
 if __name__ == "__main__":

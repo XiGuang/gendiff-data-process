@@ -129,8 +129,8 @@ def convert_pt_to_ply(input_pt: str, output_ply: Optional[str] = None, binary: b
 
 def main(argv: Optional[list[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Convert a .pt point cloud to .ply")
-    parser.add_argument("--input", required=True, help="Path to input .pt file")
-    parser.add_argument("--output", default=None, help="Path to output .ply file (default: replace .pt suffix)")
+    parser.add_argument("input", help="Path to input .pt file")
+    parser.add_argument("output", default=None, help="Path to output .ply file (default: replace .pt suffix)")
     parser.add_argument("--binary", action="store_true", help="Write binary little-endian PLY instead of ASCII")
     args = parser.parse_args(argv)
 
