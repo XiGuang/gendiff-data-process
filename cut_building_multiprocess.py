@@ -185,8 +185,8 @@ def process_chunk(chunk: ChunkTask, building_models, output_folder, cube_size, t
         pieces = [copy_model(building_models[idx]) for idx in building_indices]
         if pieces:
             merged_piece = merge_objects(pieces, f"bs_{chunk.i}_{chunk.j}_{k}")
-            b_piece = perform_boolean_intersection(merged_piece, cube, epsilon=1e-2)
-            # b_piece = retain_faces_in_cube(merged_piece, (chunk.cube_x, chunk.cube_y, cube_z), cube_size,'all')
+            # b_piece = perform_boolean_intersection(merged_piece, cube, epsilon=1e-2)
+            b_piece = retain_faces_in_cube(merged_piece, (chunk.cube_x, chunk.cube_y, cube_z), cube_size,'all')
             export_object_as_obj(b_piece, chunk_folder, use_coordinates=False)
         data = {
             "position": [chunk.cube_x, cube_z, -chunk.cube_y],

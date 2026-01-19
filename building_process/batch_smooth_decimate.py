@@ -23,11 +23,11 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Batch apply Smooth + Decimate modifiers to OBJ files.")
     parser.add_argument("--input_dir", "-i", required=True, help="Input directory with .obj files")
     parser.add_argument("--output_dir", "-o", required=True, help="Output directory for processed .obj files")
-    parser.add_argument("--smooth_iterations", "--laplacian_iterations", dest="smooth_iterations", type=int, default=1,
+    parser.add_argument("--smooth_iterations", "--laplacian_iterations", dest="smooth_iterations", type=int, default=5,
                         help="Iterations for Smooth modifier")
-    parser.add_argument("--smooth_factor", "--laplacian_lambda", dest="smooth_factor", type=float, default=1.0,
+    parser.add_argument("--smooth_factor", "--laplacian_lambda", dest="smooth_factor", type=float, default=2,
                         help="Factor for Smooth modifier")
-    parser.add_argument("--decimate_ratio", type=float, default=0.5, help="Ratio for Decimate modifier (0~1)")
+    parser.add_argument("--decimate_ratio", type=float, default=0.02, help="Ratio for Decimate modifier (0~1)")
     parser.add_argument("--suffix", type=str, default=None, help="Suffix for output file name")
     parser.add_argument("--num_workers", type=int, default=1, help="Number of parallel processes (>=1)")
     parser.add_argument("--chunk_size", type=int, default=1, help="How many files a worker processes sequentially (>=1)")

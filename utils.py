@@ -70,7 +70,7 @@ def perform_boolean_intersection(target_obj, cutter_obj, epsilon = 1e-4):
     # 为目标对象添加布尔修改器
     bool_modifier = target_obj.modifiers.new(name="Boolean", type='BOOLEAN')
     bool_modifier.operation = 'INTERSECT'
-    bool_modifier.solver = 'FAST'
+    bool_modifier.solver = 'EXACT'
     bool_modifier.double_threshold = 0.000001
     bool_modifier.object = cutter_obj
     

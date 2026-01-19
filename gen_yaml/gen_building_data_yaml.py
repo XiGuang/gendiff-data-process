@@ -1,12 +1,15 @@
 import os
 import yaml
 import random
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from multiprocessing import Manager
 
-dataset_folder="/mnt/d/data/data/block/yuehai_building_block_fast"
-condition_folder="/mnt/d/data/data/condition/yuehai_building_fast_combination_rotate"
+dataset_folder="/mnt/d/data/data/block/lihu_building_fast"
+condition_folder="/mnt/d/data/data/condition/lihu_fast_building_ground_vggt_rotate"
 # 可通过环境变量控制验证集比例与随机种子
 VAL_RATIO = float(os.getenv("VAL_RATIO", "0.0"))  # 0~1 之间的小数，默认 10%
 SPLIT_SEED = int(os.getenv("SPLIT_SEED", "42"))
+MAX_WORKERS = int(os.getenv("MAX_WORKERS", "60"))  # 进程数，可通过环境变量控制
 # 直接从dataset_folder读取split文件
 # split_file = os.path.join(dataset_folder, "test.lst")
 # with open(split_file, "r") as f:
@@ -43,6 +46,50 @@ if VAL_RATIO > 0 and val_group_count == 0 and len(group_keys) > 0:
 val_keys = set(group_keys[:val_group_count])
 train_keys = set(group_keys[val_group_count:])
 
+# 共享缓存（通过 multiprocessing.Manager 提供跨进程共享内存能力）
+BUILDING_CACHE = None
+CACHE_LOCK = None
+LOCAL_CACHE = {}
+
+
+def _init_worker(cache, lock):
+    """初始化子进程的共享缓存引用。"""
+    global BUILDING_CACHE, CACHE_LOCK
+    BUILDING_CACHE = cache
+    CACHE_LOCK = lock
+
+
+def _load_building_indices(folder_path):
+    """读取并缓存 building_indices，优先使用共享内存，减少重复 IO。"""
+    global BUILDING_CACHE, CACHE_LOCK
+
+    # 优先使用共享缓存
+    if BUILDING_CACHE is not None:
+        cached = BUILDING_CACHE.get(folder_path)
+        if cached is not None:
+            return cached
+        with CACHE_LOCK:
+            cached = BUILDING_CACHE.get(folder_path)
+            if cached is not None:
+                return cached
+            data_path = os.path.join(folder_path, "data.yaml")
+            with open(data_path, "r") as f:
+                data = yaml.load(f, Loader=yaml.FullLoader)
+            building = frozenset(data["building_indices"])
+            BUILDING_CACHE[folder_path] = building
+            return building
+
+    # 回退到本地缓存（单进程运行时减少重复 IO）
+    cached = LOCAL_CACHE.get(folder_path)
+    if cached is not None:
+        return cached
+    data_path = os.path.join(folder_path, "data.yaml")
+    with open(data_path, "r") as f:
+        data = yaml.load(f, Loader=yaml.FullLoader)
+    building = frozenset(data["building_indices"])
+    LOCAL_CACHE[folder_path] = building
+    return building
+
 def generate_pairs_for_group(a, b, max_c):
     pairs = []
     upper = max_c + 1
@@ -50,12 +97,10 @@ def generate_pairs_for_group(a, b, max_c):
         for j in range(upper):
             if i == j:
                 continue
-            with open(f"{dataset_folder}/{a}_{b}_{i}/data.yaml",'r') as f:
-                t1_data=yaml.load(f,Loader=yaml.FullLoader)
-                t1_building=set(t1_data['building_indices'])
-            with open(f"{dataset_folder}/{a}_{b}_{j}/data.yaml",'r') as f:
-                t2_data=yaml.load(f,Loader=yaml.FullLoader)
-                t2_building=set(t2_data['building_indices'])
+            t1_folder = f"{dataset_folder}/{a}_{b}_{i}"
+            t2_folder = f"{dataset_folder}/{a}_{b}_{j}"
+            t1_building = _load_building_indices(t1_folder)
+            t2_building = _load_building_indices(t2_folder)
 
             # if len(t1_building) > 0 and not os.path.exists(f"{dataset_folder}/{a}_{b}_{i}/kl_embed/{a}_{b}_{i}_r0.pt"): # building_normalized
             #     continue
@@ -70,17 +115,47 @@ def generate_pairs_for_group(a, b, max_c):
                 })
     return pairs
 
-train_combinations = []
-val_combinations = []
+def _process_group(item):
+    (a, b), max_c = item
+    is_val = (a, b) in val_keys
+    pairs = generate_pairs_for_group(a, b, max_c)
+    return is_val, pairs
 
-for (a, b), max_c in prefix_to_max_third.items():
-    if (a, b) in val_keys:
-        val_combinations.extend(generate_pairs_for_group(a, b, max_c))
-    else:
-        train_combinations.extend(generate_pairs_for_group(a, b, max_c))
 
-with open("train.yaml", "w") as f:
-    yaml.dump(train_combinations, f)
+def main():
+    train_combinations = []
+    val_combinations = []
 
-with open("val.yaml", "w") as f:
-    yaml.dump(val_combinations, f)
+    items = list(prefix_to_max_third.items())
+    workers = max(1, min(MAX_WORKERS, len(items)))
+
+    # if not items:
+    #     with open("longhua_building1.yaml", "w") as f:
+    #         yaml.dump(train_combinations, f)
+    #     with open("val.yaml", "w") as f:
+    #         yaml.dump(val_combinations, f)
+    #     return
+
+    with Manager() as manager:
+        cache = manager.dict()
+        lock = manager.Lock()
+        with ProcessPoolExecutor(
+            max_workers=workers, initializer=_init_worker, initargs=(cache, lock)
+        ) as executor:
+            future_to_item = {executor.submit(_process_group, item): item for item in items}
+            for future in as_completed(future_to_item):
+                is_val, pairs = future.result()
+                if is_val:
+                    val_combinations.extend(pairs)
+                else:
+                    train_combinations.extend(pairs)
+
+    with open("lihu_building_train.yaml", "w") as f:
+        yaml.dump(train_combinations, f)
+
+    with open("lihu_building_val.yaml", "w") as f:
+        yaml.dump(val_combinations, f)
+
+
+if __name__ == "__main__":
+    main()

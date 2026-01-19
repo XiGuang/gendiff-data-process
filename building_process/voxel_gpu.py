@@ -138,7 +138,7 @@ def filter_forward_hits(
 def build_base_voxel_layer(voxels: trimesh.voxel.VoxelGrid, layer_index: int) -> trimesh.voxel.VoxelGrid:
     matrix = np.zeros(voxels.matrix.shape,dtype=bool)
     y_index = int(np.clip(layer_index, 0, matrix.shape[1] - 1))
-    xz_footprint = matrix.any(axis=1)
+    xz_footprint = voxels.matrix.any(axis=1)
     matrix[:, y_index, :] |= xz_footprint
     return trimesh.voxel.VoxelGrid(
         encoding=matrix,
@@ -227,12 +227,12 @@ def process_one_mesh(
 
     mesh = trimesh.load_mesh(mesh_path)
     # 如果 Y 轴高度（bounds 的 max_y - min_y）大于 70，则跳过
-    height_y = float(mesh.bounds[1][1] - mesh.bounds[0][1])
-    if height_y > 70.0:
-        print(
-            f"[PID {mp.current_process().pid}] Skip {mesh_path} because height_y={height_y:.3f} > 70.0",
-        )
-        return
+    # height_y = float(mesh.bounds[1][1] - mesh.bounds[0][1])
+    # if height_y > 70.0:
+    #     print(
+    #         f"[PID {mp.current_process().pid}] Skip {mesh_path} because height_y={height_y:.3f} > 70.0",
+    #     )
+    #     return
 
     print(f"[PID {mp.current_process().pid}] Loaded mesh with extents {mesh.extents} and bounds {mesh.bounds}")
 

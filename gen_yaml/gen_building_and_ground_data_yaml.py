@@ -2,8 +2,8 @@ import os
 import yaml
 import random
 
-dataset_folder="/mnt/d/data/data/block/yuehai_building_block_exact"
-condition_folder="/mnt/d/data/data/condition/yuehai_building_and_ground_combinations_rotate"
+dataset_folder="/mnt/d/data/data/block/longhua_building_fast"
+condition_folder="/mnt/d/data/data/condition/longhua_fast_building_and_ground_combinations_rotate"
 # 可通过环境变量控制验证集比例与随机种子
 VAL_RATIO = float(os.getenv("VAL_RATIO", "0.0"))  # 0~1 之间的小数，默认 10%
 SPLIT_SEED = int(os.getenv("SPLIT_SEED", "42"))
@@ -64,10 +64,10 @@ def generate_pairs_for_group(a, b, max_c):
             # if len(t2_building) > 0 and not os.path.exists(f"{dataset_folder}/{a}_{b}_{j}/kl_embed/{a}_{b}_{j}_r0.pt"):
             #     continue
 
-            if i!=0 and not os.path.exists(f"{dataset_folder}/{a}_{b}_{i}/kl_embed/{a}_{b}_{i}_r0.pt"):
-                continue
-            if j!=0 and not os.path.exists(f"{dataset_folder}/{a}_{b}_{j}/kl_embed/{a}_{b}_{j}_r0.pt"):
-                continue
+            # if i!=0 and not os.path.exists(f"{dataset_folder}/{a}_{b}_{i}/kl_embed/{a}_{b}_{i}_r0.pt"):
+            #     continue
+            # if j!=0 and not os.path.exists(f"{dataset_folder}/{a}_{b}_{j}/kl_embed/{a}_{b}_{j}_r0.pt"):
+            #     continue
 
             if (len(t2_building - t1_building) > 0 and len(t1_building - t2_building) == 0) or (len(t2_ground - t1_ground) > 0 and len(t1_ground - t2_ground) == 0):
                 pairs.append({

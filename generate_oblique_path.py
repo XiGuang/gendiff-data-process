@@ -24,10 +24,12 @@ from __future__ import annotations
 import argparse
 import math
 import pathlib
+import sys
 from dataclasses import dataclass
 from typing import Iterable, List, Sequence
 
 import matplotlib.pyplot as plt
+from list_obj_bboxes import collect_obj_files, combine, compute_bbox, format_bbox
 
 
 def positive_float(value: float, *, name: str) -> float:
@@ -106,6 +108,20 @@ def compute_vertical_fov(hfov_rad: float, image_width: int, image_height: int) -
     aspect = image_height / image_width
     return 2.0 * math.atan(aspect * math.tan(hfov_rad * 0.5))
 
+def ceil_to_factor(value, factor):
+    """
+    将一个值向上取整到最接近的指定因子的倍数。
+
+    参数:
+    value (float/int): 需要取整的值。
+    factor (float/int): 倍数因子（必须 > 0）。
+
+    返回:
+    float/int: value 向上取整后的因子倍数。
+    """
+    if factor <= 0:
+        raise ValueError("因子 (factor) 必须是正数。")
+    return math.ceil(value / factor) * factor
 
 def serpentine_path(
     bounds: SceneBounds,
@@ -129,6 +145,8 @@ def serpentine_path(
         num_rows = 1
     else:
         num_rows = max(1, math.ceil(z_extent / cross_step) + 1)
+
+    current_z += (z_extent - (num_rows-2) * cross_step)/2 if z_extent - (num_rows-2) * cross_step > 0 else 0.0
 
     for row in range(num_rows):
         z = clamp(current_z, bounds.zmin, bounds.zmax)
@@ -183,10 +201,10 @@ def expand_five_camera_rig(
     """Duplicate each waypoint into a 5-camera rig (front/back/left/right/nadir)."""
 
     camera_offsets = (
-        ("F", 0.0, oblique_pitch_deg),
-        ("B", 180.0, oblique_pitch_deg),
-        ("L", -90.0, oblique_pitch_deg),
-        ("R", 90.0, oblique_pitch_deg),
+        # ("F", 0.0, oblique_pitch_deg),
+        # ("B", 180.0, oblique_pitch_deg),
+        # ("L", -90.0, oblique_pitch_deg),
+        # ("R", 90.0, oblique_pitch_deg),
         ("N", 0.0, nadir_pitch_deg),
     )
 
@@ -195,11 +213,13 @@ def expand_five_camera_rig(
         for suffix, yaw_offset, pitch_deg in camera_offsets:
             rigged.append(
                 Pose(
-                    name=f"{pose.name}_{suffix}",
+                    name=f"{pose.name}_{suffix}.png",
                     x=pose.x,
                     y=pose.y,
                     z=pose.z,
-                    yaw=normalize_angle(pose.yaw + yaw_offset),
+                    # Ignore vehicle heading: each camera keeps a fixed world yaw.
+                    yaw=normalize_angle(yaw_offset),
+                    # yaw=normalize_angle(yaw_offset, + pose.yaw),
                     pitch=pitch_deg,
                     roll=pose.roll,
                 )
@@ -255,12 +275,17 @@ def visualize_path(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate an oblique-photography flight path.")
-    parser.add_argument("--xmin", type=float, required=True, help="Scene minimum X (meters).")
-    parser.add_argument("--xmax", type=float, required=True, help="Scene maximum X (meters).")
-    parser.add_argument("--ymin", type=float, required=True, help="Scene minimum Y (meters).")
-    parser.add_argument("--ymax", type=float, required=True, help="Scene maximum Y (meters).")
-    parser.add_argument("--zmin", type=float, required=True, help="Scene minimum Z (meters).")
-    parser.add_argument("--zmax", type=float, required=True, help="Scene maximum Z (meters).")
+    parser.add_argument(
+        "--obj-root",
+        type=pathlib.Path,
+        help="Root folder containing OBJ files; if set, scene bounds are derived from all OBJ vertices.",
+    )
+    parser.add_argument("--xmin", type=float, help="Scene minimum X (meters). Required if --obj-root is not set.")
+    parser.add_argument("--xmax", type=float, help="Scene maximum X (meters). Required if --obj-root is not set.")
+    parser.add_argument("--ymin", type=float, help="Scene minimum Y (meters). Required if --obj-root is not set.")
+    parser.add_argument("--ymax", type=float, help="Scene maximum Y (meters). Required if --obj-root is not set.")
+    parser.add_argument("--zmin", type=float, help="Scene minimum Z (meters). Required if --obj-root is not set.")
+    parser.add_argument("--zmax", type=float, help="Scene maximum Z (meters). Required if --obj-root is not set.")
     parser.add_argument("--path-height", type=float, required=True, help="Camera altitude or height above ground (meters).")
     parser.add_argument("--height-mode", choices=["absolute", "relative"], default="relative", help="Interpretation of path-height: absolute Y or relative to ground-y.")
     parser.add_argument("--ground-y", type=float, default=0.0, help="Ground reference Y used when height-mode=relative.")
@@ -282,13 +307,69 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
+    obj_root = args.obj_root
+    manual_bound_args = ["xmin", "xmax", "ymin", "ymax", "zmin", "zmax"]
+    has_manual_bounds = any(getattr(args, name) is not None for name in manual_bound_args)
+
+    if obj_root is not None and has_manual_bounds:
+        print("Do not mix --obj-root with manual bounds --xmin/--xmax/--ymin/--ymax/--zmin/--zmax.", file=sys.stderr)
+        raise SystemExit(1)
+
+    if obj_root is not None:
+        if not obj_root.exists():
+            print(f"OBJ root folder does not exist: {obj_root}", file=sys.stderr)
+            raise SystemExit(1)
+        if not obj_root.is_dir():
+            print(f"OBJ root path is not a directory: {obj_root}", file=sys.stderr)
+            raise SystemExit(1)
+
+        obj_files = list(collect_obj_files(obj_root))
+        if not obj_files:
+            print(f"No OBJ files found under: {obj_root}", file=sys.stderr)
+            raise SystemExit(1)
+
+        per_file_bboxes = []
+        for obj_path in obj_files:
+            try:
+                bbox = compute_bbox(obj_path)
+            except ValueError as exc:
+                print(exc, file=sys.stderr)
+                continue
+            per_file_bboxes.append(bbox)
+
+        if not per_file_bboxes:
+            print("No usable OBJ files found when deriving bounds.", file=sys.stderr)
+            raise SystemExit(1)
+
+        summary_bbox = combine(per_file_bboxes)
+        print(
+            f"Derived scene bounds from OBJ files in {obj_root}: {format_bbox(summary_bbox)}",
+            file=sys.stderr,
+        )
+        xmin, xmax, ymin, ymax, zmin, zmax = summary_bbox
+    else:
+        missing = [name for name in manual_bound_args if getattr(args, name) is None]
+        if missing:
+            print(
+                "Either set --obj-root or provide all of --xmin/--xmax/--ymin/--ymax/--zmin/--zmax.",
+                file=sys.stderr,
+            )
+            raise SystemExit(1)
+
+        xmin = float(args.xmin)
+        xmax = float(args.xmax)
+        ymin = float(args.ymin)
+        ymax = float(args.ymax)
+        zmin = float(args.zmin)
+        zmax = float(args.zmax)
+
     bounds = SceneBounds(
-        xmin=float(args.xmin),
-        xmax=float(args.xmax),
-        ymin=float(args.ymin),
-        ymax=float(args.ymax),
-        zmin=float(args.zmin),
-        zmax=float(args.zmax),
+        xmin=xmin,
+        xmax=xmax,
+        ymin=ymin,
+        ymax=ymax,
+        zmin=zmin,
+        zmax=zmax,
     )
     bounds.validate()
 
@@ -323,16 +404,26 @@ def main() -> None:
 
     base_roll = float(args.roll_deg)
 
-    pad_x = footprint_along * 0.5
-    pad_z = footprint_cross * 0.5
+    # pad_x = footprint_along * 0.5
+    # pad_z = footprint_cross * 0.5
+    # coverage_bounds = SceneBounds(
+    #     xmin=bounds.xmin - pad_x,
+    #     xmax=bounds.xmax + pad_x,
+    #     ymin=bounds.ymin,
+    #     ymax=bounds.ymax,
+    #     zmin=bounds.zmin - pad_z,
+    #     zmax=bounds.zmax + pad_z,
+    # )
+    pad_x = (ceil_to_factor(bounds.xmax-bounds.xmin, along_step)- (bounds.xmax - bounds.xmin))/2
     coverage_bounds = SceneBounds(
-        xmin=bounds.xmin - pad_x,
-        xmax=bounds.xmax + pad_x,
+        xmin=bounds.xmin-pad_x,
+        xmax=bounds.xmax+pad_x,
         ymin=bounds.ymin,
         ymax=bounds.ymax,
-        zmin=bounds.zmin - pad_z,
-        zmax=bounds.zmax + pad_z,
+        zmin=bounds.zmin,
+        zmax=bounds.zmax,
     )
+
     coverage_bounds.validate()
 
     poses = serpentine_path(
@@ -359,9 +450,9 @@ def main() -> None:
     print(
         f"Derived vertical FOV: {vfov_deg:.2f}° from image aspect ratio {image_width}:{image_height}"
     )
-    print(
-        f"Applied padding (m): X ±{pad_x:.2f}, Z ±{pad_z:.2f} so coverage meets scene edges"
-    )
+    # print(
+    #     f"Applied padding (m): X ±{pad_x:.2f}, Z ±{pad_z:.2f} so coverage meets scene edges"
+    # )
     print(f"Generated {len(rigged_poses)} camera records ({len(poses)} waypoints × 5) -> {output_path}")
     print(f"Visualization saved to {image_path}")
 
