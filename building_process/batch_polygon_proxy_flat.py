@@ -6,11 +6,13 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from building_process.polygon_proxy import ProxyConfig, process_obj_to_directory
+from building_process.polygon_proxy import ProxyArtifact, ProxyConfig, build_proxy_artifact
 
 
 def parse_args() -> argparse.Namespace:
@@ -89,10 +91,73 @@ def discover_objs(input_root: Path, selected_objs: set[str]) -> list[Path]:
     return jobs
 
 
+def _flatten_entries(entries: list[dict]) -> list[dict]:
+    flattened: list[dict] = []
+    for entry in entries:
+        base_height = float(entry["base_height"])
+        height = float(entry["height"])
+        contour = [[float(point[0]), float(point[2])] for point in entry["footprint"]]
+        flattened.append(
+            {
+                "proxy_id": entry["proxy_id"],
+                "level_index": entry["level_index"],
+                "min_height": base_height,
+                "max_height": base_height + height,
+                "footprint": contour,
+            }
+        )
+    return flattened
+
+
+def write_flat_proxy_outputs(artifact: ProxyArtifact, output_dir: Path) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    yaml_path = output_dir / f"{artifact.source_obj.stem}.yaml"
+    flat_entries = _flatten_entries(artifact.entries)
+    with yaml_path.open("w", encoding="utf-8") as handle:
+        yaml.safe_dump(flat_entries, handle, sort_keys=False)
+
+    if artifact.mesh is not None:
+        artifact.mesh.export(output_dir / artifact.source_obj.name)
+
+    metadata = {
+        "source_obj": str(artifact.source_obj),
+        "levels": artifact.levels,
+        "config": config_to_dict(artifact.config),
+        "proxy_count": len(flat_entries),
+        "output_format": {
+            "footprint": "xz_2d",
+            "height_fields": ["min_height", "max_height"],
+        },
+    }
+    with (output_dir / "polygon_proxy_meta.yaml").open("w", encoding="utf-8") as handle:
+        yaml.safe_dump(metadata, handle, sort_keys=False)
+
+
+def config_to_dict(config: ProxyConfig) -> dict:
+    return {
+        "grid_pitch": config.grid_pitch,
+        "height_bin": config.height_bin,
+        "max_levels": config.max_levels,
+        "min_stage_height": config.min_stage_height,
+        "min_component_area": config.min_component_area,
+        "min_component_faces": config.min_component_faces,
+        "min_fragment_projected_area": config.min_fragment_projected_area,
+        "stage_support_ratio": config.stage_support_ratio,
+        "cluster_gap": config.cluster_gap,
+        "padding_cells": config.padding_cells,
+        "simplify_tolerance_factor": config.simplify_tolerance_factor,
+        "edge_smooth_radius_factor": config.edge_smooth_radius_factor,
+        "keypoint_snap_tolerance_factor": config.keypoint_snap_tolerance_factor,
+        "curve_preserve_angle_deg": config.curve_preserve_angle_deg,
+        "ray_batch_size": config.ray_batch_size,
+    }
+
+
 def _run_single(job: tuple[str, str, str, dict]) -> tuple[str, int]:
     obj_path_str, output_dir_str, obj_name, config_payload = job
     config = ProxyConfig(**config_payload)
-    artifact = process_obj_to_directory(Path(obj_path_str), Path(output_dir_str), config)
+    artifact = build_proxy_artifact(Path(obj_path_str), config)
+    write_flat_proxy_outputs(artifact, Path(output_dir_str))
     return obj_name, len(artifact.entries)
 
 
