@@ -34,7 +34,7 @@ training, or changes to `/mnt/d/projects/GenDiff`.
 | ORG-09 | PASS | Actual consumer, candidate construction pipeline, and legacy pipelines are separated without false promotion. | `docs/CURRENT_PIPELINE.md`; `catalog/pipelines/construction_sequence_v1.yaml`; `catalog/pipelines/history_area_edit_v2.yaml`; no pipeline status is `current`. | Review the `blocked_target` classification; it is not a release claim. |
 | ORG-10 | PASS | Entry navigation answers code, data, lineage, consumer, and status questions without duplicating catalogs. | `README.md` and `catalog/README.md` link the code inventory, dataset index/manifests, legacy outputs, training consumer evidence, pipeline decision, unresolved register, and this report. | None. |
 | ORG-11 | PASS | Final bounded validation passes after all edits. | 128 catalog YAML files parsed; manifest evidence 29/29 and mismatches 12; code inventory 67/67; dataset catalog 119/119; 67 Python files compiled with `tokenize.open()` and no pyc writes; 5 synthetic tests passed; `uv lock --check`, Pandoc rendering, Git boundary, and `git diff --check` passed. | Real-data and canonicalizer tests remain out of scope and must not be inferred from this PASS. |
-| ORG-12 | FAIL | Requested code-only clone exists at `/mnt/d/projects/gendiff-data-process`, matches the pushed branch, excludes forbidden trees, and is clean. | Not run before push by design. | Confirm target path does not exist, clone only after push, then verify HEAD/status/path exclusions. |
+| ORG-12 | PASS | Requested code-only clone exists at `/mnt/d/projects/gendiff-data-process`, matches the pushed branch, excludes forbidden trees, and is clean. | Target absence was confirmed before clone. Fresh clone HEAD/upstream both equaled `e884896f99371b3ccfdd7d31c8034388efc23c55`; porcelain status was empty; `data`, `output`, `outputs`, `pipeline/output`, and `.venv` were absent; clone validation reported 128 YAML, 67 Python, 119 dataset rows, 5 passing synthetic tests, and a valid lock. | `/mnt/d/data` remains the legacy compatibility root; no migration or symlink change was made. |
 
 FAIL is intentional for unresolved lineage and compatibility. Project
 organization can be accepted while those technical gates remain blocked, but no
@@ -63,7 +63,7 @@ installation, and training are out of scope.
 
 ## Exact next gate
 
-Explicitly stage and push the listed files, then create and verify the requested
-fresh clone to complete ORG-12. Stop after organization
-handoff. Canonicalizer, adapter, generation, and training work require a new
-reviewed task and remain blocked by ORG-07/ORG-08.
+Record and push this acceptance result, fast-forward the fresh clone to the
+recording commit, verify clean status and forbidden-path absence once more, then
+stop after organization handoff. Canonicalizer, adapter, generation, and
+training work require a new reviewed task and remain blocked by ORG-07/ORG-08.
