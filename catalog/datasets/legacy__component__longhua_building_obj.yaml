@@ -1,0 +1,36 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__component__longhua_building_obj"
+status: unknown
+lifecycle: intermediate
+physical_path: "/mnt/d/data/data/component/Longhua_building_obj"
+legacy_relative_path: "component/Longhua_building_obj"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 4444992927
+  file_count: 524
+  earliest_mtime_utc: "2026-01-06T03:12:21.429554Z"
+  latest_mtime_utc: "2026-01-06T03:19:27.103565Z"
+  scan_error_count: 0
+  extensions:
+    ".mtl": 262
+    ".obj": 262
+
+producer:
+  script_id: "legacy.component_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "可能由切分或合并脚本产生；具体命令和 commit 未保留。"

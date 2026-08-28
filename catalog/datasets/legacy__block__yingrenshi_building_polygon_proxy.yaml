@@ -1,0 +1,36 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__block__yingrenshi_building_polygon_proxy"
+status: candidate
+lifecycle: processed
+physical_path: "/mnt/d/data/data/block/yingrenshi_building_polygon_proxy"
+legacy_relative_path: "block/yingrenshi_building_polygon_proxy"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 87210
+  file_count: 12
+  earliest_mtime_utc: "2025-12-10T09:30:09.573058Z"
+  latest_mtime_utc: "2026-03-09T09:23:47.797891Z"
+  scan_error_count: 0
+  extensions:
+    ".obj": 3
+    ".yaml": 9
+
+producer:
+  script_id: "polygon_proxy.candidate_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: medium
+notes: "名称与 polygon proxy 候选链一致；仍缺原始 command/commit 证明。"

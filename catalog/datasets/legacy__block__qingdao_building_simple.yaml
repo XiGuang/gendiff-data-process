@@ -1,0 +1,38 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__block__qingdao_building_simple"
+status: legacy
+lifecycle: processed
+physical_path: "/mnt/d/data/data/block/qingdao_building_simple"
+legacy_relative_path: "block/qingdao_building_simple"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 133689730204
+  file_count: 47236
+  earliest_mtime_utc: "2025-11-26T10:57:00.509667Z"
+  latest_mtime_utc: "2025-11-27T07:48:29.503435Z"
+  scan_error_count: 0
+  extensions:
+    ".npz": 15414
+    ".obj": 15415
+    ".ply": 10385
+    ".yaml": 6022
+
+producer:
+  script_id: "legacy.block_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "属于旧 block 处理链；具体 producer 仅能从命名和脚本用途推断。"

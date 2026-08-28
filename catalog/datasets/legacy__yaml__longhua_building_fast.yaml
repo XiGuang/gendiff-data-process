@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__yaml__longhua_building_fast"
+status: legacy
+lifecycle: manifest
+physical_path: "/mnt/d/data/data/yaml/longhua_building_fast"
+legacy_relative_path: "yaml/longhua_building_fast"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 4486572
+  file_count: 15648
+  earliest_mtime_utc: "2026-01-06T07:11:33.858457Z"
+  latest_mtime_utc: "2026-01-06T07:28:50.218398Z"
+  scan_error_count: 0
+  extensions:
+    ".yaml": 15648
+
+producer:
+  script_id: "legacy.yaml_generation_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "可能由 gen_yaml 脚本族产生；具体输入、命令和 commit 未保留。"

@@ -1,0 +1,37 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__block__wuhu_building_fast"
+status: legacy
+lifecycle: processed
+physical_path: "/mnt/d/data/data/block/wuhu_building_fast"
+legacy_relative_path: "block/wuhu_building_fast"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 405431552495
+  file_count: 76056
+  earliest_mtime_utc: "2026-01-05T09:16:24.477726Z"
+  latest_mtime_utc: "2026-01-06T13:28:51.074907Z"
+  scan_error_count: 0
+  extensions:
+    ".npz": 24815
+    ".obj": 24815
+    ".yaml": 26426
+
+producer:
+  script_id: "legacy.block_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "属于旧 block 处理链；具体 producer 仅能从命名和脚本用途推断。"

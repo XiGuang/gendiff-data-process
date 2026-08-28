@@ -1,0 +1,38 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__block__yuehai_building_block_exact"
+status: legacy
+lifecycle: processed
+physical_path: "/mnt/d/data/data/block/yuehai_building_block_exact"
+legacy_relative_path: "block/yuehai_building_block_exact"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 37989696733
+  file_count: 19515
+  earliest_mtime_utc: "2025-11-25T13:31:16Z"
+  latest_mtime_utc: "2025-12-13T04:49:12.726988Z"
+  scan_error_count: 0
+  extensions:
+    ".npz": 6262
+    ".obj": 6262
+    ".ply": 4759
+    ".yaml": 2232
+
+producer:
+  script_id: "legacy.block_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "属于旧 block 处理链；具体 producer 仅能从命名和脚本用途推断。"

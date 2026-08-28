@@ -1,0 +1,746 @@
+schema_version: dataset_index_v1
+cataloged_at: "2026-08-28"
+data_root: "/mnt/d/data/data"
+dataset_count: 119
+total_file_count: 5672789
+total_size_bytes: 3587926590672
+categories:
+  "block":
+    dataset_count: 16
+    size_bytes: 1377435913903
+  "component":
+    dataset_count: 7
+    size_bytes: 150567475056
+  "condition":
+    dataset_count: 25
+    size_bytes: 433131957751
+  "images":
+    dataset_count: 5
+    size_bytes: 842895765714
+  "latents":
+    dataset_count: 21
+    size_bytes: 780597306429
+  "origin":
+    dataset_count: 1
+    size_bytes: 1653203072
+  "test":
+    dataset_count: 37
+    size_bytes: 1630525664
+  "yaml":
+    dataset_count: 7
+    size_bytes: 14443083
+datasets:
+  - dataset_id: "legacy__block__language"
+    manifest: "legacy__block__language.yaml"
+    legacy_path: "block/language"
+    status: legacy
+    size_bytes: 14361800
+    file_count: 7944
+  - dataset_id: "legacy__block__lihu_building_exact"
+    manifest: "legacy__block__lihu_building_exact.yaml"
+    legacy_path: "block/lihu_building_exact"
+    status: legacy
+    size_bytes: 1841555982
+    file_count: 2094
+  - dataset_id: "legacy__block__lihu_building_fast"
+    manifest: "legacy__block__lihu_building_fast.yaml"
+    legacy_path: "block/lihu_building_fast"
+    status: legacy
+    size_bytes: 13001261198
+    file_count: 2894
+  - dataset_id: "legacy__block__longhua_building_exact"
+    manifest: "legacy__block__longhua_building_exact.yaml"
+    legacy_path: "block/longhua_building_exact"
+    status: legacy
+    size_bytes: 53457436324
+    file_count: 30375
+  - dataset_id: "legacy__block__longhua_building_fast"
+    manifest: "legacy__block__longhua_building_fast.yaml"
+    legacy_path: "block/longhua_building_fast"
+    status: legacy
+    size_bytes: 249084468043
+    file_count: 45102
+  - dataset_id: "legacy__block__qingdao_building_simple"
+    manifest: "legacy__block__qingdao_building_simple.yaml"
+    legacy_path: "block/qingdao_building_simple"
+    status: legacy
+    size_bytes: 133689730204
+    file_count: 47236
+  - dataset_id: "legacy__block__qingdao_building_simple_fast"
+    manifest: "legacy__block__qingdao_building_simple_fast.yaml"
+    legacy_path: "block/qingdao_building_simple_fast"
+    status: legacy
+    size_bytes: 151275243419
+    file_count: 78392
+  - dataset_id: "legacy__block__qingdao_building_simple_t2_fast"
+    manifest: "legacy__block__qingdao_building_simple_t2_fast.yaml"
+    legacy_path: "block/qingdao_building_simple_t2_fast"
+    status: legacy
+    size_bytes: 91936972604
+    file_count: 74354
+  - dataset_id: "legacy__block__wuhu_building_exact"
+    manifest: "legacy__block__wuhu_building_exact.yaml"
+    legacy_path: "block/wuhu_building_exact"
+    status: legacy
+    size_bytes: 72109136034
+    file_count: 51241
+  - dataset_id: "legacy__block__wuhu_building_fast"
+    manifest: "legacy__block__wuhu_building_fast.yaml"
+    legacy_path: "block/wuhu_building_fast"
+    status: legacy
+    size_bytes: 405431552495
+    file_count: 76056
+  - dataset_id: "legacy__block__yingrenshi_building_origin"
+    manifest: "legacy__block__yingrenshi_building_origin.yaml"
+    legacy_path: "block/yingrenshi_building_origin"
+    status: legacy
+    size_bytes: 51734306866
+    file_count: 3846
+  - dataset_id: "legacy__block__yingrenshi_building_polygon_proxy"
+    manifest: "legacy__block__yingrenshi_building_polygon_proxy.yaml"
+    legacy_path: "block/yingrenshi_building_polygon_proxy"
+    status: candidate
+    size_bytes: 87210
+    file_count: 12
+  - dataset_id: "legacy__block__yingrenshi_building_proxy"
+    manifest: "legacy__block__yingrenshi_building_proxy.yaml"
+    legacy_path: "block/yingrenshi_building_proxy"
+    status: legacy
+    size_bytes: 5258880
+    file_count: 2592
+  - dataset_id: "legacy__block__yingrenshi_building_simple"
+    manifest: "legacy__block__yingrenshi_building_simple.yaml"
+    legacy_path: "block/yingrenshi_building_simple"
+    status: legacy
+    size_bytes: 77863761838
+    file_count: 32687
+  - dataset_id: "legacy__block__yuehai_building_block_exact"
+    manifest: "legacy__block__yuehai_building_block_exact.yaml"
+    legacy_path: "block/yuehai_building_block_exact"
+    status: legacy
+    size_bytes: 37989696733
+    file_count: 19515
+  - dataset_id: "legacy__block__yuehai_building_block_fast"
+    manifest: "legacy__block__yuehai_building_block_fast.yaml"
+    legacy_path: "block/yuehai_building_block_fast"
+    status: legacy
+    size_bytes: 38001084273
+    file_count: 19377
+  - dataset_id: "legacy__component__longhua_building_obj"
+    manifest: "legacy__component__longhua_building_obj.yaml"
+    legacy_path: "component/Longhua_building_obj"
+    status: unknown
+    size_bytes: 4444992927
+    file_count: 524
+  - dataset_id: "legacy__component__lihu"
+    manifest: "legacy__component__lihu.yaml"
+    legacy_path: "component/lihu"
+    status: unknown
+    size_bytes: 40751736642
+    file_count: 188
+  - dataset_id: "legacy__component__longhua"
+    manifest: "legacy__component__longhua.yaml"
+    legacy_path: "component/longhua"
+    status: unknown
+    size_bytes: 2327061665
+    file_count: 262
+  - dataset_id: "legacy__component__qingdao"
+    manifest: "legacy__component__qingdao.yaml"
+    legacy_path: "component/qingdao"
+    status: unknown
+    size_bytes: 87347528592
+    file_count: 1204
+  - dataset_id: "legacy__component__wuhu"
+    manifest: "legacy__component__wuhu.yaml"
+    legacy_path: "component/wuhu"
+    status: unknown
+    size_bytes: 6356046111
+    file_count: 1711
+  - dataset_id: "legacy__component__yingrenshi_change"
+    manifest: "legacy__component__yingrenshi_change.yaml"
+    legacy_path: "component/yingrenshi_change"
+    status: unknown
+    size_bytes: 6855923138
+    file_count: 138
+  - dataset_id: "legacy__component__yuehai"
+    manifest: "legacy__component__yuehai.yaml"
+    legacy_path: "component/yuehai"
+    status: unknown
+    size_bytes: 2484185981
+    file_count: 340
+  - dataset_id: "legacy__condition__lihu_fast_building_ground_vggt_rotate"
+    manifest: "legacy__condition__lihu_fast_building_ground_vggt_rotate.yaml"
+    legacy_path: "condition/lihu_fast_building_ground_vggt_rotate"
+    status: legacy
+    size_bytes: 780378896
+    file_count: 9760
+  - dataset_id: "legacy__condition__longhua_building_fast"
+    manifest: "legacy__condition__longhua_building_fast.yaml"
+    legacy_path: "condition/longhua_building_fast"
+    status: legacy
+    size_bytes: 41682606695
+    file_count: 439257
+  - dataset_id: "legacy__condition__longhua_fast_building_vggt_rotate"
+    manifest: "legacy__condition__longhua_fast_building_vggt_rotate.yaml"
+    legacy_path: "condition/longhua_fast_building_vggt_rotate"
+    status: legacy
+    size_bytes: 166814486505
+    file_count: 1757028
+  - dataset_id: "legacy__condition__qingdao_building_and_ground_combinations"
+    manifest: "legacy__condition__qingdao_building_and_ground_combinations.yaml"
+    legacy_path: "condition/qingdao_building_and_ground_combinations"
+    status: legacy
+    size_bytes: 5814604020
+    file_count: 47968
+  - dataset_id: "legacy__condition__qingdao_building_and_ground_combinations_rotate"
+    manifest: "legacy__condition__qingdao_building_and_ground_combinations_rotate.yaml"
+    legacy_path: "condition/qingdao_building_and_ground_combinations_rotate"
+    status: legacy
+    size_bytes: 23263145648
+    file_count: 191872
+  - dataset_id: "legacy__condition__qingdao_building_combination"
+    manifest: "legacy__condition__qingdao_building_combination.yaml"
+    legacy_path: "condition/qingdao_building_combination"
+    status: legacy
+    size_bytes: 2907302010
+    file_count: 23984
+  - dataset_id: "legacy__condition__qingdao_building_combination_rotate"
+    manifest: "legacy__condition__qingdao_building_combination_rotate.yaml"
+    legacy_path: "condition/qingdao_building_combination_rotate"
+    status: legacy
+    size_bytes: 11631572824
+    file_count: 95936
+  - dataset_id: "legacy__condition__qingdao_vggt_rotate"
+    manifest: "legacy__condition__qingdao_vggt_rotate.yaml"
+    legacy_path: "condition/qingdao_vggt_rotate"
+    status: legacy
+    size_bytes: 18364035056
+    file_count: 191872
+  - dataset_id: "legacy__condition__wuhu_fast_building_vggt_rotate"
+    manifest: "legacy__condition__wuhu_fast_building_vggt_rotate.yaml"
+    legacy_path: "condition/wuhu_fast_building_vggt_rotate"
+    status: legacy
+    size_bytes: 102315230450
+    file_count: 1099976
+  - dataset_id: "legacy__condition__yingrenshi_building_and_ground_combinations"
+    manifest: "legacy__condition__yingrenshi_building_and_ground_combinations.yaml"
+    legacy_path: "condition/yingrenshi_building_and_ground_combinations"
+    status: legacy
+    size_bytes: 3042847420
+    file_count: 25104
+  - dataset_id: "legacy__condition__yingrenshi_building_and_ground_combinations_rotate"
+    manifest: "legacy__condition__yingrenshi_building_and_ground_combinations_rotate.yaml"
+    legacy_path: "condition/yingrenshi_building_and_ground_combinations_rotate"
+    status: legacy
+    size_bytes: 12173523520
+    file_count: 100416
+  - dataset_id: "legacy__condition__yingrenshi_building_simple_combinations"
+    manifest: "legacy__condition__yingrenshi_building_simple_combinations.yaml"
+    legacy_path: "condition/yingrenshi_building_simple_combinations"
+    status: legacy
+    size_bytes: 1521423710
+    file_count: 12552
+  - dataset_id: "legacy__condition__yingrenshi_building_simple_combinations_origin_model"
+    manifest: "legacy__condition__yingrenshi_building_simple_combinations_origin_model.yaml"
+    legacy_path: "condition/yingrenshi_building_simple_combinations_origin_model"
+    status: legacy
+    size_bytes: 1521423710
+    file_count: 12552
+  - dataset_id: "legacy__condition__yingrenshi_building_simple_combinations_rotate"
+    manifest: "legacy__condition__yingrenshi_building_simple_combinations_rotate.yaml"
+    legacy_path: "condition/yingrenshi_building_simple_combinations_rotate"
+    status: legacy
+    size_bytes: 6086761760
+    file_count: 50208
+  - dataset_id: "legacy__condition__yingrenshi_vggt_fixed_rotate"
+    manifest: "legacy__condition__yingrenshi_vggt_fixed_rotate.yaml"
+    legacy_path: "condition/yingrenshi_vggt_fixed_rotate"
+    status: legacy
+    size_bytes: 9844703808
+    file_count: 100416
+  - dataset_id: "legacy__condition__yingrenshi_vggt_rotate"
+    manifest: "legacy__condition__yingrenshi_vggt_rotate.yaml"
+    legacy_path: "condition/yingrenshi_vggt_rotate"
+    status: legacy
+    size_bytes: 9909298816
+    file_count: 100416
+  - dataset_id: "legacy__condition__yuehai_building_and_ground_combinations"
+    manifest: "legacy__condition__yuehai_building_and_ground_combinations.yaml"
+    legacy_path: "condition/yuehai_building_and_ground_combinations"
+    status: legacy
+    size_bytes: 872045280
+    file_count: 7194
+  - dataset_id: "legacy__condition__yuehai_building_and_ground_combinations_rotate"
+    manifest: "legacy__condition__yuehai_building_and_ground_combinations_rotate.yaml"
+    legacy_path: "condition/yuehai_building_and_ground_combinations_rotate"
+    status: legacy
+    size_bytes: 3488858914
+    file_count: 28776
+  - dataset_id: "legacy__condition__yuehai_building_combination"
+    manifest: "legacy__condition__yuehai_building_combination.yaml"
+    legacy_path: "condition/yuehai_building_combination"
+    status: legacy
+    size_bytes: 436022640
+    file_count: 3597
+  - dataset_id: "legacy__condition__yuehai_building_combination_rotate"
+    manifest: "legacy__condition__yuehai_building_combination_rotate.yaml"
+    legacy_path: "condition/yuehai_building_combination_rotate"
+    status: legacy
+    size_bytes: 1744429457
+    file_count: 14388
+  - dataset_id: "legacy__condition__yuehai_building_fast_and_ground_combinations"
+    manifest: "legacy__condition__yuehai_building_fast_and_ground_combinations.yaml"
+    legacy_path: "condition/yuehai_building_fast_and_ground_combinations"
+    status: legacy
+    size_bytes: 865984340
+    file_count: 7144
+  - dataset_id: "legacy__condition__yuehai_building_fast_and_ground_combinations_rotate"
+    manifest: "legacy__condition__yuehai_building_fast_and_ground_combinations_rotate.yaml"
+    legacy_path: "condition/yuehai_building_fast_and_ground_combinations_rotate"
+    status: legacy
+    size_bytes: 3464610904
+    file_count: 28576
+  - dataset_id: "legacy__condition__yuehai_building_fast_combination"
+    manifest: "legacy__condition__yuehai_building_fast_combination.yaml"
+    legacy_path: "condition/yuehai_building_fast_combination"
+    status: legacy
+    size_bytes: 432992170
+    file_count: 3572
+  - dataset_id: "legacy__condition__yuehai_building_fast_combination_rotate"
+    manifest: "legacy__condition__yuehai_building_fast_combination_rotate.yaml"
+    legacy_path: "condition/yuehai_building_fast_combination_rotate"
+    status: legacy
+    size_bytes: 1732305452
+    file_count: 14288
+  - dataset_id: "legacy__condition__yuehai_exact_vggt_rotate"
+    manifest: "legacy__condition__yuehai_exact_vggt_rotate.yaml"
+    legacy_path: "condition/yuehai_exact_vggt_rotate"
+    status: legacy
+    size_bytes: 2421363746
+    file_count: 28776
+  - dataset_id: "legacy__images__qingdao_building_fast"
+    manifest: "legacy__images__qingdao_building_fast.yaml"
+    legacy_path: "images/qingdao_building_fast"
+    status: unknown
+    size_bytes: 129585213848
+    file_count: 66242
+  - dataset_id: "legacy__images__wuhu_building_fast"
+    manifest: "legacy__images__wuhu_building_fast.yaml"
+    legacy_path: "images/wuhu_building_fast"
+    status: unknown
+    size_bytes: 593356832332
+    file_count: 282866
+  - dataset_id: "legacy__images__yingrenshi_building"
+    manifest: "legacy__images__yingrenshi_building.yaml"
+    legacy_path: "images/yingrenshi_building"
+    status: unknown
+    size_bytes: 24036937521
+    file_count: 14718
+  - dataset_id: "legacy__images__yuehai_building_exact"
+    manifest: "legacy__images__yuehai_building_exact.yaml"
+    legacy_path: "images/yuehai_building_exact"
+    status: unknown
+    size_bytes: 48098497294
+    file_count: 24552
+  - dataset_id: "legacy__images__yuehai_building_fast"
+    manifest: "legacy__images__yuehai_building_fast.yaml"
+    legacy_path: "images/yuehai_building_fast"
+    status: unknown
+    size_bytes: 47818284719
+    file_count: 18873
+  - dataset_id: "legacy__latents__lihu_urbanbis_fast_rotate_noise_0_1_dynamic_512"
+    manifest: "legacy__latents__lihu_urbanbis_fast_rotate_noise_0_1_dynamic_512.yaml"
+    legacy_path: "latents/lihu_urbanbis_fast_rotate_noise_0.1_dynamic_512"
+    status: unknown
+    size_bytes: 7570927885
+    file_count: 3196
+  - dataset_id: "legacy__latents__longhua_urbanbis_fast_rotate_noise_0_1_dynamic_512"
+    manifest: "legacy__latents__longhua_urbanbis_fast_rotate_noise_0_1_dynamic_512.yaml"
+    legacy_path: "latents/longhua_urbanbis_fast_rotate_noise_0.1_dynamic_512"
+    status: unknown
+    size_bytes: 127749495746
+    file_count: 53928
+  - dataset_id: "legacy__latents__qingdao_building_dora_rotate_noise_0_1"
+    manifest: "legacy__latents__qingdao_building_dora_rotate_noise_0_1.yaml"
+    legacy_path: "latents/qingdao_building_dora_rotate_noise_0.1"
+    status: unknown
+    size_bytes: 45264567191
+    file_count: 19108
+  - dataset_id: "legacy__latents__qingdao_building_dora_rotate_noise_0_1_dynamic_4096"
+    manifest: "legacy__latents__qingdao_building_dora_rotate_noise_0_1_dynamic_4096.yaml"
+    legacy_path: "latents/qingdao_building_dora_rotate_noise_0.1_dynamic_4096"
+    status: unknown
+    size_bytes: 62796233623
+    file_count: 19108
+  - dataset_id: "legacy__latents__qingdao_building_dora_rotate_noise_0_1_dynamic_512"
+    manifest: "legacy__latents__qingdao_building_dora_rotate_noise_0_1_dynamic_512.yaml"
+    legacy_path: "latents/qingdao_building_dora_rotate_noise_0.1_dynamic_512"
+    status: unknown
+    size_bytes: 45264567191
+    file_count: 19108
+  - dataset_id: "legacy__latents__qingdao_building_dora_rotate_noise_0_1_dynamic_512_vggt"
+    manifest: "legacy__latents__qingdao_building_dora_rotate_noise_0_1_dynamic_512_vggt.yaml"
+    legacy_path: "latents/qingdao_building_dora_rotate_noise_0.1_dynamic_512_vggt"
+    status: unknown
+    size_bytes: 45264567191
+    file_count: 19108
+  - dataset_id: "legacy__latents__qingdao_urbanbis_fast_rotate_noise_0_1_dynamic_512"
+    manifest: "legacy__latents__qingdao_urbanbis_fast_rotate_noise_0_1_dynamic_512.yaml"
+    legacy_path: "latents/qingdao_urbanbis_fast_rotate_noise_0.1_dynamic_512"
+    status: unknown
+    size_bytes: 45264567191
+    file_count: 19108
+  - dataset_id: "legacy__latents__wuhu_urbanbis_fast_rotate_noise_0_1_dynamic_512"
+    manifest: "legacy__latents__wuhu_urbanbis_fast_rotate_noise_0_1_dynamic_512.yaml"
+    legacy_path: "latents/wuhu_urbanbis_fast_rotate_noise_0.1_dynamic_512"
+    status: unknown
+    size_bytes: 216819464794
+    file_count: 91528
+  - dataset_id: "legacy__latents__yingrenshi_building_dora_rotate_noise_0_1_dynamic_512_vggt"
+    manifest: "legacy__latents__yingrenshi_building_dora_rotate_noise_0_1_dynamic_512_vggt.yaml"
+    legacy_path: "latents/yingrenshi_building_dora_rotate_noise_0.1_dynamic_512_vggt"
+    status: unknown
+    size_bytes: 11882248818
+    file_count: 5016
+  - dataset_id: "legacy__latents__yingrenshi_building_simple_dora_rotate_noise_0_1"
+    manifest: "legacy__latents__yingrenshi_building_simple_dora_rotate_noise_0_1.yaml"
+    legacy_path: "latents/yingrenshi_building_simple_dora_rotate_noise_0.1"
+    status: unknown
+    size_bytes: 11882307263
+    file_count: 5017
+  - dataset_id: "legacy__latents__yingrenshi_building_simple_dora_rotate_noise_0_1_dynamic_4096"
+    manifest: "legacy__latents__yingrenshi_building_simple_dora_rotate_noise_0_1_dynamic_4096.yaml"
+    legacy_path: "latents/yingrenshi_building_simple_dora_rotate_noise_0.1_dynamic_4096"
+    status: unknown
+    size_bytes: 16484448882
+    file_count: 5016
+  - dataset_id: "legacy__latents__yingrenshi_building_simple_dora_rotate_noise_0_1_dynamic_512"
+    manifest: "legacy__latents__yingrenshi_building_simple_dora_rotate_noise_0_1_dynamic_512.yaml"
+    legacy_path: "latents/yingrenshi_building_simple_dora_rotate_noise_0.1_dynamic_512"
+    status: unknown
+    size_bytes: 11882248818
+    file_count: 5016
+  - dataset_id: "legacy__latents__yingrenshi_building_simple_dora_rotate_noise_2_5"
+    manifest: "legacy__latents__yingrenshi_building_simple_dora_rotate_noise_2_5.yaml"
+    legacy_path: "latents/yingrenshi_building_simple_dora_rotate_noise_2.5"
+    status: unknown
+    size_bytes: 11882304365
+    file_count: 5017
+  - dataset_id: "legacy__latents__yingrenshi_urbanbis_fast_rotate_noise_0_1_dynamic_512"
+    manifest: "legacy__latents__yingrenshi_urbanbis_fast_rotate_noise_0_1_dynamic_512.yaml"
+    legacy_path: "latents/yingrenshi_urbanbis_fast_rotate_noise_0.1_dynamic_512"
+    status: unknown
+    size_bytes: 11882248818
+    file_count: 5016
+  - dataset_id: "legacy__latents__yuehai_building_dora_rotate_noise_0_1"
+    manifest: "legacy__latents__yuehai_building_dora_rotate_noise_0_1.yaml"
+    legacy_path: "latents/yuehai_building_dora_rotate_noise_0.1"
+    status: unknown
+    size_bytes: 14014290417
+    file_count: 5916
+  - dataset_id: "legacy__latents__yuehai_building_dora_rotate_noise_0_1_dynamic_4096"
+    manifest: "legacy__latents__yuehai_building_dora_rotate_noise_0_1_dynamic_4096.yaml"
+    legacy_path: "latents/yuehai_building_dora_rotate_noise_0.1_dynamic_4096"
+    status: unknown
+    size_bytes: 19442244081
+    file_count: 5916
+  - dataset_id: "legacy__latents__yuehai_building_dora_rotate_noise_0_1_dynamic_512"
+    manifest: "legacy__latents__yuehai_building_dora_rotate_noise_0_1_dynamic_512.yaml"
+    legacy_path: "latents/yuehai_building_dora_rotate_noise_0.1_dynamic_512"
+    status: unknown
+    size_bytes: 14014290417
+    file_count: 5916
+  - dataset_id: "legacy__latents__yuehai_building_exact_dora_rotate_noise_0_1_dynamic_512_vggt"
+    manifest: "legacy__latents__yuehai_building_exact_dora_rotate_noise_0_1_dynamic_512_vggt.yaml"
+    legacy_path: "latents/yuehai_building_exact_dora_rotate_noise_0.1_dynamic_512_vggt"
+    status: unknown
+    size_bytes: 14014290417
+    file_count: 5916
+  - dataset_id: "legacy__latents__yuehai_building_fast_dora_rotate_noise_0_1_dynamic_4096"
+    manifest: "legacy__latents__yuehai_building_fast_dora_rotate_noise_0_1_dynamic_4096.yaml"
+    legacy_path: "latents/yuehai_building_fast_dora_rotate_noise_0.1_dynamic_4096"
+    status: unknown
+    size_bytes: 19297643196
+    file_count: 5872
+  - dataset_id: "legacy__latents__yuehai_building_fast_dora_rotate_noise_0_1_dynamic_512"
+    manifest: "legacy__latents__yuehai_building_fast_dora_rotate_noise_0_1_dynamic_512.yaml"
+    legacy_path: "latents/yuehai_building_fast_dora_rotate_noise_0.1_dynamic_512"
+    status: unknown
+    size_bytes: 13910059708
+    file_count: 5872
+  - dataset_id: "legacy__latents__yuehai_urbanbis_exact_rotate_noise_0_1_dynamic_512"
+    manifest: "legacy__latents__yuehai_urbanbis_exact_rotate_noise_0_1_dynamic_512.yaml"
+    legacy_path: "latents/yuehai_urbanbis_exact_rotate_noise_0.1_dynamic_512"
+    status: unknown
+    size_bytes: 14014290417
+    file_count: 5916
+  - dataset_id: "legacy__origin__yingrenshi"
+    manifest: "legacy__origin__yingrenshi.yaml"
+    legacy_path: "origin/Yingrenshi"
+    status: legacy
+    size_bytes: 1653203072
+    file_count: 310
+  - dataset_id: "legacy__test__0_1_0"
+    manifest: "legacy__test__0_1_0.yaml"
+    legacy_path: "test/0_1_0"
+    status: experiment
+    size_bytes: 1919700
+    file_count: 7
+  - dataset_id: "legacy__test__0_1_1"
+    manifest: "legacy__test__0_1_1.yaml"
+    legacy_path: "test/0_1_1"
+    status: experiment
+    size_bytes: 34624136
+    file_count: 11
+  - dataset_id: "legacy__test__0_2_0"
+    manifest: "legacy__test__0_2_0.yaml"
+    legacy_path: "test/0_2_0"
+    status: experiment
+    size_bytes: 3438595
+    file_count: 7
+  - dataset_id: "legacy__test__0_2_1"
+    manifest: "legacy__test__0_2_1.yaml"
+    legacy_path: "test/0_2_1"
+    status: experiment
+    size_bytes: 34763022
+    file_count: 17
+  - dataset_id: "legacy__test__0_2_2"
+    manifest: "legacy__test__0_2_2.yaml"
+    legacy_path: "test/0_2_2"
+    status: experiment
+    size_bytes: 61582385
+    file_count: 14
+  - dataset_id: "legacy__test__0_2_3"
+    manifest: "legacy__test__0_2_3.yaml"
+    legacy_path: "test/0_2_3"
+    status: experiment
+    size_bytes: 69921695
+    file_count: 14
+  - dataset_id: "legacy__test__0_3_0"
+    manifest: "legacy__test__0_3_0.yaml"
+    legacy_path: "test/0_3_0"
+    status: experiment
+    size_bytes: 5001166
+    file_count: 10
+  - dataset_id: "legacy__test__0_3_1"
+    manifest: "legacy__test__0_3_1.yaml"
+    legacy_path: "test/0_3_1"
+    status: experiment
+    size_bytes: 28196658
+    file_count: 17
+  - dataset_id: "legacy__test__0_3_2"
+    manifest: "legacy__test__0_3_2.yaml"
+    legacy_path: "test/0_3_2"
+    status: experiment
+    size_bytes: 37658524
+    file_count: 20
+  - dataset_id: "legacy__test__0_3_3"
+    manifest: "legacy__test__0_3_3.yaml"
+    legacy_path: "test/0_3_3"
+    status: experiment
+    size_bytes: 75483191
+    file_count: 17
+  - dataset_id: "legacy__test__0_3_4"
+    manifest: "legacy__test__0_3_4.yaml"
+    legacy_path: "test/0_3_4"
+    status: experiment
+    size_bytes: 38081064
+    file_count: 20
+  - dataset_id: "legacy__test__0_3_5"
+    manifest: "legacy__test__0_3_5.yaml"
+    legacy_path: "test/0_3_5"
+    status: experiment
+    size_bytes: 75905212
+    file_count: 17
+  - dataset_id: "legacy__test__0_3_6"
+    manifest: "legacy__test__0_3_6.yaml"
+    legacy_path: "test/0_3_6"
+    status: experiment
+    size_bytes: 85149627
+    file_count: 17
+  - dataset_id: "legacy__test__0_3_7"
+    manifest: "legacy__test__0_3_7.yaml"
+    legacy_path: "test/0_3_7"
+    status: experiment
+    size_bytes: 85572153
+    file_count: 17
+  - dataset_id: "legacy__test__0_4_0"
+    manifest: "legacy__test__0_4_0.yaml"
+    legacy_path: "test/0_4_0"
+    status: experiment
+    size_bytes: 4776995
+    file_count: 10
+  - dataset_id: "legacy__test__0_4_1"
+    manifest: "legacy__test__0_4_1.yaml"
+    legacy_path: "test/0_4_1"
+    status: experiment
+    size_bytes: 27971269
+    file_count: 17
+  - dataset_id: "legacy__test__0_4_2"
+    manifest: "legacy__test__0_4_2.yaml"
+    legacy_path: "test/0_4_2"
+    status: experiment
+    size_bytes: 29293557
+    file_count: 20
+  - dataset_id: "legacy__test__0_4_3"
+    manifest: "legacy__test__0_4_3.yaml"
+    legacy_path: "test/0_4_3"
+    status: experiment
+    size_bytes: 49178234
+    file_count: 17
+  - dataset_id: "legacy__test__0_4_4"
+    manifest: "legacy__test__0_4_4.yaml"
+    legacy_path: "test/0_4_4"
+    status: experiment
+    size_bytes: 29696510
+    file_count: 20
+  - dataset_id: "legacy__test__0_4_5"
+    manifest: "legacy__test__0_4_5.yaml"
+    legacy_path: "test/0_4_5"
+    status: experiment
+    size_bytes: 49597885
+    file_count: 17
+  - dataset_id: "legacy__test__0_4_6"
+    manifest: "legacy__test__0_4_6.yaml"
+    legacy_path: "test/0_4_6"
+    status: experiment
+    size_bytes: 50656931
+    file_count: 17
+  - dataset_id: "legacy__test__0_4_7"
+    manifest: "legacy__test__0_4_7.yaml"
+    legacy_path: "test/0_4_7"
+    status: experiment
+    size_bytes: 51077975
+    file_count: 17
+  - dataset_id: "legacy__test__1_0_0"
+    manifest: "legacy__test__1_0_0.yaml"
+    legacy_path: "test/1_0_0"
+    status: experiment
+    size_bytes: 3197148
+    file_count: 7
+  - dataset_id: "legacy__test__1_0_1"
+    manifest: "legacy__test__1_0_1.yaml"
+    legacy_path: "test/1_0_1"
+    status: experiment
+    size_bytes: 27732170
+    file_count: 17
+  - dataset_id: "legacy__test__1_0_2"
+    manifest: "legacy__test__1_0_2.yaml"
+    legacy_path: "test/1_0_2"
+    status: experiment
+    size_bytes: 44300948
+    file_count: 14
+  - dataset_id: "legacy__test__1_0_3"
+    manifest: "legacy__test__1_0_3.yaml"
+    legacy_path: "test/1_0_3"
+    status: experiment
+    size_bytes: 45806767
+    file_count: 14
+  - dataset_id: "legacy__test__1_1_0"
+    manifest: "legacy__test__1_1_0.yaml"
+    legacy_path: "test/1_1_0"
+    status: experiment
+    size_bytes: 6555126
+    file_count: 13
+  - dataset_id: "legacy__test__1_1_1"
+    manifest: "legacy__test__1_1_1.yaml"
+    legacy_path: "test/1_1_1"
+    status: experiment
+    size_bytes: 45214739
+    file_count: 23
+  - dataset_id: "legacy__test__1_1_2"
+    manifest: "legacy__test__1_1_2.yaml"
+    legacy_path: "test/1_1_2"
+    status: experiment
+    size_bytes: 47576807
+    file_count: 20
+  - dataset_id: "legacy__test__1_1_3"
+    manifest: "legacy__test__1_1_3.yaml"
+    legacy_path: "test/1_1_3"
+    status: experiment
+    size_bytes: 33141176
+    file_count: 23
+  - dataset_id: "legacy__test__1_1_4"
+    manifest: "legacy__test__1_1_4.yaml"
+    legacy_path: "test/1_1_4"
+    status: experiment
+    size_bytes: 39603736
+    file_count: 20
+  - dataset_id: "legacy__test__1_1_5"
+    manifest: "legacy__test__1_1_5.yaml"
+    legacy_path: "test/1_1_5"
+    status: experiment
+    size_bytes: 63225768
+    file_count: 20
+  - dataset_id: "legacy__test__1_1_6"
+    manifest: "legacy__test__1_1_6.yaml"
+    legacy_path: "test/1_1_6"
+    status: experiment
+    size_bytes: 49097472
+    file_count: 26
+  - dataset_id: "legacy__test__1_1_7"
+    manifest: "legacy__test__1_1_7.yaml"
+    legacy_path: "test/1_1_7"
+    status: experiment
+    size_bytes: 55589758
+    file_count: 23
+  - dataset_id: "legacy__test__1_1_8"
+    manifest: "legacy__test__1_1_8.yaml"
+    legacy_path: "test/1_1_8"
+    status: experiment
+    size_bytes: 51460612
+    file_count: 23
+  - dataset_id: "legacy__test__1_1_9"
+    manifest: "legacy__test__1_1_9.yaml"
+    legacy_path: "test/1_1_9"
+    status: experiment
+    size_bytes: 57952366
+    file_count: 20
+  - dataset_id: "legacy__test__polyfit_batch_output"
+    manifest: "legacy__test__polyfit_batch_output.yaml"
+    legacy_path: "test/polyfit_batch_output"
+    status: experiment
+    size_bytes: 130524587
+    file_count: 121
+  - dataset_id: "legacy__yaml__lihu_building_fast"
+    manifest: "legacy__yaml__lihu_building_fast.yaml"
+    legacy_path: "yaml/lihu_building_fast"
+    status: legacy
+    size_bytes: 254487
+    file_count: 1294
+  - dataset_id: "legacy__yaml__longhua_building_fast"
+    manifest: "legacy__yaml__longhua_building_fast.yaml"
+    legacy_path: "yaml/longhua_building_fast"
+    status: legacy
+    size_bytes: 4486572
+    file_count: 15648
+  - dataset_id: "legacy__yaml__qingdao_building_fast"
+    manifest: "legacy__yaml__qingdao_building_fast.yaml"
+    legacy_path: "yaml/qingdao_building_fast"
+    status: legacy
+    size_bytes: 1558570
+    file_count: 6022
+  - dataset_id: "legacy__yaml__wuhu_building_fast"
+    manifest: "legacy__yaml__wuhu_building_fast.yaml"
+    legacy_path: "yaml/wuhu_building_fast"
+    status: legacy
+    size_bytes: 6774982
+    file_count: 26426
+  - dataset_id: "legacy__yaml__yingrenshi_building"
+    manifest: "legacy__yaml__yingrenshi_building.yaml"
+    legacy_path: "yaml/yingrenshi_building"
+    status: legacy
+    size_bytes: 360674
+    file_count: 1338
+  - dataset_id: "legacy__yaml__yuehai_building_exact"
+    manifest: "legacy__yaml__yuehai_building_exact.yaml"
+    legacy_path: "yaml/yuehai_building_exact"
+    status: legacy
+    size_bytes: 505510
+    file_count: 2232
+  - dataset_id: "legacy__yaml__yuehai_building_fast"
+    manifest: "legacy__yaml__yuehai_building_fast.yaml"
+    legacy_path: "yaml/yuehai_building_fast"
+    status: legacy
+    size_bytes: 502288
+    file_count: 2218

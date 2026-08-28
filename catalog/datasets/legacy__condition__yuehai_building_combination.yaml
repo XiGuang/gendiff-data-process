@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__condition__yuehai_building_combination"
+status: legacy
+lifecycle: processed
+physical_path: "/mnt/d/data/data/condition/yuehai_building_combination"
+legacy_relative_path: "condition/yuehai_building_combination"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 436022640
+  file_count: 3597
+  earliest_mtime_utc: "2025-11-25T16:21:59Z"
+  latest_mtime_utc: "2025-11-25T16:22:20Z"
+  scan_error_count: 0
+  extensions:
+    ".pt": 3597
+
+producer:
+  script_id: "legacy.condition_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "属于旧 condition/rotation/combination 链；缺少原始运行命令。"

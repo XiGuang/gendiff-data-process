@@ -1,0 +1,40 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__test__1_1_5"
+status: experiment
+lifecycle: scratch
+physical_path: "/mnt/d/data/data/test/1_1_5"
+legacy_relative_path: "test/1_1_5"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 63225768
+  file_count: 20
+  earliest_mtime_utc: "2026-03-11T05:48:34.730121Z"
+  latest_mtime_utc: "2026-03-11T06:29:33.900615Z"
+  scan_error_count: 0
+  extensions:
+    ".npy": 1
+    ".npz": 5
+    ".obj": 5
+    ".ply": 4
+    ".pt": 4
+    ".yaml": 1
+
+producer:
+  script_id: "unknown"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "测试或人工检查数据；不得仅凭目录名删除。"

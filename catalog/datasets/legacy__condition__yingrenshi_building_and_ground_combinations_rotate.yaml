@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__condition__yingrenshi_building_and_ground_combinations_rotate"
+status: legacy
+lifecycle: processed
+physical_path: "/mnt/d/data/data/condition/yingrenshi_building_and_ground_combinations_rotate"
+legacy_relative_path: "condition/yingrenshi_building_and_ground_combinations_rotate"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 12173523520
+  file_count: 100416
+  earliest_mtime_utc: "2025-12-10T13:40:08.562813Z"
+  latest_mtime_utc: "2025-12-10T13:40:14.787667Z"
+  scan_error_count: 0
+  extensions:
+    ".pt": 100416
+
+producer:
+  script_id: "legacy.condition_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "属于旧 condition/rotation/combination 链；缺少原始运行命令。"

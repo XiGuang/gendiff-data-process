@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__component__yuehai"
+status: unknown
+lifecycle: intermediate
+physical_path: "/mnt/d/data/data/component/yuehai"
+legacy_relative_path: "component/yuehai"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 2484185981
+  file_count: 340
+  earliest_mtime_utc: "2025-11-23T09:02:34.260664Z"
+  latest_mtime_utc: "2025-12-26T09:18:10.380170Z"
+  scan_error_count: 0
+  extensions:
+    ".obj": 340
+
+producer:
+  script_id: "legacy.component_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "可能由切分或合并脚本产生；具体命令和 commit 未保留。"

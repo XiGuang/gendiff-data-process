@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__condition__yingrenshi_building_simple_combinations_origin_model"
+status: legacy
+lifecycle: processed
+physical_path: "/mnt/d/data/data/condition/yingrenshi_building_simple_combinations_origin_model"
+legacy_relative_path: "condition/yingrenshi_building_simple_combinations_origin_model"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 1521423710
+  file_count: 12552
+  earliest_mtime_utc: "2025-11-22T05:41:37.826860Z"
+  latest_mtime_utc: "2025-11-22T05:43:10.880525Z"
+  scan_error_count: 0
+  extensions:
+    ".pt": 12552
+
+producer:
+  script_id: "legacy.condition_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "属于旧 condition/rotation/combination 链；缺少原始运行命令。"

@@ -1,0 +1,38 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__test__polyfit_batch_output"
+status: experiment
+lifecycle: scratch
+physical_path: "/mnt/d/data/data/test/polyfit_batch_output"
+legacy_relative_path: "test/polyfit_batch_output"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 130524587
+  file_count: 121
+  earliest_mtime_utc: "2026-03-11T08:25:31.003321Z"
+  latest_mtime_utc: "2026-03-11T08:28:33.216760Z"
+  scan_error_count: 0
+  extensions:
+    ".json": 30
+    ".obj": 29
+    ".vg": 31
+    ".xyz": 31
+
+producer:
+  script_id: "unknown"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "测试或人工检查数据；不得仅凭目录名删除。"

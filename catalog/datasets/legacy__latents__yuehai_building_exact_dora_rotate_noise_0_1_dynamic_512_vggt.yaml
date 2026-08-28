@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__latents__yuehai_building_exact_dora_rotate_noise_0_1_dynamic_512_vggt"
+status: unknown
+lifecycle: derived
+physical_path: "/mnt/d/data/data/latents/yuehai_building_exact_dora_rotate_noise_0.1_dynamic_512_vggt"
+legacy_relative_path: "latents/yuehai_building_exact_dora_rotate_noise_0.1_dynamic_512_vggt"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 14014290417
+  file_count: 5916
+  earliest_mtime_utc: "2025-12-29T07:54:57.906129Z"
+  latest_mtime_utc: "2025-12-29T07:55:11.360941Z"
+  scan_error_count: 0
+  extensions:
+    ".pt": 5916
+
+producer:
+  script_id: "external_or_unknown"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "latent producer 很可能在训练或编码仓库；当前仓库证据不足。"

@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__condition__yuehai_building_fast_and_ground_combinations_rotate"
+status: legacy
+lifecycle: processed
+physical_path: "/mnt/d/data/data/condition/yuehai_building_fast_and_ground_combinations_rotate"
+legacy_relative_path: "condition/yuehai_building_fast_and_ground_combinations_rotate"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 3464610904
+  file_count: 28576
+  earliest_mtime_utc: "2025-12-10T13:40:49.205878Z"
+  latest_mtime_utc: "2025-12-10T13:40:50.503848Z"
+  scan_error_count: 0
+  extensions:
+    ".pt": 28576
+
+producer:
+  script_id: "legacy.condition_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "属于旧 condition/rotation/combination 链；缺少原始运行命令。"

@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__yaml__yuehai_building_fast"
+status: legacy
+lifecycle: manifest
+physical_path: "/mnt/d/data/data/yaml/yuehai_building_fast"
+legacy_relative_path: "yaml/yuehai_building_fast"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 502288
+  file_count: 2218
+  earliest_mtime_utc: "2025-12-10T09:25:32.963887Z"
+  latest_mtime_utc: "2025-12-10T09:25:36.054007Z"
+  scan_error_count: 0
+  extensions:
+    ".yaml": 2218
+
+producer:
+  script_id: "legacy.yaml_generation_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "可能由 gen_yaml 脚本族产生；具体输入、命令和 commit 未保留。"

@@ -1,0 +1,36 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__images__wuhu_building_fast"
+status: unknown
+lifecycle: derived
+physical_path: "/mnt/d/data/data/images/wuhu_building_fast"
+legacy_relative_path: "images/wuhu_building_fast"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 593356832332
+  file_count: 282866
+  earliest_mtime_utc: "2026-01-11T11:42:22.917241Z"
+  latest_mtime_utc: "2026-01-14T01:19:30.562323Z"
+  scan_error_count: 0
+  extensions:
+    ".png": 256440
+    ".yaml": 26426
+
+producer:
+  script_id: "external_or_unknown"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "图像 producer 很可能跨仓库或依赖 Blender；当前不强行归属。"

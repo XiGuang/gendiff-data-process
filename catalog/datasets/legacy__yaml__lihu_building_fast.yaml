@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__yaml__lihu_building_fast"
+status: legacy
+lifecycle: manifest
+physical_path: "/mnt/d/data/data/yaml/lihu_building_fast"
+legacy_relative_path: "yaml/lihu_building_fast"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 254487
+  file_count: 1294
+  earliest_mtime_utc: "2026-01-05T08:47:50.886296Z"
+  latest_mtime_utc: "2026-01-05T08:48:54.570147Z"
+  scan_error_count: 0
+  extensions:
+    ".yaml": 1294
+
+producer:
+  script_id: "legacy.yaml_generation_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "可能由 gen_yaml 脚本族产生；具体输入、命令和 commit 未保留。"

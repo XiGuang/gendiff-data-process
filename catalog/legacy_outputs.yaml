@@ -1,0 +1,51 @@
+schema_version: legacy_output_inventory_v1
+cataloged_at: "2026-08-28"
+policy: "登记但不移动、不删除；tmp/test/new 名称不能作为删除依据"
+
+roots:
+  - path: /mnt/d/data/output
+    role: mixed_scratch_and_candidate_runs
+    git_ignored: true
+    entries:
+      - {name: top_level_ply_files, kind: scratch_group, file_count: 19, size_bytes: 10557645, producer: unknown}
+      - {name: construction_proxy, kind: candidate_run, file_count: 9, size_bytes: 143903, producer: construction.proxy_stage.v1}
+      - {name: construction_sequence, kind: candidate_run, file_count: 16, size_bytes: 305841, producer: construction.sequence.v1}
+      - {name: cube_error, kind: diagnostic, file_count: 2, size_bytes: 9735, producer: unknown}
+      - {name: flat_test, kind: experiment, file_count: 69, size_bytes: 955228, producer: polygon_proxy.batch_flat.v1}
+      - {name: floating_error, kind: diagnostic, file_count: 3, size_bytes: 4637, producer: support.floating_polygon_detect.v1}
+      - {name: oblique, kind: experiment, file_count: 6, size_bytes: 1446083, producer: support.oblique_path.v1}
+      - {name: polygon_proxy, kind: candidate_run, file_count: 9, size_bytes: 864491, producer: polygon_proxy.cli_tiles.v2}
+      - {name: polygon_proxy_components, kind: candidate_run, file_count: 6, size_bytes: 462893, producer: polygon_proxy.cli_components.v2}
+      - {name: polygon_proxy_components_flat, kind: candidate_run, file_count: 69, size_bytes: 1764970, producer: polygon_proxy.batch_flat.v1}
+      - {name: polygon_proxy_components_flat_smoke, kind: experiment, file_count: 3, size_bytes: 45159, producer: polygon_proxy.batch_flat.v1}
+      - {name: polygon_proxy_components_smoke, kind: experiment, file_count: 3, size_bytes: 452418, producer: polygon_proxy.cli_components.v2}
+      - {name: polygon_proxy_fix_tmp, kind: experiment, file_count: 3, size_bytes: 328275, producer: unknown}
+      - {name: polygon_proxy_fix_tmp2, kind: experiment, file_count: 3, size_bytes: 144328, producer: unknown}
+      - {name: polygon_proxy_samples_tmp, kind: experiment, file_count: 9, size_bytes: 11270462, producer: polygon_proxy.sample_check.v2}
+      - {name: polygon_proxy_samples_tmp2, kind: experiment, file_count: 9, size_bytes: 2628862, producer: polygon_proxy.sample_check.v2}
+      - {name: polygon_proxy_samples_tmp3, kind: experiment, file_count: 9, size_bytes: 843001, producer: polygon_proxy.sample_check.v2}
+      - {name: polygon_proxy_smoke_tmp, kind: experiment, file_count: 15, size_bytes: 1505622, producer: polygon_proxy.smoke.v1}
+      - {name: test_edit, kind: experiment, file_count: 11, size_bytes: 116436, producer: construction.sequence_edit_dataset.v1}
+      - {name: to, kind: experiment, file_count: 41, size_bytes: 1093407, producer: unknown}
+      - {name: yingrenshi_polygon_proxy_components_flat, kind: candidate_run, file_count: 69, size_bytes: 1764970, producer: polygon_proxy.batch_flat.v1}
+      - {name: yingrenshi_polygon_proxy_components_flat_new, kind: candidate_run, file_count: 69, size_bytes: 1665871, producer: polygon_proxy.batch_flat.v1}
+
+  - path: /mnt/d/data/outputs
+    role: canonical_candidate_runs
+    git_ignored: true
+    entries:
+      - {name: canonical, kind: candidate_run, file_count: 50, size_bytes: 1810449, producer: construction.canonical_edit_dataset.v1}
+      - {name: canonical_obj, kind: candidate_run, file_count: 54, size_bytes: 1969954, producer: construction.canonical_edit_dataset.v1}
+
+  - path: /mnt/d/data/pipeline/output
+    role: legacy_point_cloud_pipeline_outputs
+    git_ignored: true
+    entries:
+      - {name: blocks, kind: legacy_output, file_count: 168, size_bytes: 3418897461, producer: legacy.pipeline.segment_normalize.v1}
+      - {name: global, kind: legacy_output, file_count: 2, size_bytes: 2543777307, producer: legacy.pipeline.segment_normalize.v1}
+      - {name: metrics.json, kind: report, file_count: 1, size_bytes: 10761, producer: legacy.pipeline.segment_normalize.v1}
+      - {name: pred_it37894, kind: experiment, file_count: 2, size_bytes: 14473099, producer: unknown}
+
+unresolved:
+  - 所有 producer 映射均缺少原始 command/config/commit，最高只能视为 medium confidence
+  - 应在迁移前为需要保留的运行目录生成独立 run manifest 和内容 hash

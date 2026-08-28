@@ -1,0 +1,57 @@
+schema_version: pipeline_catalog_v1
+pipeline_id: construction_sequence_v1
+status: candidate
+confidence: medium
+purpose: 从 polygon proxy 生成多阶段建筑施工序列及 edit 训练数据
+
+stages:
+  - order: 1
+    script_id: construction.proxy_stage.v1
+    script: building_process/generate_construction_proxy.py
+    input: polygon proxy YAML
+    output: one stage YAML/OBJ/metadata
+
+  - order: 2
+    script_id: construction.sequence.v1
+    script: building_process/generate_construction_sequence.py
+    input: polygon proxy YAML
+    output: vertical/footprint/hybrid stage sequence
+
+  - order: 3
+    alternatives:
+      - script_id: construction.canonical_edit_dataset.v1
+        role: preferred_candidate
+        output: canonical edit objects, v2 sequences, conditions, split manifests
+      - script_id: construction.sequence_edit_dataset.v1
+        role: earlier_candidate
+        output: non-canonical layer-edit pairs
+      - script_id: construction.layer_edit_dataset.v1
+        role: deprecated
+        output: old layer-edit tokens and condition points
+
+  - order: 4
+    optional_script_id: construction.cut_dense_mesh.v1
+    script: building_process/cut_dense_mesh_by_construction_sequence.py
+    input: dense source mesh + sequence stage metadata
+    output: staged dense mesh with cap metadata
+
+known_legacy_outputs:
+  - /mnt/d/data/output/construction_proxy
+  - /mnt/d/data/output/construction_sequence
+  - /mnt/d/data/output/test_edit
+  - /mnt/d/data/outputs/canonical
+  - /mnt/d/data/outputs/canonical_obj
+
+unresolved_risks:
+  - canonical edit 序列是否对等价几何具有唯一表示尚未验证
+  - layer/point 排序、对称 footprint、浮点容差和 nearest-match 可能造成一对多表示
+  - 未对完整数据集执行 canonicalize -> apply -> compare round-trip
+  - 未确认 GenDiff 当前训练 loader 实际消费哪一版 schema
+  - 当前 Python 环境缺少 torch/trimesh/shapely，无法执行 CLI 集成验证
+
+promotion_gate:
+  - 固定输入和 seed 重复运行，逐字节比较 canonical outputs
+  - 对顶点循环移位、反向、layer 顺序置换和微小浮点扰动做等价性测试
+  - 全量 round-trip 后几何误差为零或低于显式阈值
+  - 统计 duplicate canonical key、冲突 target 和无法匹配 lineage
+  - 在 fresh environment 中用训练 loader 读取并完成小批过拟合测试

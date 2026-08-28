@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__latents__wuhu_urbanbis_fast_rotate_noise_0_1_dynamic_512"
+status: unknown
+lifecycle: derived
+physical_path: "/mnt/d/data/data/latents/wuhu_urbanbis_fast_rotate_noise_0.1_dynamic_512"
+legacy_relative_path: "latents/wuhu_urbanbis_fast_rotate_noise_0.1_dynamic_512"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 216819464794
+  file_count: 91528
+  earliest_mtime_utc: "2026-01-14T07:04:49.119590Z"
+  latest_mtime_utc: "2026-01-14T07:32:53.308939Z"
+  scan_error_count: 0
+  extensions:
+    ".pt": 91528
+
+producer:
+  script_id: "external_or_unknown"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "latent producer 很可能在训练或编码仓库；当前仓库证据不足。"

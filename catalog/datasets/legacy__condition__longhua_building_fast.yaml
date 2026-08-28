@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__condition__longhua_building_fast"
+status: legacy
+lifecycle: processed
+physical_path: "/mnt/d/data/data/condition/longhua_building_fast"
+legacy_relative_path: "condition/longhua_building_fast"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 41682606695
+  file_count: 439257
+  earliest_mtime_utc: "2026-01-15T05:19:15.053294Z"
+  latest_mtime_utc: "2026-01-15T05:47:57.899208Z"
+  scan_error_count: 0
+  extensions:
+    ".pt": 439257
+
+producer:
+  script_id: "legacy.condition_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "属于旧 condition/rotation/combination 链；缺少原始运行命令。"

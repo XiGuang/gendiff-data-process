@@ -1,0 +1,37 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__origin__yingrenshi"
+status: legacy
+lifecycle: raw
+physical_path: "/mnt/d/data/data/origin/Yingrenshi"
+legacy_relative_path: "origin/Yingrenshi"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 1653203072
+  file_count: 310
+  earliest_mtime_utc: "2026-04-02T06:24:28.083868Z"
+  latest_mtime_utc: "2026-04-02T06:25:45.682904Z"
+  scan_error_count: 0
+  extensions:
+    ".jpg": 80
+    ".mtl": 115
+    ".obj": 115
+
+producer:
+  script_id: "unknown"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "原始源数据；本仓库内未找到足够证据确认其生成程序。"

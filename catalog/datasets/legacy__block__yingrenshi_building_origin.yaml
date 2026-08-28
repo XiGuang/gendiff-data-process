@@ -1,0 +1,37 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__block__yingrenshi_building_origin"
+status: legacy
+lifecycle: processed
+physical_path: "/mnt/d/data/data/block/yingrenshi_building_origin"
+legacy_relative_path: "block/yingrenshi_building_origin"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 51734306866
+  file_count: 3846
+  earliest_mtime_utc: "2025-12-02T13:38:50.238873Z"
+  latest_mtime_utc: "2025-12-02T13:52:05.595647Z"
+  scan_error_count: 0
+  extensions:
+    ".npz": 1254
+    ".obj": 1254
+    ".yaml": 1338
+
+producer:
+  script_id: "legacy.block_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "属于旧 block 处理链；具体 producer 仅能从命名和脚本用途推断。"

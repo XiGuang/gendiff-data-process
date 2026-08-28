@@ -1,0 +1,37 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__block__longhua_building_fast"
+status: legacy
+lifecycle: processed
+physical_path: "/mnt/d/data/data/block/longhua_building_fast"
+legacy_relative_path: "block/longhua_building_fast"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 249084468043
+  file_count: 45102
+  earliest_mtime_utc: "2026-01-06T07:11:33.858457Z"
+  latest_mtime_utc: "2026-01-06T13:46:00.062535Z"
+  scan_error_count: 0
+  extensions:
+    ".npz": 14727
+    ".obj": 14727
+    ".yaml": 15648
+
+producer:
+  script_id: "legacy.block_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "属于旧 block 处理链；具体 producer 仅能从命名和脚本用途推断。"

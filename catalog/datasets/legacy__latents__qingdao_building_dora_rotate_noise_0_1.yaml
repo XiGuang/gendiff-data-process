@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__latents__qingdao_building_dora_rotate_noise_0_1"
+status: unknown
+lifecycle: derived
+physical_path: "/mnt/d/data/data/latents/qingdao_building_dora_rotate_noise_0.1"
+legacy_relative_path: "latents/qingdao_building_dora_rotate_noise_0.1"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 45264567191
+  file_count: 19108
+  earliest_mtime_utc: "2025-11-29T09:05:09.954673Z"
+  latest_mtime_utc: "2025-11-29T09:08:42.547770Z"
+  scan_error_count: 0
+  extensions:
+    ".pt": 19108
+
+producer:
+  script_id: "external_or_unknown"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "latent producer 很可能在训练或编码仓库；当前仓库证据不足。"

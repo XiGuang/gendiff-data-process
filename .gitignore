@@ -1,25 +1,35 @@
 # Python-generated files
 __pycache__/
-*.py[oc]
+*.py[cod]
 build/
 dist/
 wheels/
-*.egg-info
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
 
-# Virtual environments
-.venv
+# Local environments and editor state
+/.venv/
+/.vscode/
+/.codex
 
-.vscode/
-yingrenshi*/
-*yingrenshi/
+# Data and generated artifacts are kept outside Git
+/data/
+/output/
+/outputs/
+/pipeline/output/
 
-data/
+# Historical generated dataset indexes (cataloged, not source configuration)
+/config/
+/data.yaml
+/pipeline/pairs_t1_t2.yaml
 
+# Large binary artifacts must be referenced by catalog manifests
+*.obj
+*.mtl
+*.ply
+*.pt
+*.npz
 *.png
 *.jpg
-*.npz
-*.pt
-*.obj
-*.yaml
-*.ply
-*.mtl
+*.jpeg

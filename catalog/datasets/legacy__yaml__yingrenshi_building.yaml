@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__yaml__yingrenshi_building"
+status: legacy
+lifecycle: manifest
+physical_path: "/mnt/d/data/data/yaml/yingrenshi_building"
+legacy_relative_path: "yaml/yingrenshi_building"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 360674
+  file_count: 1338
+  earliest_mtime_utc: "2025-12-10T09:30:09.486056Z"
+  latest_mtime_utc: "2025-12-10T09:30:12.197115Z"
+  scan_error_count: 0
+  extensions:
+    ".yaml": 1338
+
+producer:
+  script_id: "legacy.yaml_generation_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "可能由 gen_yaml 脚本族产生；具体输入、命令和 commit 未保留。"

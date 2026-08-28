@@ -1,0 +1,36 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__images__yingrenshi_building"
+status: unknown
+lifecycle: derived
+physical_path: "/mnt/d/data/data/images/yingrenshi_building"
+legacy_relative_path: "images/yingrenshi_building"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 24036937521
+  file_count: 14718
+  earliest_mtime_utc: "2025-12-22T11:16:07.555722Z"
+  latest_mtime_utc: "2025-12-23T14:53:09.619818Z"
+  scan_error_count: 0
+  extensions:
+    ".png": 13380
+    ".yaml": 1338
+
+producer:
+  script_id: "external_or_unknown"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "图像 producer 很可能跨仓库或依赖 Blender；当前不强行归属。"

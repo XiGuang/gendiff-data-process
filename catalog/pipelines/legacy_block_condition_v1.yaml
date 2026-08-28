@@ -1,0 +1,49 @@
+schema_version: pipeline_catalog_v1
+pipeline_id: legacy_block_condition_v1
+status: legacy
+confidence: low
+purpose: 解释 2025 年 block、condition、image、latent 和 YAML 数据族的可能来源
+
+dag:
+  - inputs:
+      - data/origin/*
+      - data/component/*
+    scripts:
+      - cut_building_from_yaml.py
+      - cut_building_multiprocess.py
+      - cut_building_only.py
+      - merge_building.py
+      - process_change/*
+    outputs:
+      - data/block/*
+
+  - inputs:
+      - data/block/*
+      - ground/building point clouds or meshes
+    scripts:
+      - process_combination/process_combination.py
+      - process_combination/process_combination_use_mesh.py
+      - process_combination/batch_rotate_pointclouds.py
+    outputs:
+      - data/condition/*
+
+  - inputs:
+      - data/block/*
+      - data/condition/*
+      - data/images/*
+      - data/latents/*
+    scripts:
+      - gen_yaml/gen_building_data_yaml.py
+      - gen_yaml/gen_building_and_ground_data_yaml.py
+      - gen_yaml/gen_language_yaml.py
+    outputs:
+      - data/yaml/*
+
+external_or_unknown_steps:
+  - data/images 的渲染流程未在本仓库得到确认
+  - data/latents 的编码/训练流程很可能属于其他仓库
+  - 多个 exact/fast/simple/rotate/vggt 变体缺少 command/config/commit
+
+policy:
+  - 现有目录仅登记为 legacy/unknown，不因仍被某个脚本引用而提升为 current
+  - 在 producer 证据补齐前不得重命名或合并这些数据族

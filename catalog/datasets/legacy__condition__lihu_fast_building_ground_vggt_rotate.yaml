@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__condition__lihu_fast_building_ground_vggt_rotate"
+status: legacy
+lifecycle: processed
+physical_path: "/mnt/d/data/data/condition/lihu_fast_building_ground_vggt_rotate"
+legacy_relative_path: "condition/lihu_fast_building_ground_vggt_rotate"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 780378896
+  file_count: 9760
+  earliest_mtime_utc: "2026-01-15T06:39:11.135028Z"
+  latest_mtime_utc: "2026-01-15T06:39:32.927981Z"
+  scan_error_count: 0
+  extensions:
+    ".pt": 9760
+
+producer:
+  script_id: "legacy.condition_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "属于旧 condition/rotation/combination 链；缺少原始运行命令。"

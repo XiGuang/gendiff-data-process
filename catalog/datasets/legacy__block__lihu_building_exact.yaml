@@ -1,0 +1,36 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__block__lihu_building_exact"
+status: legacy
+lifecycle: processed
+physical_path: "/mnt/d/data/data/block/lihu_building_exact"
+legacy_relative_path: "block/lihu_building_exact"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 1841555982
+  file_count: 2094
+  earliest_mtime_utc: "2026-01-05T08:40:43.338188Z"
+  latest_mtime_utc: "2026-01-05T08:42:22.639889Z"
+  scan_error_count: 0
+  extensions:
+    ".obj": 800
+    ".yaml": 1294
+
+producer:
+  script_id: "legacy.block_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "属于旧 block 处理链；具体 producer 仅能从命名和脚本用途推断。"

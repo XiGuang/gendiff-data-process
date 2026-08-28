@@ -1,0 +1,83 @@
+schema_version: legacy_yaml_index_inventory_v1
+cataloged_at: "2026-08-28"
+classification: generated_dataset_indexes
+git_policy: "按路径忽略；只在 catalog 中记录 hash、行数和 producer 线索"
+
+indexes:
+  - path: /mnt/d/data/config/qingdao_all.yaml
+    size_bytes: 5189140
+    row_count: 23984
+    sha256: 614b1465480e4988b4ec347a2415b7c92818c7b03ae14ad167d00107d928efdb
+    schema_keys: [condition, t1, t2]
+    producer: legacy.yaml_building_ground.v1
+    confidence: medium
+
+  - path: /mnt/d/data/config/qingdao_with_remove.yaml
+    size_bytes: 11433576
+    row_count: 47968
+    sha256: 99c43a4c86fe9aba0ffb5f7fb7b40615d7092df5cd3ff52f4e337a3d2a3807fb
+    schema_keys: [condition, t1, t2]
+    producer: legacy.yaml_building_ground.v1
+    confidence: medium
+
+  - path: /mnt/d/data/config/yingrenshi_with_remove.yaml
+    size_bytes: 5870968
+    row_count: 25104
+    sha256: cfb9999f7fb1af6a09d4582652992b5a0e1485e0cd11698dd2649b0ceccb7687
+    schema_keys: [condition, t1, t2]
+    producer: legacy.yaml_building_ground.v1
+    confidence: medium
+
+  - path: /mnt/d/data/config/yuehai_all.yaml
+    size_bytes: 803448
+    row_count: 3597
+    sha256: 8a3aeabf65b50fec6c85c260dedc12661cb31fd39464d6be5ba8e1964ca00cc7
+    schema_keys: [condition, t1, t2]
+    producer: legacy.yaml_building_ground.v1
+    confidence: medium
+
+  - path: /mnt/d/data/config/yuehai_fast.yaml
+    size_bytes: 808576
+    row_count: 3572
+    sha256: 3773b998522a4ebf973b157865a3eccb9d95574d4c991d369c64323ab34f21fa
+    schema_keys: [condition, t1, t2]
+    producer: legacy.yaml_building_ground.v1
+    confidence: medium
+
+  - path: /mnt/d/data/config/yuehai_with_remove_fast.yaml
+    size_bytes: 3334320
+    row_count: 14288
+    sha256: 9829a9fd09a1ea5d28dc9ebf47f6d30b45f538b0d16f41eec8696fc1b51ebd06
+    schema_keys: [condition, t1, t2]
+    producer: legacy.yaml_building_ground.v1
+    confidence: medium
+
+  - path: /mnt/d/data/config/yuehai_with_remove.yaml
+    size_bytes: 1693224
+    row_count: 7194
+    sha256: 4e8bf5fc52f6267cdf436f6fc06bd98a8678d1fff004a17586b4a26ed0097c1b
+    schema_keys: [condition, t1, t2]
+    producer: legacy.yaml_building_ground.v1
+    confidence: medium
+
+  - path: /mnt/d/data/data.yaml
+    size_bytes: 1693224
+    row_count: 7194
+    sha256: 4e8bf5fc52f6267cdf436f6fc06bd98a8678d1fff004a17586b4a26ed0097c1b
+    schema_keys: [condition, t1, t2]
+    producer: unknown_copy
+    confidence: high_for_duplicate_content
+    notes: 与 config/yuehai_with_remove.yaml 字节级 SHA-256 相同
+
+  - path: /mnt/d/data/pipeline/pairs_t1_t2.yaml
+    size_bytes: 12028
+    row_count: 84
+    sha256: 81f4976c1900708f0e383e37dfbe5b1075b5c26711d000677541ced66f1ce65c
+    schema_keys: [position, t1, t2]
+    producer: legacy.pipeline.select_t1_t2.v1
+    confidence: medium
+
+backup:
+  path: /mnt/d/artifacts/gendiff-data-process/snapshots/20260828_pre_organization/newly_revealed_yaml.tar.gz
+  sha256: 6bb4ab3392447692eeaebf3c3cce2a744b54ca58c0deeafb9e022ceb465a76bc
+  verified: true

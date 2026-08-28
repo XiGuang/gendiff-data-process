@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__condition__yingrenshi_vggt_fixed_rotate"
+status: legacy
+lifecycle: processed
+physical_path: "/mnt/d/data/data/condition/yingrenshi_vggt_fixed_rotate"
+legacy_relative_path: "condition/yingrenshi_vggt_fixed_rotate"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 9844703808
+  file_count: 100416
+  earliest_mtime_utc: "2025-12-28T06:20:54.557601Z"
+  latest_mtime_utc: "2025-12-28T06:20:59.341534Z"
+  scan_error_count: 0
+  extensions:
+    ".pt": 100416
+
+producer:
+  script_id: "legacy.condition_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "属于旧 condition/rotation/combination 链；缺少原始运行命令。"

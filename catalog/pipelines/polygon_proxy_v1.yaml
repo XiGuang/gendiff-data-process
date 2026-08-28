@@ -1,0 +1,53 @@
+schema_version: pipeline_catalog_v1
+pipeline_id: polygon_proxy_v1
+status: candidate
+confidence: medium
+purpose: 将建筑三角网格转换为更小的 polygon/prism 代理表示
+
+input_families:
+  - component OBJ under data/component/*
+  - tile OBJ under data/block/*
+
+implementations:
+  - implementation_id: polygon_proxy_new_core
+    entrypoints:
+      - tools/build_polygon_proxy.py
+      - tools/build_polygon_proxy_components.py
+    library: polygon_proxy/core.py
+    outputs:
+      - proxy JSON
+      - proxy OBJ
+      - metrics JSON
+    validation:
+      synthetic_tests: "5 passed on 2026-08-28"
+      real_data_tests: not_run_during_organization
+
+  - implementation_id: polygon_proxy_flat_legacy_core
+    entrypoints:
+      - building_process/batch_polygon_proxy.py
+      - building_process/batch_polygon_proxy_flat.py
+    library: building_process/polygon_proxy.py
+    outputs:
+      - footprint/min_height/max_height YAML
+      - proxy OBJ
+      - polygon_proxy_meta.yaml
+    validation:
+      status: compile_only
+
+known_legacy_outputs:
+  - /mnt/d/data/output/polygon_proxy
+  - /mnt/d/data/output/polygon_proxy_components
+  - /mnt/d/data/output/polygon_proxy_components_flat
+  - /mnt/d/data/output/yingrenshi_polygon_proxy_components_flat
+  - /mnt/d/data/output/yingrenshi_polygon_proxy_components_flat_new
+  - /mnt/d/data/data/block/yingrenshi_building_polygon_proxy
+
+constraints:
+  - 两套实现的 API、坐标和输出 schema 未证明等价
+  - 下游 construction 工具需要 YAML 代理，不能直接假设可消费 new-core JSON
+  - 正式运行必须记录输入 dataset_id、commit、完整 command/config 和 validation report
+
+promotion_gate:
+  - 选定唯一实现和唯一 schema
+  - 在固定样本集上验证确定性、闭合性、面积/高度误差和 round-trip
+  - 用实际 construction consumer 做端到端测试

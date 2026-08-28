@@ -1,0 +1,36 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__latents__yingrenshi_building_simple_dora_rotate_noise_2_5"
+status: unknown
+lifecycle: derived
+physical_path: "/mnt/d/data/data/latents/yingrenshi_building_simple_dora_rotate_noise_2.5"
+legacy_relative_path: "latents/yingrenshi_building_simple_dora_rotate_noise_2.5"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 11882304365
+  file_count: 5017
+  earliest_mtime_utc: "2025-11-24T07:20:03.301586Z"
+  latest_mtime_utc: "2025-11-24T07:48:12.102319Z"
+  scan_error_count: 0
+  extensions:
+    ".png": 1
+    ".pt": 5016
+
+producer:
+  script_id: "external_or_unknown"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "latent producer 很可能在训练或编码仓库；当前仓库证据不足。"

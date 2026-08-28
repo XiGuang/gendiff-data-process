@@ -1,0 +1,35 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__component__yingrenshi_change"
+status: unknown
+lifecycle: intermediate
+physical_path: "/mnt/d/data/data/component/yingrenshi_change"
+legacy_relative_path: "component/yingrenshi_change"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 6855923138
+  file_count: 138
+  earliest_mtime_utc: "2025-10-22T12:40:49.311107Z"
+  latest_mtime_utc: "2025-12-26T06:25:00.010928Z"
+  scan_error_count: 0
+  extensions:
+    ".obj": 138
+
+producer:
+  script_id: "legacy.component_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "可能由切分或合并脚本产生；具体命令和 commit 未保留。"

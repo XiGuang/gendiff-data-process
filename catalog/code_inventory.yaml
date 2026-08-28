@@ -1,0 +1,562 @@
+schema_version: code_inventory_v1
+cataloged_at: "2026-08-28"
+repository: gendiff-data-process
+branch: organize/catalog-and-code-snapshot-20260828
+classification_rule: "current 需要正式下游运行证据；仅因文件较新不能标为 current"
+
+status_definitions:
+  current: 已确认属于当前生产链路
+  candidate: 最近开发且可能接替旧链路，但尚未完成全链验证
+  legacy: 历史流程，保留用于解释已有数据
+  support: 检查、转换、复制、统计或目录工具
+  experiment: smoke、测试或一次性探索脚本
+  unknown: 暂时无法确认用途或上下游
+  deprecated: 已有明确候选替代者，待迁移验收后归档
+
+scripts:
+  - script_id: package.polygon_proxy.v1
+    path: polygon_proxy/__init__.py
+    status: support
+    group: package_api
+    purpose: 导出新 polygon proxy 核心的公共 API
+    io: internal_library
+    verification: import_covered_by_synthetic_tests_2026_08_28
+
+  - script_id: package.process_change.v1
+    path: process_change/__init__.py
+    status: legacy
+    group: change_processing
+    purpose: 旧 change-processing Python 包标记
+    io: internal_library
+    verification: not_run
+
+  - script_id: building.decimate_laplacian.v1
+    path: building_process/batch_laplacian_decimate.py
+    status: legacy
+    group: mesh_preprocessing
+    purpose: 批量执行 Laplacian/decimation 网格简化
+    io: "dense OBJ -> simplified OBJ"
+    verification: not_run
+
+  - script_id: polygon_proxy.batch_flat.v1
+    path: building_process/batch_polygon_proxy_flat.py
+    status: candidate
+    group: polygon_proxy_legacy_core
+    purpose: 使用 building_process/polygon_proxy.py 批量生成扁平 YAML 与代理 OBJ
+    io: "component OBJ -> footprint/min_height/max_height YAML + OBJ + metadata"
+    verification: compile_passed_2026_08_28
+    caveat: 与 polygon_proxy/core.py 是两套实现，不应默认认为 schema 等价
+
+  - script_id: polygon_proxy.batch_tiles.v1
+    path: building_process/batch_polygon_proxy.py
+    status: candidate
+    group: polygon_proxy_legacy_core
+    purpose: 按 tile 批量调用旧 polygon proxy 实现
+    io: "tile OBJ tree -> per-tile proxy artifacts"
+    verification: compile_passed_2026_08_28
+
+  - script_id: building.decimate_smooth.v1
+    path: building_process/batch_smooth_decimate.py
+    status: legacy
+    group: mesh_preprocessing
+    purpose: 批量平滑并简化建筑网格
+    io: "dense OBJ -> smoothed/decimated OBJ"
+    verification: not_run
+
+  - script_id: construction.layer_edit_dataset.v1
+    path: building_process/build_layer_edit_dataset_from_sequence.py
+    status: deprecated
+    group: construction_sequence
+    purpose: 从 staged construction sequence 生成旧版 layer-edit 训练对
+    io: "stage YAML/OBJ -> edit tokens + condition points + split files"
+    verification: compile_only_2026_08_28
+    caveat: 含硬编码 /mnt/d/projects/GenDiff/test_data 默认路径；由 canonical 版本候选替代
+
+  - script_id: building.ground_voxel.v1
+    path: building_process/compute_ground_voxel.py
+    status: legacy
+    group: mesh_preprocessing
+    purpose: 计算地面 voxel 表示
+    io: "mesh/point data -> ground voxel"
+    verification: not_run
+
+  - script_id: construction.cut_dense_mesh.v1
+    path: building_process/cut_dense_mesh_by_construction_sequence.py
+    status: candidate
+    group: construction_sequence
+    purpose: 在 Blender 中按 construction stage 裁切 dense mesh 并生成封口
+    io: "dense OBJ + stage YAML/metadata -> staged OBJ/PLY + cap metadata"
+    verification: compile_only_2026_08_28
+    caveat: 运行需要 bpy/Blender 环境
+
+  - script_id: construction.proxy_stage.v1
+    path: building_process/generate_construction_proxy.py
+    status: candidate
+    group: construction_sequence
+    purpose: 从 polygon proxy YAML 生成指定进度的单个 construction stage
+    io: "proxy YAML -> stage YAML + optional OBJ + metadata"
+    verification: compile_only_2026_08_28
+
+  - script_id: construction.sequence.v1
+    path: building_process/generate_construction_sequence.py
+    status: candidate
+    group: construction_sequence
+    purpose: 生成 vertical/footprint/hybrid 多阶段 construction sequence
+    io: "proxy YAML -> sequence directories with stage YAML/OBJ/metadata"
+    verification: compile_only_2026_08_28
+
+  - script_id: construction.canonical_edit_dataset.v1
+    path: building_process/generate_construction_sequence_canonical_edit_dataset.py
+    status: candidate
+    group: canonical_edit
+    purpose: 生成带 point lineage 的 construction sequence、canonical edit object 与 v2 token sequence
+    io: "proxy YAML -> sequences + canonical edit dataset + conditions"
+    verification: compile_only_2026_08_28
+    caveat: 尚未做全量确定性、唯一性、round-trip 和训练消费验证
+
+  - script_id: construction.sequence_edit_dataset.v1
+    path: building_process/generate_construction_sequence_edit_dataset.py
+    status: candidate
+    group: construction_sequence
+    purpose: 联合生成 construction sequence 与非 canonical layer-edit 数据集
+    io: "proxy YAML -> staged sequence + edit training pairs"
+    verification: compile_only_2026_08_28
+
+  - script_id: polygon_proxy.legacy_core.v1
+    path: building_process/polygon_proxy.py
+    status: candidate
+    group: polygon_proxy_legacy_core
+    purpose: 基于 height raster/footprint 的代理建筑实现，供 building_process 下批处理脚本使用
+    io: "OBJ -> ProxyArtifact/YAML/OBJ"
+    verification: indirectly_compile_passed_2026_08_28
+    caveat: 与 polygon_proxy/core.py API 和输出 schema 不同
+
+  - script_id: polygon_proxy.smoke.v1
+    path: building_process/polygon_proxy_smoke_test.py
+    status: experiment
+    group: validation
+    purpose: 在少量真实样本上检查 polygon proxy 几何阈值
+    io: "sample OBJ -> smoke outputs + pass/fail summary"
+    verification: compile_passed_2026_08_28
+
+  - script_id: building.voxel_gpu.v1
+    path: building_process/voxel_gpu.py
+    status: legacy
+    group: mesh_preprocessing
+    purpose: GPU voxel 处理实验实现
+    io: "mesh/points -> voxel representation"
+    verification: not_run
+
+  - script_id: support.check_obj_threshold.v1
+    path: check_obj_threshold.py
+    status: support
+    group: inspection
+    purpose: 检查 OBJ 是否超过预设几何阈值
+    io: "OBJ tree -> diagnostic report"
+    verification: not_run
+
+  - script_id: support.copy_relative.v1
+    path: copy_by_relative_path.py
+    status: support
+    group: data_movement
+    purpose: 按扩展名复制文件并保持相对目录结构
+    io: "input tree -> filtered copy"
+    verification: not_run
+
+  - script_id: support.count_obj_heights.v1
+    path: count_obj_heights.py
+    status: support
+    group: inspection
+    purpose: 统计 OBJ 高度分布
+    io: "OBJ tree -> height statistics"
+    verification: not_run
+
+  - script_id: legacy.cut_building_yaml.v1
+    path: cut_building_from_yaml.py
+    status: legacy
+    group: block_generation
+    purpose: 按 YAML 范围从场景中裁切建筑
+    io: "scene mesh + YAML -> building/block meshes"
+    verification: not_run
+
+  - script_id: legacy.cut_building_multiprocess.v1
+    path: cut_building_multiprocess.py
+    status: legacy
+    group: block_generation
+    purpose: 多进程批量裁切建筑
+    io: "scene meshes -> building/block meshes"
+    verification: not_run
+
+  - script_id: legacy.cut_building_only.v1
+    path: cut_building_only.py
+    status: legacy
+    group: block_generation
+    purpose: 仅裁切建筑部分的旧脚本
+    io: "scene mesh -> building meshes"
+    verification: not_run
+
+  - script_id: support.floating_polygon_detect.v1
+    path: floating_poly_detect.py
+    status: support
+    group: inspection
+    purpose: 检测浮空或异常 polygon
+    io: "mesh tree -> anomaly report/artifacts"
+    verification: not_run
+
+  - script_id: support.oblique_path.v1
+    path: generate_oblique_path.py
+    status: support
+    group: camera_path
+    purpose: 生成倾斜视角路径
+    io: "scene bounds/config -> camera path"
+    verification: not_run
+
+  - script_id: legacy.generate_t2.v1
+    path: generate_t2.py
+    status: legacy
+    group: block_generation
+    purpose: 生成旧链路 t2 建筑状态
+    io: "t1/block data -> t2 data"
+    verification: not_run
+
+  - script_id: legacy.get_origin.v1
+    path: get_origin.py
+    status: legacy
+    group: block_generation
+    purpose: 提取或复制旧链路 origin 数据
+    io: "source scene/data -> origin artifacts"
+    verification: not_run
+
+  - script_id: support.list_obj_bboxes.v1
+    path: list_obj_bboxes.py
+    status: support
+    group: inspection
+    purpose: 列出 OBJ 包围盒
+    io: "OBJ tree -> bbox report"
+    verification: not_run
+
+  - script_id: legacy.merge_building.v1
+    path: merge_building.py
+    status: legacy
+    group: block_generation
+    purpose: 合并旧链路建筑组件
+    io: "component meshes -> merged building mesh"
+    verification: not_run
+
+  - script_id: support.stat_chunk_num.v1
+    path: stat_chunk_num.py
+    status: support
+    group: inspection
+    purpose: 统计数据 chunk 数量
+    io: "dataset tree -> counts"
+    verification: not_run
+
+  - script_id: experiment.root_tensor_probe.v1
+    path: test.py
+    status: experiment
+    group: one_off
+    purpose: 加载单个 VGGT condition tensor 并打印 shape
+    io: "硬编码 PT 路径 -> stdout"
+    verification: compile_only_2026_08_28
+    caveat: 依赖外部 /mnt/d/projects/vggt 路径，不是可复用测试
+
+  - script_id: support.shared_utils.v1
+    path: utils.py
+    status: support
+    group: shared
+    purpose: 根目录共享工具函数
+    io: internal_library
+    verification: not_run
+
+  - script_id: experiment.watertight.v1
+    path: watertight.py
+    status: experiment
+    group: mesh_inspection
+    purpose: 一次性检查或修复 watertight 网格
+    io: "mesh -> diagnostic/fixed mesh"
+    verification: not_run
+
+  - script_id: legacy.dora_sharp_sample.v1
+    path: dora_preprocess/building_sharp_sample_multiprocess.py
+    status: legacy
+    group: dora_preprocess
+    purpose: 多进程 sharp-surface 点采样
+    io: "building meshes -> sampled points"
+    verification: not_run
+
+  - script_id: legacy.dora_detect_path.v1
+    path: dora_preprocess/detect_path.py
+    status: legacy
+    group: dora_preprocess
+    purpose: 检查 DORA 数据路径完整性
+    io: "dataset tree -> missing/path report"
+    verification: not_run
+
+  - script_id: legacy.dora_process_building.v1
+    path: dora_preprocess/process_building_data.py
+    status: legacy
+    group: dora_preprocess
+    purpose: 处理 DORA 建筑训练数据
+    io: "building meshes/points -> DORA preprocessing artifacts"
+    verification: not_run
+
+  - script_id: legacy.dora_sdf_marching_cubes.v1
+    path: dora_preprocess/sdf_marching_cubes.py
+    status: legacy
+    group: dora_preprocess
+    purpose: 从 SDF 使用 marching cubes 重建网格
+    io: "SDF -> mesh"
+    verification: not_run
+
+  - script_id: legacy.yaml_edit_data.v1
+    path: gen_yaml/edit_data_yaml.py
+    status: legacy
+    group: yaml_generation
+    purpose: 修改旧训练数据 YAML
+    io: "dataset YAML -> edited YAML"
+    verification: not_run
+
+  - script_id: legacy.yaml_building_ground.v1
+    path: gen_yaml/gen_building_and_ground_data_yaml.py
+    status: legacy
+    group: yaml_generation
+    purpose: 生成 building+ground 训练清单
+    io: "block/condition/image paths -> YAML manifests"
+    verification: not_run
+
+  - script_id: legacy.yaml_building.v1
+    path: gen_yaml/gen_building_data_yaml.py
+    status: legacy
+    group: yaml_generation
+    purpose: 生成 building 训练清单
+    io: "block/condition/image paths -> YAML manifests"
+    verification: not_run
+
+  - script_id: legacy.yaml_language.v1
+    path: gen_yaml/gen_language_yaml.py
+    status: legacy
+    group: yaml_generation
+    purpose: 生成语言条件训练清单
+    io: "language/building paths -> YAML manifests"
+    verification: not_run
+
+  - script_id: obj_language.batch_roundtrip.v1
+    path: obj_to_language/batch_obj_yaml_pipeline.py
+    status: legacy
+    group: obj_to_language
+    purpose: 批量执行 OBJ 到 YAML 再重建 OBJ 的实验流水线
+    io: "OBJ -> footprint YAML -> reconstructed OBJ"
+    verification: not_run
+
+  - script_id: obj_language.obj_to_yaml_new.v1
+    path: obj_to_language/obj_to_yaml_new.py
+    status: experiment
+    group: obj_to_language
+    purpose: 按连通分量将 OBJ 转为 footprint/height YAML
+    io: "OBJ -> component footprint YAML"
+    verification: not_run
+    caveat: schema 与当前 GenDiff CityEngine stage YAML 不一致
+
+  - script_id: obj_language.obj_to_yaml_legacy.v1
+    path: obj_to_language/obj_to_yaml.py
+    status: legacy
+    group: obj_to_language
+    purpose: 旧版 OBJ 到 YAML 转换
+    io: "OBJ -> YAML"
+    verification: not_run
+
+  - script_id: obj_language.large_footprint_report.v1
+    path: obj_to_language/report_large_footprints.py
+    status: support
+    group: inspection
+    purpose: 报告异常大的 footprint
+    io: "footprint YAML tree -> report"
+    verification: not_run
+
+  - script_id: obj_language.rotate_footprints.v1
+    path: obj_to_language/rotate_yaml_bottom_contours.py
+    status: support
+    group: transformation
+    purpose: 旋转 YAML bottom_contour/footprint 坐标
+    io: "YAML -> rotated YAML"
+    verification: not_run
+
+  - script_id: experiment.obj_component_split.v1
+    path: obj_to_language/test.py
+    status: experiment
+    group: one_off
+    purpose: 合并近邻顶点后按连通分量拆分单个 OBJ
+    io: "硬编码 OBJ -> output/merged_parts"
+    verification: compile_only_2026_08_28
+    caveat: 路径和阈值硬编码，不是自动化测试
+
+  - script_id: obj_language.yaml_to_obj_new.v1
+    path: obj_to_language/yaml_to_obj_new.py
+    status: support
+    group: obj_to_language
+    purpose: 校验 footprint/base_height/height 并从 YAML 重建 OBJ
+    io: "component footprint YAML -> OBJ"
+    verification: compile_only_2026_08_28
+
+  - script_id: obj_language.yaml_to_obj_legacy.v1
+    path: obj_to_language/yaml_to_obj.py
+    status: legacy
+    group: obj_to_language
+    purpose: 旧版 YAML 到 OBJ 转换
+    io: "YAML -> OBJ"
+    verification: not_run
+
+  - script_id: legacy.pipeline.segment_normalize.v1
+    path: pipeline/segment_and_normalize_point_cloud.py
+    status: legacy
+    group: point_cloud_pipeline
+    purpose: 分割并归一化点云 block
+    io: "point cloud -> normalized blocks"
+    verification: not_run
+
+  - script_id: legacy.pipeline.select_t1_t2.v1
+    path: pipeline/select_t1_and_t2.py
+    status: legacy
+    group: point_cloud_pipeline
+    purpose: 选择并配对 t1/t2 block
+    io: "block collection -> t1/t2 pairs"
+    verification: not_run
+
+  - script_id: polygon_proxy.core.v2
+    path: polygon_proxy/core.py
+    status: candidate
+    group: polygon_proxy_new_core
+    purpose: 从三角网格提取平面 patch、规则化 polygon 并输出代理建筑
+    io: "OBJ -> proxy JSON/OBJ/metrics"
+    verification: five_synthetic_tests_passed_2026_08_28
+    caveat: 真实数据测试依赖本机 data/block 样本，fresh clone 中不可运行
+
+  - script_id: legacy.change.cut_insert.v1
+    path: process_change/cut_inser_building_change_model.py
+    status: legacy
+    group: change_processing
+    purpose: 裁切并插入建筑以构造 change model
+    io: "source components -> changed building mesh"
+    verification: not_run
+
+  - script_id: legacy.change.process_model.v1
+    path: process_change/process_change_model.py
+    status: legacy
+    group: change_processing
+    purpose: 构造旧版建筑变化数据
+    io: "component/origin data -> change model artifacts"
+    verification: not_run
+
+  - script_id: legacy.change.run_blender.v1
+    path: process_change/run_multi_blender.py
+    status: legacy
+    group: change_processing
+    purpose: 并行启动 Blender change-processing 工作
+    io: "job list -> Blender outputs"
+    verification: not_run
+
+  - script_id: legacy.change.sampling_worker.v1
+    path: process_change/sampling_worker.py
+    status: legacy
+    group: change_processing
+    purpose: change model 点采样 worker
+    io: "meshes -> sampled point artifacts"
+    verification: not_run
+
+  - script_id: legacy.change.utils.v1
+    path: process_change/utils.py
+    status: legacy
+    group: change_processing
+    purpose: 旧 change-processing 共享函数
+    io: internal_library
+    verification: not_run
+
+  - script_id: legacy.condition.attach_yaml.v1
+    path: process_combination/add_condition_to_yaml.py
+    status: legacy
+    group: condition_processing
+    purpose: 将 condition 路径写入旧训练 YAML
+    io: "YAML + condition tree -> updated YAML"
+    verification: not_run
+
+  - script_id: legacy.condition.coord_report.v1
+    path: process_combination/batch_report_max_coords.py
+    status: support
+    group: condition_inspection
+    purpose: 批量统计 condition 坐标范围
+    io: "point-cloud tree -> max-coordinate report"
+    verification: not_run
+
+  - script_id: legacy.condition.rotate_points.v1
+    path: process_combination/batch_rotate_pointclouds.py
+    status: legacy
+    group: condition_processing
+    purpose: 批量旋转 condition 点云
+    io: "point clouds -> rotated point clouds"
+    verification: not_run
+
+  - script_id: legacy.condition.pt_to_ply.v1
+    path: process_combination/convert_pt_to_ply.py
+    status: support
+    group: condition_conversion
+    purpose: 将 PyTorch 点云张量转为 PLY
+    io: "PT -> PLY"
+    verification: not_run
+
+  - script_id: legacy.condition.combine_points.v1
+    path: process_combination/process_combination.py
+    status: legacy
+    group: condition_processing
+    purpose: 组合建筑与地面点云 condition
+    io: "building/ground points -> combined condition"
+    verification: not_run
+
+  - script_id: legacy.condition.combine_mesh.v1
+    path: process_combination/process_combination_use_mesh.py
+    status: legacy
+    group: condition_processing
+    purpose: 基于 mesh 组合建筑与地面 condition
+    io: "building/ground meshes -> combined condition"
+    verification: not_run
+
+  - script_id: tests.polygon_proxy.v1
+    path: tests/test_polygon_proxy.py
+    status: experiment
+    group: validation
+    purpose: polygon_proxy/core.py 的合成测试与真实数据集成测试
+    io: "synthetic or local OBJ -> assertions"
+    verification: five_synthetic_tests_passed_2026_08_28
+    caveat: 两个真实数据测试依赖 data/block/yingrenshi_building_simple
+
+  - script_id: polygon_proxy.cli_components.v2
+    path: tools/build_polygon_proxy_components.py
+    status: candidate
+    group: polygon_proxy_new_core
+    purpose: 对 component OBJ 批量运行新 polygon proxy 核心
+    io: "component OBJ tree -> proxy JSON/OBJ/metrics"
+    verification: compile_passed_2026_08_28
+
+  - script_id: polygon_proxy.cli_tiles.v2
+    path: tools/build_polygon_proxy.py
+    status: candidate
+    group: polygon_proxy_new_core
+    purpose: 对 tile OBJ 批量运行新 polygon proxy 核心
+    io: "tile OBJ tree -> proxy JSON/OBJ/metrics"
+    verification: compile_passed_2026_08_28
+
+  - script_id: polygon_proxy.sample_check.v2
+    path: tools/check_polygon_proxy_samples.py
+    status: support
+    group: validation
+    purpose: 抽样执行 polygon proxy 并汇总几何质量指标
+    io: "sample OBJ -> report + proxy artifacts"
+    verification: compile_passed_2026_08_28
+
+  - script_id: catalog.dataset_scanner.v1
+    path: tools/build_data_catalog.py
+    status: support
+    group: catalog
+    purpose: 只读扫描 data/<category>/<dataset> 并生成观测型 manifest
+    io: "legacy data tree -> catalog/datasets/*.yaml"
+    verification: generated_119_manifests_2026_08_28
+    caveat: producer 字段按类别作低置信度分类，未知字段不会猜测

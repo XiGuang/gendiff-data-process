@@ -1,0 +1,36 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__component__lihu"
+status: unknown
+lifecycle: intermediate
+physical_path: "/mnt/d/data/data/component/lihu"
+legacy_relative_path: "component/lihu"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 40751736642
+  file_count: 188
+  earliest_mtime_utc: "2026-01-05T04:08:47.283217Z"
+  latest_mtime_utc: "2026-01-05T08:19:57.366043Z"
+  scan_error_count: 0
+  extensions:
+    ".mtl": 47
+    ".obj": 141
+
+producer:
+  script_id: "legacy.component_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "可能由切分或合并脚本产生；具体命令和 commit 未保留。"

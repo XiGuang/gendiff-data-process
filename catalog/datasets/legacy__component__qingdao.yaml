@@ -1,0 +1,36 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__component__qingdao"
+status: unknown
+lifecycle: intermediate
+physical_path: "/mnt/d/data/data/component/qingdao"
+legacy_relative_path: "component/qingdao"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 87347528592
+  file_count: 1204
+  earliest_mtime_utc: "2025-11-26T07:42:18.259839Z"
+  latest_mtime_utc: "2025-12-26T09:17:50.204425Z"
+  scan_error_count: 0
+  extensions:
+    ".mtl": 230
+    ".obj": 974
+
+producer:
+  script_id: "legacy.component_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "可能由切分或合并脚本产生；具体命令和 commit 未保留。"

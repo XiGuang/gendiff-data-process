@@ -1,0 +1,39 @@
+schema_version: pipeline_catalog_v1
+pipeline_id: history_area_edit_v2
+status: unresolved_target
+confidence: low
+purpose: 记录计划中的统一 canonicalizer 与 GenDiff history/area edit 训练接口
+
+expected_contract:
+  input:
+    - source building layers with stable semantic/geometry identifiers
+    - target building layers
+    - optional construction lineage metadata
+  canonicalizer:
+    - normalize coordinate precision and units
+    - normalize polygon winding and choose a unique cyclic start vertex
+    - sort layers and components by stable geometry keys
+    - resolve symmetry ties with explicit deterministic tie-breakers
+    - produce stable layer, edge, point, and operation IDs
+    - emit one canonical edit order per equivalent transformation
+  output:
+    - canonical edit object
+    - deterministic token/value sequence
+    - provenance and validation report
+
+candidate_implementation:
+  script_id: construction.canonical_edit_dataset.v1
+  path: building_process/generate_construction_sequence_canonical_edit_dataset.py
+
+required_invariants:
+  - canonicalize(x) == canonicalize(equivalent_permutation(x))
+  - apply(source, compile(canonicalize(source, target))) geometrically equals target
+  - repeated runs with the same input/seed are byte-identical
+  - every training sample key maps to exactly one canonical target sequence
+  - collisions and ambiguous matches fail closed and are reported
+
+missing_evidence:
+  - 当前 GenDiff training loader/schema 的确定版本与 commit
+  - history_stages/area 数据的确切 producer command
+  - canonical key 冲突率、round-trip 失败率和训练可学性统计
+  - 与旧 edit 数据的兼容或迁移规则

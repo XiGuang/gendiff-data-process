@@ -1,0 +1,37 @@
+schema_version: dataset_catalog_v1
+dataset_id: "legacy__component__wuhu"
+status: unknown
+lifecycle: intermediate
+physical_path: "/mnt/d/data/data/component/wuhu"
+legacy_relative_path: "component/wuhu"
+cataloged_at: "2026-08-28"
+immutable: unknown
+
+observed:
+  size_bytes: 6356046111
+  file_count: 1711
+  earliest_mtime_utc: "2026-01-05T04:09:54.824116Z"
+  latest_mtime_utc: "2026-01-05T08:54:55.220125Z"
+  scan_error_count: 0
+  extensions:
+    ".mtl": 570
+    ".obj": 1140
+    ".txt": 1
+
+producer:
+  script_id: "legacy.component_processing_family"
+  script_path: unknown
+  git_commit: unknown
+  command: unknown
+  config: unknown
+  dirty_worktree: unknown
+
+inputs:
+  - unknown
+consumers:
+  - unknown
+validation:
+  status: not_cataloged
+  report: unknown
+provenance_confidence: low
+notes: "可能由切分或合并脚本产生；具体命令和 commit 未保留。"
