@@ -1,4 +1,4 @@
-# GenDiff Unified Canonicalizer v1 Specification
+# GenDiff 统一规范化器 v1 规范
 
 - 状态：Draft for implementation review
 - 版本：`canonicalizer_v1`
@@ -75,7 +75,7 @@ Canonicalizer 是数据合同的一部分。任何会改变 canonical 输出、l
 5. **Decomposition invariance**：只要 raw layers 的实体 union 相同，其 canonical stage 必须相同。
 6. **Determinism**：进程数、worker 数、输入文件遍历顺序不改变输出。
 7. **Round-trip**：对任意有效 pair，`canonicalize(apply(source, edit))` 的 stage hash 必须等于 target stage hash。
-8. **No silent loss**：禁止静默丢弃 MultiPolygon 小分量、超容量点、超容量层或无法匹配的数据。
+8. **不允许静默丢失**：禁止静默丢弃 MultiPolygon 小分量、超容量点、超容量层或无法匹配的数据。
 
 ## 5. 几何等价关系
 
@@ -420,13 +420,13 @@ construction-only v1 不把完全移动到不相交位置的 layer 视为同一 
 
 实现不得依赖 Hungarian/SciPy 对平分情况的未定义返回顺序。建议先求最优总成本，再逐个 source 固定能保持全局最优的最小 target，得到确定性 lexicographic optimum。
 
-#### Split / merge
+#### 拆分与合并
 
 - 一对多 split：只有全局最优的一条 target 继承 source lineage，其余 target 分配新 lineage。
 - 多对一 merge：只有全局最优的一条 source lineage 被 target 继承，其余 source 产生 DELETE。
 - 选择完全由上述全局目标和 tie-break 决定，禁止使用 raw proxy id 决胜。
 
-#### Layer lineage 分配
+#### 层 Lineage 分配
 
 - 第一个非空 stage 按 canonical layer 顺序分配 `layer_lineage_id = 0..N-1`。
 - matched target 继承 source lineage。
@@ -441,7 +441,7 @@ Point lineage 只在 matched layer lineage 内传播。
 
 lineage 第一次出现时，按 canonical ring 顺序分配 `point_lineage_id = 0..N-1`。
 
-#### Cyclic alignment
+#### 循环对齐
 
 对 source 和 target 的 CCW canonical ring：
 
@@ -477,7 +477,7 @@ KEEP < MOVE < DELETE < INSERT
 
 如果没有可靠匹配，必须使用确定性的“source 全 DELETE，target 全 INSERT”，并记录 `W_POINT_ALIGNMENT_FALLBACK`，不能退化为按数组下标匹配。
 
-#### Point lineage 分配
+#### 点 Lineage 分配
 
 - KEEP/MOVE target 继承 source point lineage。
 - INSERT target 按 target canonical index 分配该 layer lineage 内单调递增的新 point lineage。
@@ -498,13 +498,13 @@ Lineage 只通过相邻阶段建立一次。对任意合法 `stage_i -> stage_j`
 
 ### 9.10 唯一 edit 排序
 
-#### Layer edit 顺序
+#### 层编辑顺序
 
 1. 所有 source-backed action（KEEP/MODIFY/DELETE）按 `source_layer_index` 升序。
 2. 所有 INSERT_LAYER 按 `target_layer_index` 升序。
 3. 顶层 EOS。
 
-#### Point edit 顺序
+#### 点编辑顺序
 
 每个 matched layer 内：
 
@@ -774,7 +774,7 @@ CLI 必须输出：
 | layer split/merge | primary lineage 选择稳定 |
 | 量化格内扰动 | hash 相同 |
 | 跨量化格变化 | hash 不同 |
-| construction removal | hard fail |
+| 施工删除 | 强制失败 |
 | no-op | 标记并从普通 pair 排除 |
 | 33 点且容量 32 | hard fail，不截断 |
 
@@ -811,7 +811,7 @@ CLI 必须输出：
 - 三次重跑、workers=1/8/56 的 sequence hash 100% 一致。
 - 所有 edit round-trip 100% 通过。
 - canonical layer 正体积重叠 = 0。
-- train/val/test building overlap = 0。
+- train/val/test 的 building 重叠 = 0。
 - 静默丢 layer/point/building = 0。
 - `(source_hash, condition_hash)` 监督冲突 = 0。
 - action 分布中，任务声明需要的动作均有明确非零覆盖；否则训练配置必须禁用相应能力声明。
@@ -865,7 +865,7 @@ hashes:
 
 验收：所有单 stage 等价变换 hash 一致；canonical union 无重叠且无实体损失。
 
-### M2：Lineage 和 edit v3
+### M2：血缘与编辑 v3
 
 - 实现确定性全局 layer matching。
 - 实现 cyclic point alignment、lineage 分配和唯一 action 排序。
@@ -874,7 +874,7 @@ hashes:
 
 验收：已知换起点/反向案例不再产生假 MOVE；所有 golden pair round-trip 通过。
 
-### M3：Validator、CLI 和 v2 adapter
+### M3：验证器、CLI 与 v2 适配器
 
 - 实现错误码、报告、manifest、determinism-check。
 - 接入当前 v2 tensor/action adapter。
@@ -882,7 +882,7 @@ hashes:
 
 验收：相同输入在 workers=1/8/56 下字节级一致；坏数据全部得到明确错误。
 
-### M4：100 栋 pilot
+### M4：100 栋试点
 
 - 从 1501 栋中选固定 100 栋，生成不覆盖原目录的 v3 数据。
 - 审查 warning 分布和 layer/action/capacity 分布。
@@ -890,7 +890,7 @@ hashes:
 
 验收：满足第 16.4 节全部 gate，才能处理剩余 1501 栋。
 
-### M5：全量接入和 forward
+### M5：全量接入与前向流程
 
 - 生成全量 versioned canonical dataset。
 - 修改 area pair generator 和 forward pipeline 使用同一 core。

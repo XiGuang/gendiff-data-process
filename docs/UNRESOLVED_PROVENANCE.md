@@ -1,82 +1,72 @@
-# Unresolved provenance and risk register
+# 未解决数据血缘与风险登记
 
-## P0: blocks safe training claims
+## P0：阻塞可信训练结论
 
-- The observed GenDiff consumer is now linked in
-  `catalog/training_consumer_manifest.yaml`: inspected checkout commit
-  `c6bcd8fda184dfa4042c8158a8fd8c797fb57fbc`, loader
+- 已观测 GenDiff consumer 现已记录在
+  `catalog/training_consumer_manifest.yaml`：已检查 checkout commit
+  `c6bcd8fda184dfa4042c8158a8fd8c797fb57fbc`、loader
   `/mnt/d/projects/GenDiff/craftsman/data/packed_area_edit_v2_data_module.py`,
-  run command/config, and required `area_v2_packed_v1` /
-  `area_v2_absolute_target_coord_no_anchor` schemas are known. The historical
-  run commit, dirty diff hash, exact Python environment, packed-data generation
-  command, and producer commit remain `unknown`.
-- The observed packed release is not a valid held-out release: train, validation,
-  and test alias the same 20,000 samples. Evidence is
-  `docs/TRAINING_CONSUMER_AUDIT.md` and manifest evidence IDs `E14`/`E15`.
-- This repository's canonical construction candidate is not directly compatible
-  with the observed loader. The missing versioned
+  run command/config，以及所需 `area_v2_packed_v1` /
+  `area_v2_absolute_target_coord_no_anchor` schema 均已知。历史 run commit、
+  dirty diff hash、精确 Python environment、packed 数据生成 command 和 producer
+  commit 仍为 `unknown`。
+- 已观测 packed release 不是有效的 held-out release：train、validation 和 test
+  alias 同一批 20,000 个样本。证据见 `docs/TRAINING_CONSUMER_AUDIT.md` 和
+  manifest 证据 ID `E14`/`E15`。
+- 本仓库的 canonical construction candidate 与已观测 loader 不直接兼容。缺失有版本的
   `canonical_edit_v3 -> area_v2_absolute_target_coord_no_anchor` adapter,
-  normalization/schema differences, and 12 classified mismatches block a
-  producer-to-consumer claim.
-- Canonical edit uniqueness is unmeasured. Cyclic polygon starts, winding,
-  symmetric shapes, layer ordering, nearest matches, and float tolerances can
-  produce multiple sequences for equivalent geometry.
-- The canonical candidate has no full-dataset round-trip, collision, ambiguity,
-  or duplicate-key report.
-- Construction CLIs cannot currently run in the active environment because the
-  declared project environment and historical Conda/Pip snapshots disagree;
-  `torch` is absent from the uv project dependencies.
+  normalization/schema 差异和 12 项已分类 mismatch 共同阻塞 producer-to-consumer
+  结论。
+- Canonical edit 唯一性尚未测量。polygon 循环起点、winding、对称形状、layer 顺序、
+  nearest match 和浮点容差都可能使等价几何产生多个序列。
+- Canonical candidate 尚无全数据集 round-trip、collision、ambiguity 或
+  duplicate-key 报告。
+- 当前 active environment 无法运行 construction CLI，因为声明的项目环境与历史
+  Conda/Pip snapshot 不一致，且 uv 项目依赖中没有 `torch`。
 
-## P1: blocks reliable regeneration
+## P1：阻塞可靠再生成
 
-- Nearly all legacy datasets lack an exact command, config, seed, and producer
-  commit.
-- The current CityEngine stage YAML producer and its immutable source/config are
-  `unknown`; the local `obj_to_language` schema is not evidence for that link.
-- `data/images` and `data/latents` likely cross repository boundaries; their
-  producers are unknown.
-- The two polygon proxy implementations have not been schema- or
-  geometry-equivalence tested.
-- Real-data tests use ignored local paths and have no small versioned fixture.
-- Several one-off scripts contain hard-coded `/mnt/d/...` paths.
-- Historical generated YAML pair indexes contain absolute `/mnt/d/data/...`
-  paths; `data.yaml` is byte-identical to `config/yuehai_with_remove.yaml`.
-- `requirements.txt`/`requirements_pip.txt` are historical environment exports,
-  while `pyproject.toml`/`uv.lock` describe a narrower code environment.
+- 几乎所有 legacy 数据集都缺少精确 command、config、seed 和 producer commit。
+- 当前 CityEngine stage YAML producer 及其不可变 source/config 为 `unknown`；
+  本地 `obj_to_language` schema 不能作为该关系的证据。
+- `data/images` 和 `data/latents` 很可能跨仓库，其 producer 为 unknown。
+- 两套 polygon proxy 实现尚未进行 schema 或几何等价测试。
+- real-data test 使用被 ignore 的本地路径，没有小型 versioned fixture。
+- 多个一次性脚本包含硬编码 `/mnt/d/...` 路径。
+- 历史生成 YAML pair index 包含绝对 `/mnt/d/data/...` 路径；`data.yaml` 与
+  `config/yuehai_with_remove.yaml` 字节完全相同。
+- `requirements.txt`/`requirements_pip.txt` 是历史 environment export，
+  `pyproject.toml`/`uv.lock` 则描述更窄的代码环境。
 
-## P2: storage and hygiene
+## P2：存储与仓库卫生
 
-- The legacy `.git` directory is about 18 GB and contains an approximately
-  17.09 GiB temporary pack. It was intentionally not deleted before backup and
-  fresh-clone verification.
-- Historical outputs mix candidate runs, diagnostics, and scratch data. They
-  are inventoried in `catalog/legacy_outputs.yaml` but not yet assigned immutable
-  run IDs. Candidate output consumers are explicitly `unknown`; the observed
-  packed GenDiff run is not evidence that it consumed those directories.
-- Dataset manifests record apparent byte sizes and file metadata, not content
-  hashes; hashing all 3.59 TB is a separate planned operation.
+- legacy `.git` 目录约 18 GB，包含约 17.09 GiB 临时 pack。在完成备份和 fresh
+  clone 验证前，它被有意保留而未删除。
+- 历史输出混合了 candidate run、diagnostic 和 scratch 数据。它们已在
+  `catalog/legacy_outputs.yaml` 中登记，但尚未分配不可变 run ID。candidate output
+  consumer 已显式写为 `unknown`；已观测 packed GenDiff run 不能证明其消费这些目录。
+- Dataset manifest 记录的是表观字节数和文件元数据，不是内容 hash；对全部 3.59 TB
+  做 hash 属于另一项计划任务。
 
-## Evidence needed to close an item
+## 关闭问题所需证据
 
-For a pipeline/dataset relation to reach high confidence, attach:
+pipeline/dataset 关系要达到 high confidence，必须附带：
 
-1. immutable producer commit and clean-worktree proof;
-2. exact command/config/seed/environment;
-3. immutable input dataset IDs and content hashes;
-4. output counts/sizes/hashes;
-5. validation report, including canonical collisions and round-trip results;
-6. downstream consumer commit/config and a successful smoke/overfit result.
+1. 不可变 producer commit 和 clean worktree 证明；
+2. 精确 command/config/seed/environment；
+3. 不可变输入 dataset ID 和内容 hash；
+4. 输出数量、大小和 hash；
+5. validation report，包括 canonical collision 和 round-trip 结果；
+6. 下游 consumer commit/config 及成功的 smoke/overfit 结果。
 
-Unknown fields must remain `unknown`; directory names and mtimes are supporting
-clues, not proof.
+未知字段必须保持 `unknown`；目录名和 mtime 只能作为辅助线索，不能作为证明。
 
-## Confirmed relations that are no longer unknown
+## 已确认、不再未知的关系
 
-- Observed run to command/config: high confidence, manifest evidence `E04/E08`.
-- Observed run to selected consumer file bytes: high confidence, `E05`.
-- Packed dataset to source-stage paths and recorded generation parameters: high
-  confidence, `E14`.
-- Candidate producer to the observed training run: still `unknown`, `E26/E27`.
+- 已观测 run 到 command/config：high confidence，manifest evidence `E04/E08`。
+- 已观测 run 到选定 consumer 文件字节：high confidence，`E05`。
+- Packed dataset 到 source-stage 路径和已记录生成参数：high confidence，`E14`。
+- Candidate producer 到已观测训练 run：仍为 `unknown`，`E26/E27`。
 
-These closures are scoped to the inspected paths and bytes. They do not promote
-either pipeline or reconstruct the missing historical run manifest.
+这些关闭结论仅适用于已检查的路径和字节，既不提升任何 pipeline，也不能重建缺失的
+历史 run manifest。

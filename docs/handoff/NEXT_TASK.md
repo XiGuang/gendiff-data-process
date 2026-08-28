@@ -1,150 +1,139 @@
-# Server Codex handoff: training consumer and canonicalizer audit
+# 服务器 Codex 交接：训练消费端与规范化器审计
 
-Date: 2026-08-28
+日期：2026-08-28
 
-## Objective
+## 目标
 
-Establish the exact contract between the current GenDiff training code and the
-candidate canonical construction dataset before changing algorithms or
-generating more data.
+在修改算法或生成更多数据前，明确当前 GenDiff 训练代码与 candidate canonical
+construction 数据集之间的精确合同。
 
-This is an evidence-gathering task. The output must make it possible to answer:
+这是一项证据收集任务，输出必须能够回答：
 
-1. Which repository commit, loader, config, command, and physical data paths are
-   actually used by training?
-2. Which fields, shapes, token semantics, coordinate normalization, IDs, and
-   split conventions does the loader require?
-3. Does the candidate canonicalizer emit that contract exactly?
-4. Where can equivalent geometry still produce multiple supervision sequences?
-5. What small deterministic test suite must pass before implementation or bulk
-   regeneration begins?
+1. 训练实际使用哪个仓库 commit、loader、config、command 和物理数据路径？
+2. loader 要求哪些字段、shape、token 语义、坐标 normalization、ID 和 split 约定？
+3. candidate canonicalizer 是否精确输出该合同？
+4. 哪些地方仍会让等价几何产生多套 supervision sequence？
+5. 在实现或批量再生成前，必须通过哪套小型确定性测试？
 
-## Starting state
+## 起始状态
 
-- Data repository branch:
+- 数据仓库分支：
   `organize/catalog-and-code-snapshot-20260828`
-- Verified data-repository commit before this handoff:
+- 本次交接前已验证的数据仓库 commit：
   `0fb8505f37fe7709830be2e0e9949fc29243e307`
-- Clean verification checkout:
+- clean 验证 checkout：
   `/mnt/d/projects/gendiff-data-process-clean-20260828`
-- Legacy mixed code/data checkout:
+- legacy 代码/数据混合 checkout：
   `/mnt/d/data`
-- Candidate canonical implementation:
+- candidate canonical 实现：
   `building_process/generate_construction_sequence_canonical_edit_dataset.py`
-- Expected training repository from the earlier audit:
+- 先前审计预期的训练仓库：
   `/mnt/d/projects/GenDiff`
 
-The legacy dataset inventory contains 119 dataset directories, 5,672,789 files,
-and 3,587,926,590,672 observed bytes. Do not rescan or hash the full tree in this
-phase.
+legacy 数据目录包含 119 个 dataset 目录、5,672,789 个文件和
+3,587,926,590,672 个已观测 bytes。本阶段不得重新扫描或 hash 全树。
 
-## Phase 1 procedure
+## 第一阶段流程
 
-### 1. Record repository state
+### 1. 记录仓库状态
 
-For the GenDiff training repository, record without modifying it:
+对 GenDiff 训练仓库做只读记录：
 
-- resolved path and remote URL;
-- branch, HEAD commit, upstream, and dirty status;
-- relevant untracked or modified files without exposing secrets;
-- Python/environment descriptors and the command actually used for training.
+- resolved path 和 remote URL；
+- branch、HEAD commit、upstream 和 dirty status；
+- 不暴露 secret 的相关 untracked 或 modified 文件；
+- Python/environment 描述以及实际训练 command。
 
-If more than one GenDiff checkout exists, identify which one produced the
-latest logs/checkpoints and explain the evidence.
+如果存在多个 GenDiff checkout，识别哪个产生了最新 log/checkpoint，并说明证据。
 
-### 2. Trace the real training consumer
+### 2. 追踪实际训练消费端
 
-Locate and trace:
+定位并追踪：
 
-- dataset/DataLoader entry point;
-- config composition and selected dataset section;
-- sample manifest paths and split files;
-- collate/tokenization/normalization code;
-- loss targets and masks;
-- model forward inputs;
-- inference/decoding/apply path;
-- latest training command, logs, and checkpoint metadata.
+- dataset/DataLoader 入口；
+- config composition 和选中的 dataset section；
+- sample manifest 路径和 split 文件；
+- collate/tokenization/normalization 代码；
+- loss target 和 mask；
+- model forward 输入；
+- inference/decoding/apply 路径；
+- 最新 training command、log 和 checkpoint metadata。
 
-Record exact file paths and line/function names. Distinguish code defaults from
-the configuration that was actually used.
+记录精确文件路径和 line/function 名称，区分代码默认值与实际使用的配置。
 
-### 3. Inspect a bounded sample
+### 3. 检查有界样本
 
-Inspect only a small representative sample sufficient to report:
+只检查足以报告以下内容的小型代表性样本：
 
-- field names, dtypes, shapes, ranges, and missing-value behavior;
-- whether train/validation/test samples or source buildings overlap;
-- presence and stability of layer/point/entity IDs;
-- duplicate canonical targets for equivalent source/target geometry;
-- no-op, demolition, reconstruction, ambiguity, and invalid-sample handling.
+- field name、dtype、shape、range 和 missing-value 行为；
+- train/validation/test 样本或 source building 是否重叠；
+- layer/point/entity ID 是否存在且稳定；
+- 等价 source/target 几何是否存在重复 canonical target；
+- no-op、demolition、reconstruction、ambiguity 和 invalid-sample 处理。
 
-Do not mutate sample files. Do not scan or hash the entire 3.59 TB tree.
+不得修改样本文件，不得扫描或 hash 整个 3.59 TB 数据树。
 
-### 4. Compare producer and consumer contracts
+### 4. 比较生产端与消费端合同
 
-Compare the current loader requirements with:
+将当前 loader 要求与以下内容比较：
 
-- the unified canonicalizer v1 specification;
-- `generate_construction_sequence_canonical_edit_dataset.py` outputs;
-- pipeline contracts under `catalog/pipelines/`.
+- unified canonicalizer v1 规范；
+- `generate_construction_sequence_canonical_edit_dataset.py` 输出；
+- `catalog/pipelines/` 下的 pipeline 合同。
 
-Classify every mismatch as blocking, compatibility risk, or documentation gap.
+将每项 mismatch 分类为阻塞项、兼容性风险或文档缺口。
 
-### 5. Define the next executable test gate
+### 5. 定义下一项可执行测试门槛
 
-Write a canonicalizer test plan covering at least:
+编写 canonicalizer 测试计划，至少覆盖：
 
-- cyclic polygon start invariance;
-- winding reversal invariance;
-- layer/component permutation invariance;
-- symmetric-geometry deterministic tie breaking;
-- floating-point quantization boundaries;
-- stable layer/edge/point identities;
-- ambiguous correspondence fail-closed behavior;
-- canonicalize/compile/apply round trip;
-- repeated-run byte identity;
-- duplicate canonical-key and conflicting-target detection;
-- training loader smoke test and bounded overfit test.
+- polygon 循环起点不变性；
+- winding 反转不变性；
+- layer/component 排列不变性；
+- 对称几何的确定性 tie-break；
+- 浮点量化边界；
+- 稳定的 layer/edge/point identity；
+- 歧义 correspondence 的失败关闭行为；
+- canonicalize/compile/apply round trip；
+- 重复 run 的字节一致性；
+- duplicate canonical-key 和 conflicting-target 检测；
+- training loader smoke test 和 bounded overfit test。
 
-Specify fixtures, metrics, commands, and pass/fail thresholds. Do not implement
-the full canonicalizer in Phase 1.
+明确 fixture、metric、command 和 pass/fail 阈值。Phase 1 不实现完整 canonicalizer。
 
-## Required outputs
+## 必需输出
 
 ### `catalog/training_consumer_manifest.yaml`
 
-Must contain:
+必须包含：
 
-- schema version and audit timestamp;
-- training repository state;
-- actual config/command evidence;
-- loader and model consumer paths;
-- input/output schema and normalization;
-- dataset/split paths;
-- producer compatibility status;
-- provenance confidence per material relation;
-- unresolved fields and blockers.
+- schema version 和审计时间戳；
+- 训练仓库状态；
+- 实际 config/command 证据；
+- loader 和 model consumer 路径；
+- input/output schema 和 normalization；
+- dataset/split 路径；
+- producer 兼容状态；
+- 每项关键关系的 provenance confidence；
+- unresolved 字段和 blocker。
 
 ### `docs/TRAINING_CONSUMER_AUDIT.md`
 
-Must lead with conclusions, then document the evidence chain, mismatches,
-leakage/uniqueness risks, and recommended gate.
+必须先写结论，再记录证据链、mismatch、泄漏/唯一性风险和建议 gate。
 
 ### `docs/CANONICALIZER_TEST_PLAN.md`
 
-Must provide a test matrix detailed enough for a later Codex task to implement
-without redefining semantics.
+必须提供足够详细的测试矩阵，使后续 Codex 任务无需重新定义语义即可实现。
 
-## Completion criteria
+## 完成标准
 
-Phase 1 is complete only when:
+只有满足以下条件，Phase 1 才算完成：
 
-- the actual training consumer is traced end to end;
-- the loader contract is stated precisely enough to build fixtures;
-- the candidate producer/consumer mismatches are classified;
-- the three required deliverables exist and parse/render correctly;
-- all blockers and inaccessible evidence are explicit;
-- no dataset, output, training code, or legacy Git storage was modified.
+- 实际训练 consumer 已完成端到端追踪；
+- loader 合同足够精确，可用于构建 fixture；
+- candidate producer/consumer mismatch 已分类；
+- 三份必需交付物存在且可正确 parse/render；
+- 所有 blocker 和不可访问证据均已显式记录；
+- 未修改任何 dataset、output、训练代码或 legacy Git storage。
 
-Stop after reporting Phase 1. Wait for review before implementing the
-canonicalizer or running bulk generation/training.
+报告 Phase 1 后停止。实现 canonicalizer 或运行批量生成/训练前等待审阅。

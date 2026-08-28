@@ -1,12 +1,11 @@
-# Legacy pipelines
+# 历史处理链路
 
-The historical code is preserved because it explains the existing 3.59 TB
-observed data tree. It is not mixed with the newer polygon/construction
-candidate path.
+历史代码予以保留，因为它解释现有 3.59 TB 已观测数据树。它不与较新的
+polygon/construction candidate 路径混合。
 
-## Block and condition family
+## 区块与条件数据家族
 
-The broad historical relation is:
+历史上的大致关系如下：
 
 ```text
 data/origin + data/component
@@ -20,26 +19,23 @@ data/origin + data/component
   -> data/yaml
 ```
 
-This is a low-confidence family-level relation. Exact commands, configs,
-commits, and input versions were not retained, so individual manifests keep
-those fields as `unknown`.
+这是 low-confidence 的家族级关系。精确 command、config、commit 和输入版本均未保留，
+因此单个 manifest 中的对应字段保持 `unknown`。
 
-## Point-cloud pipeline outputs
+## 点云处理链路输出
 
-`pipeline/select_t1_and_t2.py` and
-`pipeline/segment_and_normalize_point_cloud.py` are associated with
-`pipeline/output/{blocks,global,metrics.json}`. These outputs occupy about 5.96
-GB by apparent file size and remain ignored by Git.
+`pipeline/select_t1_and_t2.py` 和
+`pipeline/segment_and_normalize_point_cloud.py` 与
+`pipeline/output/{blocks,global,metrics.json}` 相关。这些输出按表观文件大小约占
+5.96 GB，并继续被 Git ignore。
 
-## OBJ/YAML language experiments
+## OBJ/YAML 语言实验
 
-`obj_to_language/` contains converters whose component footprint schema is not
-the same as the current GenDiff CityEngine stage schema. They remain useful for
-inspection and round-trip experiments, but they are not confirmed producers of
-current `history_stages_*` or `area` training data.
+`obj_to_language/` 包含 component footprint schema 与当前 GenDiff CityEngine
+stage schema 不同的转换器。它们仍可用于检查和 round-trip 实验，但并非当前
+`history_stages_*` 或 `area` 训练数据的已确认 producer。
 
-## Retention rule
+## 保留规则
 
-Names such as `tmp`, `test`, `new`, `fixed`, `fast`, or `exact` are not deletion
-criteria. A legacy directory can be archived only after its consumer status,
-content hash, retention need, and replacement have been recorded.
+`tmp`、`test`、`new`、`fixed`、`fast` 或 `exact` 等名称不能作为删除标准。
+只有在 consumer 状态、内容 hash、保留需求和替代项均已记录后，才能归档 legacy 目录。

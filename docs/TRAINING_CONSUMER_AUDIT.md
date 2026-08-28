@@ -1,4 +1,4 @@
-# GenDiff training consumer Phase 1 audit
+# GenDiff 训练消费端第一阶段审计
 
 审计时间：2026-08-28
 
@@ -121,7 +121,7 @@ run 自带 `code/` snapshot。以下当前文件与 run snapshot 的 SHA256 一�
 这建立了 run 到 selected file bytes 的高置信关系。run 当时的 Git HEAD、完整 dirty
 diff hash 和 environment 仍为 `unknown`。
 
-### 日志与 checkpoint
+### 日志与检查点
 
 最近 checkpoint 文件：
 
@@ -134,7 +134,7 @@ diff hash 和 environment 仍为 `unknown`。
 `unknown`；这里只使用路径、文件名、大小、mtime 和 metrics CSV，不声称 run 正常
 完成。
 
-## Loader 合同
+## 数据加载合同
 
 入口为
 `/mnt/d/projects/GenDiff/craftsman/data/packed_area_edit_v2_data_module.py:24`
@@ -157,26 +157,26 @@ edit_schema_version == area_v2_absolute_target_coord_no_anchor
 不匹配时抛 `ValueError`。这意味着仅写 `train.yaml`、`val.yaml`、`test.yaml` 的
 producer 不是该 consumer 的直接输入。
 
-### 实际 dataset/split
+### 实际数据集与划分
 
 `dataset_meta.yaml` 和 bounded PT probe 得到：
 
 | 项目 | 实际值 |
 |---|---:|
-| source stage root | `/mnt/d/projects/GenDiff/datasets/history_stages_origin` |
-| building/state | 5 / 1024 |
-| legal forward pairs | 98,976 |
-| sampled pairs | 20,000，seed 0 |
-| packed shards | 20 train shards |
-| train/val/test samples | 20,000 / 20,000 / 20,000 |
-| val/test split | 均 alias train，shard list 完全相同 |
-| stored capacity observed | 21 layers，7 points/layer |
-| stored condition | float32 `[8192,3]` |
+| 源阶段根目录 | `/mnt/d/projects/GenDiff/datasets/history_stages_origin` |
+| 建筑/状态 | 5 / 1024 |
+| 合法前向 pair | 98,976 |
+| 抽样 pair | 20,000，seed 0 |
+| packed 分片 | 20 个 train 分片 |
+| train/val/test 样本 | 20,000 / 20,000 / 20,000 |
+| val/test 划分 | 均 alias train，分片列表完全相同 |
+| 已观测存储容量 | 21 层，每层 7 点 |
+| 已存储 condition | float32 `[8192,3]` |
 
 原始 dataset metadata 记录了生成参数，但没有 exact argv、Git commit、dirty diff
 hash 或 dependency environment，所以 producer command/commit 为 `unknown`。
 
-### 坐标和 normalization
+### 坐标与归一化
 
 实际 metadata：
 
@@ -202,7 +202,7 @@ y' = (y - center_y) / scale_y
 二维点，height 是 Y，condition 是 XYZ。当前 loader 不再归一化；它信任 packed
 输入已经归一化。
 
-### 单样本 bounded probe
+### 单样本有界探查
 
 只加载了 metadata、三个 index、`states.pt` 和第一个 train shard；没有遍历其余
 19 个 shard。样本 0：
@@ -219,33 +219,33 @@ validation: layer/point counts match, max coord/height error 0, max AR tokens 6
 该样本只证明 schema、dtype、shape 和一个纯 INSERT case；它不代表全数据 action
 分布。更广泛的分布引用现有 server audit，不在 Phase 1 重扫 20k shard。
 
-### Batch schema
+### 批次 Schema
 
 配置固定 `L=64`、`P=32`、`T=P+1=33`、loader condition `N=2048`：
 
-| key | dtype / shape | 语义 |
+| key | 数据类型/形状 | 语义 |
 |---|---|---|
-| `source_point_coords` | float32 `[B,64,32,2]` | normalized XZ |
-| `source_point_mask` | bool `[B,64,32]` | source point valid |
-| `source_height_values` | float32 `[B,64,2]` | normalized min/max Y |
-| `source_layer_mask` | bool `[B,64]` | source layer valid |
-| `target_*` | 对应 source shape | target supervision |
+| `source_point_coords` | float32 `[B,64,32,2]` | 已归一化 XZ |
+| `source_point_mask` | bool `[B,64,32]` | source 点有效性 |
+| `source_height_values` | float32 `[B,64,2]` | 已归一化 min/max Y |
+| `source_layer_mask` | bool `[B,64]` | source 层有效性 |
+| `target_*` | 对应 source 形状 | target supervision |
 | `layer_actions` | int64 `[B,64]` | KEEP/MODIFY/DELETE/INSERT/PAD |
 | `point_actions` | int64 `[B,64,32]` | KEEP/MOVE/DELETE/INSERT/PAD |
 | `ar_action_targets` | int64 `[B,64,33]` | point action + EOS/PAD |
-| `ar_source_index_targets` | int64 `[B,64,33]` | explicit source index |
-| `ar_target_index_targets` | int64 `[B,64,33]` | explicit target index |
-| `ar_value_targets` | float32 `[B,64,33,2]` | absolute target XZ for MOVE/INSERT |
-| `ar_token_mask` | bool `[B,64,33]` | valid AR tokens including EOS |
-| `source_building_ids` | int64 `[B,64]` | 0 is missing/pad; source ID + 1 otherwise |
-| `change_point_clouds` | float32 `[B,2048,3]` | normalized XYZ |
-| `normalization_stats` | float32 `[B,5]` | denormalization metadata |
+| `ar_source_index_targets` | int64 `[B,64,33]` | 显式 source index |
+| `ar_target_index_targets` | int64 `[B,64,33]` | 显式 target index |
+| `ar_value_targets` | float32 `[B,64,33,2]` | MOVE/INSERT 的绝对 target XZ |
+| `ar_token_mask` | bool `[B,64,33]` | 包含 EOS 的有效 AR token |
+| `source_building_ids` | int64 `[B,64]` | 0 表示缺失/pad；其他值为 source ID + 1 |
+| `change_point_clouds` | float32 `[B,2048,3]` | 已归一化 XYZ |
+| `normalization_stats` | float32 `[B,5]` | 反归一化元数据 |
 
 `_fix_num_points()` 对超过 2048 的 condition 取前缀，对不足者重复，对空输入输出全
 零。`BuildingChangeConditionV2.forward()` 再通过 `torch_cluster.fps` 将 2048 点降到
 配置的 256 tokens。这个 deterministic prefix 不是空间覆盖采样保证。
 
-## Model、loss 和 apply 合同
+## 模型、损失与执行合同
 
 `BuildingLayerEditV2System._forward_batch()`
 (`/mnt/d/projects/GenDiff/craftsman/systems/building_layer_edit_v2_system.py:135`)
@@ -277,7 +277,7 @@ decode 路径是 `BuildingLayerEditV2System._decode_ar_predictions()` (`...syste
 applier 按显式 target point index 重建 footprint，并按 building/level/height/proxy ID
 排序输出。
 
-## Forward 状态
+## 前向流程状态
 
 大场景 runner 和 pipeline 当前都是 untracked：
 
@@ -295,19 +295,19 @@ source/target/condition case 输入；在该 output root 的 depth 3 内没有
 并且 forward 使用 per-tile normalization，而训练数据使用整个五栋 area 的一次性
 normalization。两种 normalization 的等价性没有测试。
 
-## Producer 对比
+## 生产端对比
 
-| 合同 | 实际 20k producer/packer | 本仓库 candidate | Unified v1 spec |
+| 合同 | 实际 20k producer/packer | 本仓库 candidate | 统一 v1 规范 |
 |---|---|---|---|
 | 输出容器 | packed PT state/index/shard | loose YAML + condition PT | canonical sequence/edit v3 + manifest |
-| edit schema | `area_v2_absolute_target_coord_no_anchor` | 未声明；delta/anchor value | `canonical_edit_v3` integer grid |
-| 坐标 | area-normalized float | raw float | quantized integer world XZY |
-| identity | building/proxy/point integer IDs | `proxy_id*stride+point_index` 起步 | sequence lineage，不信 raw index |
-| layer matching | greedy，proxy/source proxy 优先 | greedy，同类逻辑 | deterministic global optimum |
-| quantization | float + epsilon | Python `round()`/epsilon | half-away-from-zero integer grid |
-| split | train/val/test 相同 | train/val/test 相同 | building-level disjoint |
-| hashes | 无 canonical config/hash | 无 canonical config/hash | geometry/edit/condition/config hashes 必填 |
-| current loader | 已有成功 run | blocked | blocked，缺 adapter |
+| 编辑 schema | `area_v2_absolute_target_coord_no_anchor` | 未声明；delta/anchor value | `canonical_edit_v3` 整数网格 |
+| 坐标 | area-normalized float | raw float | 量化整数 world XZY |
+| 身份 | building/proxy/point 整数 ID | `proxy_id*stride+point_index` 起步 | sequence lineage，不信任 raw index |
+| 层匹配 | greedy，proxy/source proxy 优先 | greedy，同类逻辑 | 确定性全局最优 |
+| 量化 | float + epsilon | Python `round()`/epsilon | half-away-from-zero 整数网格 |
+| 划分 | train/val/test 相同 | train/val/test 相同 | building-level 隔离 |
+| hash | 无 canonical config/hash | 无 canonical config/hash | geometry/edit/condition/config hash 必填 |
+| 当前 loader | 已有成功 run | blocked | blocked，缺 adapter |
 
 本仓库 candidate 的关键证据：
 
@@ -320,9 +320,9 @@ normalization。两种 normalization 的等价性没有测试。
 
 因此脚本名中的 `canonical` 不能作为 v1 compatibility 证据。
 
-## Mismatch 分类
+## 不匹配项分类
 
-### Blocking
+### 阻塞项
 
 - 缺少 `canonical_edit_v3 -> area_v2_absolute_target_coord_no_anchor` 的显式、可逆、
   versioned adapter，以及 adapter 到 packed tensors 的 golden tests。
@@ -334,7 +334,7 @@ normalization。两种 normalization 的等价性没有测试。
 - packed release 缺 producer command、commit/diff hash、environment 与 canonical config
   hashes，不能可靠再生。
 
-### Compatibility risk
+### 兼容性风险
 
 - data module 和 forward 的 tensor builder 都会 slice；strict training capacity check
   没有覆盖所有预计算 tensor/原始 source point 静默截断路径。
@@ -344,15 +344,15 @@ normalization。两种 normalization 的等价性没有测试。
 - `canonicalizer.py` 中现存的 `BuildingLayerEditCanonicalizerV2` 只是按 layer/point slot
   和 `allclose` 比较，并非 Unified Canonicalizer v1。
 
-### Documentation gap / unknown
+### 文档缺口与未知项
 
-- run historical commit、dirty diff hash、Python executable、dependency environment；
+- 历史 run commit、dirty diff hash、Python 可执行文件、依赖环境；
 - packed 数据 exact generation/packing argv 与 code state；
-- CityEngine stage YAML producer；
+- CityEngine stage YAML 生产端；
 - checkpoint payload metadata；
 - completed large-scene forward output 与 GT geometry metrics。
 
-## Leakage 和唯一性风险
+## 数据泄漏与唯一性风险
 
 split leakage 是直接事实，不是抽样推断。uniqueness 风险同时由代码和既有审计支持：
 candidate 与实际 area generator 都能按 point index 造 ID；同几何环的 cyclic start 或
@@ -367,7 +367,7 @@ report 只证明“按现有标签 apply 能回到现有 target”，不能证�
 
 任何 duplicate key with conflicting target/edit 必须 hard fail，而不是保留多个训练答案。
 
-## Phase 1 验证命令
+## 第一阶段验证命令
 
 执行过的 checks 都是小范围只读操作：
 
@@ -384,7 +384,7 @@ bounded sample 使用现成 `/mnt/d/anaconda3/envs/gendiff/bin/python` 和
 `train_00000.pt` 的 sample 0。仓库 `.venv` 因缺少 Python 3.12 stdlib `encodings`
 无法启动；没有安装依赖。
 
-## Exact next gate
+## 精确下一门槛
 
 Phase 1 到此停止。下一 gate 是人工审阅本报告、
 `catalog/training_consumer_manifest.yaml` 与 `docs/CANONICALIZER_TEST_PLAN.md`；审阅通过

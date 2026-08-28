@@ -1,16 +1,14 @@
-# Organization execution report — 2026-08-28
+# 项目整理执行报告（2026-08-28）
 
-## Outcome
+## 执行结果
 
-The legacy data repository has been stabilized without moving or deleting any
-dataset. Previously uncommitted source is backed up, grouped into functional
-commits, pushed to an isolated branch, and verified from a fresh clone. Code,
-datasets, generated indexes, outputs, and unresolved provenance now have
-separate catalogs.
+legacy 数据仓库已在不移动或删除任何数据集的前提下完成稳定化。此前未提交的 source
+已备份、按功能组织为 commit、推送到隔离分支，并通过 fresh clone 验证。代码、数据集、
+生成 index、输出和未解决 provenance 现已有独立 catalog。
 
-## Git branch and commits
+## Git 分支与提交
 
-Branch: `organize/catalog-and-code-snapshot-20260828`
+分支：`organize/catalog-and-code-snapshot-20260828`
 
 ```text
 2259890 docs: add code and dataset lineage catalog
@@ -21,12 +19,11 @@ b4c15a8 feat(data): preserve construction sequence generators
 3ebbb12 feat(data): preserve polygon proxy pipeline
 ```
 
-The branch was pushed to `origin` after both the code checkpoint and catalog
-commit.
+code checkpoint 和 catalog commit 完成后，该分支已推送到 `origin`。
 
-## Repository-external backup
+## 仓库外备份
 
-Backup root:
+备份根目录：
 
 `/mnt/d/artifacts/gendiff-data-process/snapshots/20260828_pre_organization`
 
@@ -39,72 +36,65 @@ status.txt
 
 source_snapshot.tar.gz
   sha256 89074dec873302a903a64f571a8b0f5e7654e50de1f2390c8da26d017f91df94
-  gzip verification passed; 25 archived source entries
+  gzip 验证通过；归档 25 个 source 条目
 
 newly_revealed_yaml.tar.gz
   sha256 6bb4ab3392447692eeaebf3c3cce2a744b54ca58c0deeafb9e022ceb465a76bc
-  gzip verification passed
+  gzip 验证通过
 ```
 
-The second archive contains historical generated YAML indexes that became
-visible after removing the blanket `*.yaml` ignore.
+第二个归档包含移除全局 `*.yaml` ignore 后显现的历史生成 YAML index。
 
-## Catalog results
+## 目录册结果
 
-- 119 `data/<category>/<dataset>` directories cataloged.
-- 5,672,789 files observed.
-- 3,587,926,590,672 bytes observed (about 3.59 TB decimal).
-- 119 per-dataset manifests plus one aggregate dataset index generated.
-- Every tracked Python path has exactly one entry in
-  `catalog/code_inventory.yaml`.
-- Four machine-readable pipeline descriptions distinguish candidate, legacy,
-  and unresolved target flows.
-- Historical `output/`, `outputs/`, and `pipeline/output/` roots are inventoried
-  but remain untouched and ignored.
-- Nine generated YAML pair indexes are cataloged by size, row count, schema,
-  and SHA-256. `data.yaml` is byte-identical to
-  `config/yuehai_with_remove.yaml`.
+- 已登记 119 个 `data/<category>/<dataset>` 目录。
+- 已观测 5,672,789 个文件。
+- 已观测 3,587,926,590,672 bytes，十进制约 3.59 TB。
+- 已生成 119 个单数据集 manifest 和一个聚合 dataset index。
+- 每个 tracked Python 路径在 `catalog/code_inventory.yaml` 中恰有一个条目。
+- 四份机器可读 pipeline 描述区分 candidate、legacy 和 unresolved target 链路。
+- 历史 `output/`、`outputs/` 和 `pipeline/output/` 根目录已登记，但保持原样且继续被
+  ignore。
+- 九个生成 YAML pair index 已按大小、行数、schema 和 SHA-256 登记。
+  `data.yaml` 与 `config/yuehai_with_remove.yaml` 字节完全相同。
 
-All 127 catalog YAML files parsed successfully.
+全部 127 个 catalog YAML 文件解析成功。
 
-## Verification
+## 验证
 
-Fresh clone:
+全新克隆：
 
 `/mnt/d/projects/gendiff-data-process-clean-20260828`
 
-Verified at commit `22598906871384ad00a46e44492ec2ddbfa36a09`:
+在 commit `22598906871384ad00a46e44492ec2ddbfa36a09` 上验证：
 
-- local HEAD equals the pushed remote branch;
-- worktree is clean;
-- no `data/` or `output/` tree is present;
-- fresh `.git` is about 568 KiB and the checkout about 2.4 MiB;
-- all selected Python files compile;
-- five polygon proxy synthetic tests pass;
-- `uv lock --check` passes;
-- all catalog YAML files parse;
-- dataset index count equals the 119 manifests;
-- code inventory has no missing or extra Python path.
+- local HEAD 等于已推送 remote branch；
+- worktree clean；
+- 不存在 `data/` 或 `output/` 树；
+- fresh `.git` 约 568 KiB，checkout 约 2.4 MiB；
+- 所有选定 Python 文件 compile 通过；
+- 五个 polygon proxy synthetic test 通过；
+- `uv lock --check` 通过；
+- 所有 catalog YAML 文件解析通过；
+- dataset index 数量等于 119 个 manifest；
+- code inventory 没有 missing 或 extra Python 路径。
 
-## Intentionally not changed
+## 有意保持不变的内容
 
-- No dataset or historical output was moved, renamed, edited, or deleted.
-- The approximately 17.09 GiB temporary pack in the old `.git` directory was
-  not removed.
-- No algorithm implementation was refactored.
-- No pipeline was promoted to `current` without downstream evidence.
+- 没有移动、重命名、编辑或删除任何数据集或历史输出。
+- 旧 `.git` 目录中约 17.09 GiB 的临时 pack 未被移除。
+- 没有重构算法实现。
+- 没有在缺少下游证据时将任何 pipeline 提升为 `current`。
 
-## Highest-priority next work
+## 后续最高优先级工作
 
-1. Link the exact GenDiff training repository commit, loader, config, and schema
-   to the candidate canonical dataset.
-2. Add canonicalizer invariance, determinism, collision, ambiguity, and
-   round-trip tests before generating more training data.
-3. Reconcile `pyproject.toml`/`uv.lock` with the historical Conda/Pip snapshots
-   and create a runnable data-generation environment.
-4. Add a run-manifest writer that records dataset IDs, commit, clean/dirty
-   state, command, config, seed, environment, hashes, and validation reports.
-5. Execute one small frozen end-to-end run and a training-loader smoke/overfit
-   test.
-6. Only after those gates pass, migrate small candidate outputs to the external
-   artifact layout; address the old temporary Git pack last.
+1. 将精确 GenDiff 训练仓库 commit、loader、config 和 schema 与 candidate canonical
+   数据集关联。
+2. 在生成更多训练数据前增加 canonicalizer invariance、determinism、collision、
+   ambiguity 和 round-trip test。
+3. 对齐 `pyproject.toml`/`uv.lock` 与历史 Conda/Pip snapshot，建立可运行的数据生成环境。
+4. 增加 run-manifest writer，记录 dataset ID、commit、clean/dirty 状态、command、
+   config、seed、environment、hash 和 validation report。
+5. 执行一次小型冻结端到端 run 和 training-loader smoke/overfit test。
+6. 只有上述 gate 通过后，才把小型 candidate output 迁移到仓库外 artifact 布局；
+   最后处理旧临时 Git pack。

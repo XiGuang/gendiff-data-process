@@ -1,4 +1,4 @@
-# gendiff-data-process 整理与数据 Lineage 方案
+# gendiff-data-process 整理与数据血缘方案
 
 - 日期：2026-08-28
 - 服务器代码仓库：`/mnt/d/data`
@@ -368,7 +368,7 @@ __pycache__/
 
 - `config/**/*.yaml`
 - `catalog/**/*.yaml`
-- tests fixtures YAML
+- 测试 fixture YAML
 - 小型 schema 示例
 
 ### 6.4 干净新 clone
