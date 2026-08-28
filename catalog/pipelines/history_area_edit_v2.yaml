@@ -1,8 +1,22 @@
 schema_version: pipeline_catalog_v1
 pipeline_id: history_area_edit_v2
-status: unresolved_target
-confidence: low
-purpose: 记录计划中的统一 canonicalizer 与 GenDiff history/area edit 训练接口
+status: blocked_target
+confidence: medium
+purpose: 记录已观测 GenDiff packed area-v2 consumer 与计划中的统一 canonicalizer 接口
+
+observed_consumer_contract:
+  evidence_manifest: catalog/training_consumer_manifest.yaml
+  audit: docs/TRAINING_CONSUMER_AUDIT.md
+  training_repository: /mnt/d/projects/GenDiff
+  inspected_checkout_commit: c6bcd8fda184dfa4042c8158a8fd8c797fb57fbc
+  historical_run_commit: unknown
+  run_command: python train.py --config configs/packed_area_edit_v2_tiny_overfit.yaml --train --gpu 0,1,2,3,4,5,6
+  run_config_sha256: 6b61d262991fec4ec3b1787385a3f0fb0d074dddd87f3f0dd1acb9317ae40441
+  loader: /mnt/d/projects/GenDiff/craftsman/data/packed_area_edit_v2_data_module.py
+  dataset_root: /mnt/d/projects/GenDiff/datasets/history_area_edit_v2_packed
+  pack_schema: area_v2_packed_v1
+  edit_schema: area_v2_absolute_target_coord_no_anchor
+  split_status: train_val_test_alias_same_20000_samples
 
 expected_contract:
   input:
@@ -24,6 +38,10 @@ expected_contract:
 candidate_implementation:
   script_id: construction.canonical_edit_dataset.v1
   path: building_process/generate_construction_sequence_canonical_edit_dataset.py
+  introducing_commit: b4c15a89852df01c836dded8aef75a6d5b320bb2
+  direct_observed_loader_compatibility: blocked
+  required_adapter: canonical_edit_v3_to_area_v2_absolute_target_coord_no_anchor
+  adapter_status: unknown_missing
 
 required_invariants:
   - canonicalize(x) == canonicalize(equivalent_permutation(x))
@@ -33,7 +51,8 @@ required_invariants:
   - collisions and ambiguous matches fail closed and are reported
 
 missing_evidence:
-  - 当前 GenDiff training loader/schema 的确定版本与 commit
+  - 历史 training run 的 Git commit、dirty diff hash 与完整环境
+  - packed dataset 的 exact generation/packing command、producer commit 与 dirty diff hash
   - history_stages/area 数据的确切 producer command
   - canonical key 冲突率、round-trip 失败率和训练可学性统计
-  - 与旧 edit 数据的兼容或迁移规则
+  - canonical_edit_v3 到现有 area-v2 schema 的 reviewed adapter 与 golden tests

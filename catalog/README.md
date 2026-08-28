@@ -12,6 +12,9 @@ repository without moving its multi-terabyte contents.
 - `datasets/*.yaml`: physical path, file count, byte size, extensions, mtime
   range, lifecycle, validation state, and provenance confidence.
 - `pipelines/*.yaml`: candidate and legacy production DAGs.
+- `training_consumer_manifest.yaml`: read-only Phase 1 evidence for the actual
+  GenDiff checkout, run command/config, packed loader contract, producer
+  compatibility, and unresolved fields.
 - `legacy_outputs.yaml`: inventory of generated `output/`, `outputs/`, and
   `pipeline/output/` roots that remain outside Git.
 - `legacy_yaml_indexes.yaml`: hashes and row counts for large generated YAML
@@ -23,6 +26,20 @@ repository without moving its multi-terabyte contents.
 `medium` means code defaults, names, or timestamps strongly suggest a relation.
 `low` means only a broad script-family/category relation is known. Unknown
 fields stay `unknown`; they are not filled by guesswork.
+
+## Lookup order
+
+1. Find a script path in `code_inventory.yaml` to get its purpose and status.
+2. Find a legacy relative path or dataset ID in `datasets/index.yaml`, then open
+   the linked manifest for lifecycle, producer, consumers, and validation.
+3. For `output/`, `outputs/`, or `pipeline/output/`, use
+   `legacy_outputs.yaml`; candidate run consumers are explicit even when
+   `unknown`.
+4. For the external GenDiff training dataset and model-facing schema, use
+   `training_consumer_manifest.yaml` and follow its evidence IDs. Do not infer a
+   relation from a matching directory or script name.
+5. Use `pipelines/*.yaml` for DAG intent and `docs/CURRENT_PIPELINE.md` for the
+   current decision. Neither promotes a dataset without consumer evidence.
 
 ## Updating the dataset inventory
 
@@ -49,4 +66,5 @@ dataset files. Review the generated diff before committing it.
 - `unknown`: evidence is insufficient.
 
 At the time of this catalog, no data-generation pipeline is promoted to
-`current`. The canonical construction pipeline is a candidate.
+`current`. The canonical construction pipeline is a candidate whose direct
+compatibility with the observed packed GenDiff loader is blocked.

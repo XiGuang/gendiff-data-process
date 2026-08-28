@@ -1,0 +1,648 @@
+schema_version: training_consumer_manifest_v1
+
+audit:
+  phase: phase_1_read_only
+  audited_at: "2026-08-28T18:53:45+08:00"
+  auditor_repository:
+    path: /root/.codex/worktrees/8767/data
+    head_commit: ddd7a68685042dc93331a105d0f8b7449c8e467a
+    checkout: detached_head
+    pre_edit_dirty: false
+    evidence: [E01]
+  scope:
+    training_repository: /mnt/d/projects/GenDiff
+    bounded_sample:
+      - dataset_meta.pt
+      - train_index.pt
+      - val_index.pt
+      - test_index.pt
+      - states.pt
+      - shards/train/train_00000.pt
+    excluded:
+      - bulk_generation
+      - full_dataset_scan
+      - model_training
+      - dependency_installation
+      - training_repository_writes
+
+training_repository:
+  path: /mnt/d/projects/GenDiff
+  remote: git@github.com:XiGuang/GenDiff.git
+  branch: structured_proxy
+  upstream: origin/structured_proxy
+  head_commit: c6bcd8fda184dfa4042c8158a8fd8c797fb57fbc
+  dirty: true
+  dirty_entries:
+    - "M configs/packed_area_edit_v2_tiny_overfit.yaml"
+    - "M docs/area_edit_v2_dataset_output.md"
+    - "M docs/area_edit_v2_viewer_migration.md"
+    - "M docs/packed_area_edit_v2_datamodule_design.md"
+    - "M tools/build_area_edit_v2_packed_dataset.py"
+    - "M tools/generate_area_sequence_v2_dataset.py"
+    - "?? .playwright-cli/"
+    - "?? craftsman/inference/"
+    - "?? docs/area_layer_edit_v2_forward_pipeline_io.md"
+    - "?? docs/area_layer_edit_v2_network.md"
+    - "?? tools/generate_history_forward_cases.py"
+    - "?? tools/run_area_layer_edit_v2_forward.py"
+  historical_run_git_commit: unknown
+  historical_run_dirty_diff_hash: unknown
+  note: >-
+    The observed run snapshot does not record Git HEAD or a diff hash. Selected
+    consumer files are byte-identical to the inspected current worktree, but
+    this does not prove the historical run commit.
+  evidence: [E02, E03, E04, E05]
+
+environment:
+  actual_training_python_executable: unknown
+  actual_training_dependency_lock: unknown
+  repository_venv:
+    path: /mnt/d/projects/GenDiff/.venv
+    status: unusable_in_current_session
+    descriptor:
+      implementation: CPython
+      version_info: 3.12.4
+      home: /mnt/d/anaconda3/bin
+    observed_failure: ModuleNotFoundError_no_module_named_encodings
+  bounded_probe_environment:
+    executable: /mnt/d/anaconda3/envs/gendiff/bin/python
+    python: 3.11.13
+    torch: 2.4.0+cu121
+    relationship_to_training_run: unknown
+  evidence: [E06, E07]
+
+actual_training_run:
+  status: observed_completed_or_interrupted_after_step_122409
+  trial_dir: /mnt/d/projects/GenDiff/outputs/packed_area_edit_v2/tiny_overfit_20k_fixed_1
+  command: "python train.py --config configs/packed_area_edit_v2_tiny_overfit.yaml --train --gpu 0,1,2,3,4,5,6"
+  command_evidence: /mnt/d/projects/GenDiff/outputs/packed_area_edit_v2/tiny_overfit_20k_fixed_1/cmd.txt
+  raw_config_snapshot: /mnt/d/projects/GenDiff/outputs/packed_area_edit_v2/tiny_overfit_20k_fixed_1/configs/raw.yaml
+  parsed_config_snapshot: /mnt/d/projects/GenDiff/outputs/packed_area_edit_v2/tiny_overfit_20k_fixed_1/configs/parsed.yaml
+  current_config_path: /mnt/d/projects/GenDiff/configs/packed_area_edit_v2_tiny_overfit.yaml
+  config_sha256: 6b61d262991fec4ec3b1787385a3f0fb0d074dddd87f3f0dd1acb9317ae40441
+  config_git_state: modified_relative_to_current_HEAD
+  n_gpus: 7
+  latest_checkpoint:
+    path: /mnt/d/projects/GenDiff/outputs/packed_area_edit_v2/tiny_overfit_20k_fixed_1/ckpts/epoch=170-step=122000.ckpt
+    size_bytes: 424466680
+    mtime: "2026-06-11T21:00:02+08:00"
+    payload_metadata_inspected: false
+    payload_metadata: unknown
+  last_checkpoint_alias:
+    path: /mnt/d/projects/GenDiff/outputs/packed_area_edit_v2/tiny_overfit_20k_fixed_1/ckpts/last.ckpt
+    size_bytes: 424466680
+  metrics:
+    path: /mnt/d/projects/GenDiff/outputs/packed_area_edit_v2/tiny_overfit_20k_fixed_1/csv_logs/version_0/metrics.csv
+    latest_observed_step: 122409
+    latest_observed_epoch: 171
+    held_out_interpretation: invalid_because_val_and_test_alias_train
+  selected_run_snapshot_file_hashes:
+    train.py: 57029c7d357d46338c5e7ee1646b3586027d4a1bc4c3c3c445a29d34202e8dcd
+    craftsman/data/packed_area_edit_v2_data_module.py: a0d6257fefcd4e79eefd3768145a813f0bb10e1c300e0514bc71d2d5ef8be254
+    craftsman/systems/building_layer_edit_v2_system.py: d96467a1cbf09079540b641ef8127186933e54d6e16d243a60cf8596f6948f85
+    craftsman/models/backbone_models/backbone_building_layer_edit_v2.py: 9dac01fb39e57f91b9a622d71d9e1c79d61b51d5e478934978f0d66152e9f771
+  evidence: [E04, E05, E08, E09, E10]
+
+consumer:
+  training_entrypoint:
+    path: /mnt/d/projects/GenDiff/train.py
+    functions:
+      - main
+    behavior:
+      - load_config_merges_yaml_and_cli_overrides
+      - instantiate_data_type_from_registry
+      - instantiate_system_type_from_registry
+      - trainer_fit_then_trainer_test
+    evidence: [E11]
+  config:
+    path: /mnt/d/projects/GenDiff/configs/packed_area_edit_v2_tiny_overfit.yaml
+    data_type: packed-area-edit-v2-datamodule
+    system_type: building-layer-edit-v2-system
+    dataset_folder: datasets/history_area_edit_v2_packed
+    batch_size: 128
+    replica: 32
+    num_workers: 56
+    deterministic: true
+    evidence: [E12]
+  loader:
+    path: /mnt/d/projects/GenDiff/craftsman/data/packed_area_edit_v2_data_module.py
+    classes:
+      - PackedAreaEditV2Dataset
+      - PackedAreaEditV2IterableDataset
+      - PackedAreaEditV2DataModule
+    required_disk_files:
+      - dataset_meta.pt
+      - states.pt
+      - train_index.pt
+      - val_index.pt
+      - test_index.pt
+      - shards/<split>/<split>_<index>.pt
+    required_pack_schema: area_v2_packed_v1
+    required_edit_schema: area_v2_absolute_target_coord_no_anchor
+    missing_or_wrong_schema_behavior: ValueError
+    evidence: [E13]
+  actual_dataset:
+    root: /mnt/d/projects/GenDiff/datasets/history_area_edit_v2_packed
+    source_dataset_root: /mnt/d/projects/GenDiff/datasets/history_area_edit_v2_raw
+    source_stage_root: /mnt/d/projects/GenDiff/datasets/history_stages_origin
+    building_count: 5
+    state_count: 1024
+    legal_pair_count: 98976
+    sampled_pair_count: 20000
+    sample_seed: 0
+    include_demolition: false
+    stored_condition_point_count: 8192
+    stored_condition_dtype: float32
+    stored_max_layers: 21
+    stored_max_points_per_layer: 7
+    split:
+      train:
+        sample_count: 20000
+        shard_count: 20
+        alias_of: unknown
+      val:
+        sample_count: 20000
+        shard_count: 20
+        alias_of: train
+      test:
+        sample_count: 20000
+        shard_count: 20
+        alias_of: train
+      shard_lists_byte_semantically_equal: true
+      building_overlap: complete
+    producer_command: unknown
+    producer_git_commit: unknown
+    producer_dirty_diff_hash: unknown
+    evidence: [E14, E15]
+  model_capacity:
+    max_layers: 64
+    max_points_per_layer: 32
+    max_buildings: 16
+    ar_max_tokens_per_layer: 33
+    loader_condition_point_count: 2048
+    condition_token_count: 256
+    strict_area_capacity: true
+    evidence: [E12, E16]
+  normalization:
+    input_coordinates_normalized: true
+    scope: area
+    coordinate_frame:
+      footprint_axes: [x, z]
+      height_axis: y
+      condition_axes: [x, y, z]
+    formulas:
+      x: (x-center_x)/scale_xz
+      z: (z-center_z)/scale_xz
+      y: (y-center_y)/scale_y
+    observed_stats_order: [center_x, center_z, scale_xz, center_y, scale_y]
+    observed_stats: [-151.3255, 78.1355, 195.594, 97.797, 195.594]
+    point_value_semantics: absolute_target_coord_in_normalized_xz
+    anchor_supervision: false
+    evidence: [E14, E17]
+  sample_schema:
+    packed_sample_required:
+      source_state_index: int
+      target_state_index: int
+      condition: "FloatTensor[N,3]"
+      edit_object: "list[layer_edit]"
+      pair_name: string
+      validation: dict
+      edit_schema_version: area_v2_absolute_target_coord_no_anchor
+    layer:
+      required_by_successful_observed_sample:
+        - proxy_id
+        - min_height
+        - max_height
+        - footprint
+      consumed_optional_metadata:
+        - source_proxy_id
+        - building_id
+        - building_name
+        - building_layer_index
+        - point_ids
+        - source_point_ids
+        - point_roles
+      footprint_shape: "[P,2]"
+      height_shape: "[2]"
+    layer_edit:
+      fields:
+        - action
+        - source_layer_index
+        - target_layer_index
+        - source_proxy_id
+        - target_proxy_id
+        - source_building_id
+        - target_building_id
+        - height_edit
+        - point_edits
+      actions: [KEEP, MODIFY, DELETE, INSERT]
+    point_edit:
+      fields:
+        - action
+        - source_point_index
+        - target_point_index
+        - source_coord
+        - target_coord
+        - value
+      actions: [KEEP, MOVE, DELETE, INSERT]
+      value_for_move_or_insert: absolute_target_coord
+    missing_value_conventions:
+      absent_index_or_id_in_yaml: null
+      padded_tensor_index: -1
+      absent_embedding_building_id: 0
+      PAD_action: 4
+    evidence: [E13, E15, E18]
+  batch_schema:
+    notation: B_is_batch_L_64_P_32_T_33_C_2_N_2048
+    tensors:
+      source_point_coords: "float32[B,L,P,C]"
+      source_point_mask: "bool[B,L,P]"
+      source_height_values: "float32[B,L,2]"
+      source_layer_mask: "bool[B,L]"
+      target_point_coords: "float32[B,L,P,C]"
+      target_point_mask: "bool[B,L,P]"
+      target_height_values: "float32[B,L,2]"
+      target_layer_mask: "bool[B,L]"
+      layer_actions: "int64[B,L]"
+      point_actions: "int64[B,L,P]"
+      ar_action_targets: "int64[B,L,T]"
+      ar_source_index_targets: "int64[B,L,T]"
+      ar_target_index_targets: "int64[B,L,T]"
+      ar_value_targets: "float32[B,L,T,2]"
+      ar_token_mask: "bool[B,L,T]"
+      change_point_clouds: "float32[B,N,3]"
+      source_building_ids: "int64[B,L]"
+      normalization_stats: "float32[B,5]"
+    evidence: [E13, E18]
+  condition_sampling:
+    stored_to_loader: deterministic_prefix_if_more_than_2048
+    loader_padding: deterministic_repeat_if_fewer_than_2048
+    zero_point_behavior: all_zero_2048x3
+    encoder_reduction: torch_cluster_fps_from_2048_to_configured_256
+    deterministic_spatial_coverage_guarantee: false
+    evidence: [E13, E16]
+  targets_and_losses:
+    layer_action_tokens:
+      KEEP: 0
+      MODIFY: 1
+      DELETE: 2
+      INSERT: 3
+      PAD: 4
+    ar_point_action_tokens:
+      KEEP: 0
+      MOVE: 1
+      DELETE: 2
+      INSERT: 3
+      EOS: 4
+      PAD: 5
+      BOS: 6
+    losses:
+      - layer_action_cross_entropy
+      - target_height_value_loss
+      - ar_action_cross_entropy
+      - ar_source_index_cross_entropy
+      - ar_target_index_cross_entropy
+      - ar_length_cross_entropy
+      - ar_move_insert_value_loss
+    masks:
+      layer_action_nonpad: layer_actions_not_PAD
+      height: target_layer_mask
+      ar_token: ar_token_mask
+      ar_source_index: KEEP_or_MOVE_or_DELETE
+      ar_target_index: KEEP_or_MOVE_or_INSERT
+      ar_value: MOVE_or_INSERT
+    evidence: [E19, E20]
+  model_forward:
+    condition_encoder: /mnt/d/projects/GenDiff/craftsman/models/condition/building_change_condition_v2.py
+    backbone: /mnt/d/projects/GenDiff/craftsman/models/backbone_models/backbone_building_layer_edit_v2.py
+    system: /mnt/d/projects/GenDiff/craftsman/systems/building_layer_edit_v2_system.py
+    inputs:
+      - source_point_coords
+      - source_point_mask
+      - source_height_values
+      - source_layer_mask
+      - source_building_ids
+      - change_point_clouds
+      - teacher_forcing_targets_during_training
+    evidence: [E20, E21]
+  decode_and_apply:
+    decoder_function: BuildingLayerEditV2System._decode_ar_predictions
+    generated_outputs:
+      - layer_actions
+      - target_height_values
+      - ar_actions
+      - ar_source_indices
+      - ar_target_indices
+      - ar_values
+    edit_decoder: LayerwiseARGeneratedEditDecoderV2.decode_batch
+    applier: /mnt/d/projects/GenDiff/craftsman/models/editing/building_layer_edit_v2/edit_object_applier.py
+    apply_function: BuildingLayerEditObjectApplierV2.apply_to_layers
+    output_sort_key:
+      - building_id
+      - level_index
+      - min_height
+      - max_height
+      - proxy_id
+    evidence: [E20, E22]
+  large_scene_forward:
+    runner: /mnt/d/projects/GenDiff/tools/run_area_layer_edit_v2_forward.py
+    pipeline: /mnt/d/projects/GenDiff/craftsman/inference/area_layer_edit_v2_forward.py
+    git_state: untracked
+    completed_output_summary_found: false
+    observed_case_input: /mnt/d/projects/GenDiff/outputs/history_forward_cases/cases/case_000000
+    observed_final_scene: unknown
+    observed_summary: unknown
+    risks:
+      - source_point_lists_are_silently_truncated_to_max_points_per_layer
+      - condition_points_are_truncated_by_prefix
+      - over_capacity_jobs_are_skipped_unless_strict_capacity_is_enabled
+      - building_capacity_check_is_after_embedding_map_truncation
+    evidence: [E23, E24]
+
+bounded_sample_observation:
+  shard: /mnt/d/projects/GenDiff/datasets/history_area_edit_v2_packed/shards/train/train_00000.pt
+  sample_index: 0
+  pair_name: pair_000000_area_state_000000_to_area_state_000004
+  source_state_index: 0
+  target_state_index: 4
+  source_layer_count: 0
+  target_layer_count: 2
+  condition:
+    dtype: float32
+    shape: [8192, 3]
+    min: -0.49999427795410156
+    max: 0.25707948207855225
+    finite: true
+  edit_object_count: 2
+  layer_action_counts:
+    INSERT: 2
+  reconstruction_validation:
+    layer_count_match: true
+    point_count_match: true
+    max_coord_error: 0.0
+    max_height_error: 0.0
+    max_ar_tokens_required: 6
+  representativeness:
+    geometry_and_dtype: single_sample_only
+    missing_value_behavior: code_trace_plus_single_sample
+    action_distribution: not_representative
+  evidence: [E15]
+
+producer_compatibility:
+  observed_history_area_v2_producer:
+    generator: /mnt/d/projects/GenDiff/tools/generate_area_sequence_v2_dataset.py
+    packer: /mnt/d/projects/GenDiff/tools/pack_area_edit_v2_dataset.py
+    current_git_state: modified
+    exact_generation_command: unknown
+    exact_generation_commit: unknown
+    compatibility_with_observed_loader: observed_successful_run
+    provenance_confidence: medium
+    evidence: [E02, E14, E25]
+  data_repository_candidate:
+    path: /root/.codex/worktrees/8767/data/building_process/generate_construction_sequence_canonical_edit_dataset.py
+    data_repository_head: ddd7a68685042dc93331a105d0f8b7449c8e467a
+    introducing_commit: b4c15a89852df01c836dded8aef75a6d5b320bb2
+    catalog_status: candidate
+    direct_loader_compatibility: blocked
+    provenance_confidence: high_for_code_low_for_any_output_run
+    evidence: [E26, E27]
+  unified_canonicalizer_v1:
+    specification: /root/.codex/worktrees/8767/data/docs/handoff/GenDiff_unified_canonicalizer_spec_v1.md
+    implementation_status: not_implemented_in_audited_training_consumer
+    canonical_edit_v3_to_area_v2_adapter: missing
+    packer_manifest_hash_validation: missing
+    direct_loader_compatibility: blocked
+    evidence: [E28]
+
+mismatches:
+  - id: M01
+    severity: blocking
+    relation: data_repository_candidate_to_packed_loader
+    issue: candidate_emits_yaml_manifests_and_loose_PT_but_loader_requires_area_v2_packed_v1_PT_indexes_state_bank_and_shards
+    evidence: [E13, E26]
+  - id: M02
+    severity: blocking
+    relation: data_repository_candidate_to_edit_schema
+    issue: candidate_dataset_meta_omits_area_v2_absolute_target_coord_no_anchor_and_candidate_values_use_move_deltas_or_anchor_relative_insert_values
+    evidence: [E26, E29]
+  - id: M03
+    severity: blocking
+    relation: data_repository_candidate_to_normalization
+    issue: candidate_does_not_emit_area_normalization_stats_or_normalized_absolute_target_coordinates_required_by_the_run_config
+    evidence: [E12, E17, E26]
+  - id: M04
+    severity: blocking
+    relation: unified_canonicalizer_v1_to_current_model
+    issue: canonical_edit_v3_has_no_reviewed_adapter_to_current_layer_slot_and_AR_tensor_contract
+    evidence: [E18, E28]
+  - id: M05
+    severity: blocking
+    relation: split_to_evaluation
+    issue: val_and_test_alias_train_so_observed_validation_and_test_metrics_are_not_held_out
+    evidence: [E14, E15]
+  - id: M06
+    severity: blocking
+    relation: identity_to_canonical_invariance
+    issue: candidate_and_observed_area_generator_fallback_IDs_are_derived_from_proxy_id_and_point_array_index
+    evidence: [E25, E26, E28]
+  - id: M07
+    severity: blocking
+    relation: reproducibility
+    issue: packed_dataset_has_no_exact_producer_command_commit_dirty_diff_hash_or_dependency_environment
+    evidence: [E14]
+  - id: M08
+    severity: compatibility_risk
+    relation: equivalent_geometry_to_supervision
+    issue: current_layer_matching_is_greedy_and_candidate_rounding_uses_Python_round_so_symmetry_and_quantization_ties_are_not_spec_compliant
+    evidence: [E25, E26, E28]
+  - id: M09
+    severity: compatibility_risk
+    relation: capacity_to_no_silent_loss
+    issue: tensor_builders_slice_layer_and_point_lists_and_forward_condition_sampling_takes_a_prefix
+    evidence: [E13, E23]
+  - id: M10
+    severity: compatibility_risk
+    relation: forward_to_training_normalization
+    issue: forward_normalizes_per_tile_while_the_observed_training_dataset_is_normalized_once_over_the_full_five_building_area
+    evidence: [E17, E23]
+  - id: M11
+    severity: documentation_gap
+    relation: run_to_environment
+    issue: actual_training_python_and_dependency_versions_are_not_recorded
+    evidence: [E06, E07]
+  - id: M12
+    severity: documentation_gap
+    relation: forward_to_checkpoint
+    issue: untracked_forward_code_has_case_inputs_but_no_observed_final_scene_or_summary
+    evidence: [E24]
+
+provenance_relations:
+  - relation: observed_run_to_command_and_config
+    confidence: high
+    evidence: [E04, E08]
+  - relation: observed_run_to_selected_consumer_file_bytes
+    confidence: high
+    evidence: [E05]
+  - relation: observed_run_to_git_commit
+    confidence: low
+    value: unknown
+    evidence: [E03, E05]
+  - relation: packed_dataset_to_source_stage_paths_and_generation_parameters
+    confidence: high
+    evidence: [E14]
+  - relation: packed_dataset_to_exact_producer_command_and_commit
+    confidence: low
+    value: unknown
+    evidence: [E14]
+  - relation: data_repository_candidate_to_any_training_run
+    confidence: low
+    value: unknown
+    evidence: [E26, E27]
+  - relation: forward_runner_to_completed_inference
+    confidence: low
+    value: unknown
+    evidence: [E24]
+
+unresolved:
+  - actual_training_run_git_commit
+  - actual_training_run_dirty_diff_hash
+  - actual_training_python_executable_and_complete_environment
+  - exact_packed_dataset_generation_command
+  - exact_packed_dataset_generator_commit_and_dirty_diff_hash
+  - current_CityEngine_stage_YAML_producer
+  - canonical_edit_v3_to_area_v2_tensor_adapter_semantics
+  - canonicalizer_version_and_all_config_hashes_for_existing_data
+  - stable_building_level_train_val_test_split_for_future_release
+  - completed_forward_summary_and_GT_geometry_metrics
+  - checkpoint_payload_metadata_not_visible_from_filename
+
+phase_1_gate:
+  status: blocked_pending_review_and_test_implementation
+  next_gate: >-
+    Review and approve this manifest and docs/CANONICALIZER_TEST_PLAN.md; then
+    implement the deterministic canonical core and an explicit canonical_edit_v3
+    to area_v2_absolute_target_coord_no_anchor adapter under tests, without bulk
+    regeneration, and require all unit/golden/adapter/loader smoke tests to pass
+    before a bounded overfit run.
+
+evidence:
+  - id: E01
+    path: /root/.codex/worktrees/8767/data
+    command: "git status --short --branch; git rev-parse HEAD; git remote -v"
+    result: detached_HEAD_ddd7a68685042dc93331a105d0f8b7449c8e467a_and_clean_before_edit
+  - id: E02
+    path: /mnt/d/projects/GenDiff
+    command: "git status --short --branch; git remote -v"
+    result: structured_proxy_tracking_origin_structured_proxy_with_listed_dirty_entries
+  - id: E03
+    path: /mnt/d/projects/GenDiff
+    command: "git rev-parse HEAD; git log -1 --format=fuller"
+    result: c6bcd8fda184dfa4042c8158a8fd8c797fb57fbc
+  - id: E04
+    path: /mnt/d/projects/GenDiff/outputs/packed_area_edit_v2/tiny_overfit_20k_fixed_1
+    files: [cmd.txt, configs/raw.yaml, configs/parsed.yaml]
+  - id: E05
+    command: "sha256sum current selected consumer files and run code snapshots; git diff --quiet -- selected consumer files"
+    result: selected_current_files_match_run_snapshot_and_are_clean_relative_to_current_HEAD
+  - id: E06
+    path: /mnt/d/projects/GenDiff/.venv/pyvenv.cfg
+    command: "PYTHONDONTWRITEBYTECODE=1 /mnt/d/projects/GenDiff/.venv/bin/python -c 'import torch'"
+    result: fatal_missing_encodings
+  - id: E07
+    command: "PYTHONDONTWRITEBYTECODE=1 /mnt/d/anaconda3/envs/gendiff/bin/python -c 'import platform, torch; print(platform.python_version()); print(torch.__version__)'"
+    result: python_3.11.13_torch_2.4.0_cu121
+  - id: E08
+    command: "sha256sum current config, run raw config, and run code snapshot config"
+    result: all_6b61d262991fec4ec3b1787385a3f0fb0d074dddd87f3f0dd1acb9317ae40441
+  - id: E09
+    path: /mnt/d/projects/GenDiff/outputs/packed_area_edit_v2/tiny_overfit_20k_fixed_1/ckpts
+    command: targeted_find_with_size_and_mtime
+  - id: E10
+    path: /mnt/d/projects/GenDiff/outputs/packed_area_edit_v2/tiny_overfit_20k_fixed_1/csv_logs/version_0/metrics.csv
+    command: "head -n 1; tail -n 5"
+  - id: E11
+    path: /mnt/d/projects/GenDiff/train.py
+    lines: [138, 179, 184, 185, 241, 262, 263, 282]
+  - id: E12
+    path: /mnt/d/projects/GenDiff/configs/packed_area_edit_v2_tiny_overfit.yaml
+    lines: [1, 3, 7, 9, 10, 11, 12, 21, 24, 25, 26, 35, 37, 110, 115]
+  - id: E13
+    path: /mnt/d/projects/GenDiff/craftsman/data/packed_area_edit_v2_data_module.py
+    symbols:
+      - PackedAreaEditV2Dataset.__init__
+      - PackedAreaEditV2Dataset._build_item
+      - PackedAreaEditV2Dataset._state_tensors
+      - PackedAreaEditV2Dataset._fix_num_points
+      - PackedAreaEditV2Dataset._validate_capacity
+      - PackedAreaEditV2Dataset.collate
+      - PackedAreaEditV2DataModule.setup
+  - id: E14
+    path: /mnt/d/projects/GenDiff/datasets/history_area_edit_v2_packed/dataset_meta.yaml
+    lines: [1, 350, 394, 97933, 97934, 97935, 97941, 98047, 98052, 98058]
+  - id: E15
+    command: >-
+      PYTHONDONTWRITEBYTECODE=1 /mnt/d/anaconda3/envs/gendiff/bin/python
+      bounded torch.load probe of dataset_meta.pt, three index files, states.pt,
+      and only shards/train/train_00000.pt sample zero
+    result: bounded_sample_and_identical_split_shard_lists_reported_above
+  - id: E16
+    path: /mnt/d/projects/GenDiff/craftsman/models/condition/building_change_condition_v2.py
+    symbol: BuildingChangeConditionV2.forward
+  - id: E17
+    path: /mnt/d/projects/GenDiff/tools/generate_area_sequence_v2_dataset.py
+    symbols:
+      - compute_normalization_stats
+      - normalize_layers_with_stats
+      - normalize_point_cloud_with_stats
+      - build_area_pair_outputs
+  - id: E18
+    path: /mnt/d/projects/GenDiff/craftsman/models/editing/building_layer_edit_v2/ar_targets.py
+    symbol: LayerwiseAREditTargetBuilderV2.build_from_edit_object_entries
+  - id: E19
+    paths:
+      - /mnt/d/projects/GenDiff/craftsman/models/editing/building_layer_edit_v2/types.py
+      - /mnt/d/projects/GenDiff/craftsman/models/editing/building_layer_edit_v2/ar_tokens.py
+      - /mnt/d/projects/GenDiff/craftsman/models/editing/building_layer_edit_v2/ar_losses.py
+  - id: E20
+    path: /mnt/d/projects/GenDiff/craftsman/systems/building_layer_edit_v2_system.py
+    symbols:
+      - BuildingLayerEditV2System._forward_batch
+      - BuildingLayerEditV2System._compute_losses
+      - BuildingLayerEditV2System._compute_ar_losses
+      - BuildingLayerEditV2System._decode_ar_predictions
+  - id: E21
+    path: /mnt/d/projects/GenDiff/craftsman/models/backbone_models/backbone_building_layer_edit_v2.py
+    symbol: BackboneBuildingLayerEditV2.forward
+  - id: E22
+    path: /mnt/d/projects/GenDiff/craftsman/models/editing/building_layer_edit_v2/edit_object_applier.py
+    symbol: BuildingLayerEditObjectApplierV2.apply_to_layers
+  - id: E23
+    paths:
+      - /mnt/d/projects/GenDiff/tools/run_area_layer_edit_v2_forward.py
+      - /mnt/d/projects/GenDiff/craftsman/inference/area_layer_edit_v2_forward.py
+    symbols:
+      - run_predictions
+      - _validate_job_capacity
+      - make_model_batch
+      - build_structure_tensors
+      - fix_num_points
+      - merge_tile_predictions
+  - id: E24
+    path: /mnt/d/projects/GenDiff/outputs/history_forward_cases
+    command: targeted_find_maxdepth_3_for_summary_yaml_and_final_scene_yaml
+    result: case_inputs_found_but_no_summary_or_final_scene
+  - id: E25
+    path: /mnt/d/projects/GenDiff/tools/generate_area_sequence_v2_dataset.py
+    lines: [181, 191, 245, 275, 314, 1272, 1408, 1564, 2559, 2669, 3408]
+  - id: E26
+    path: /root/.codex/worktrees/8767/data/building_process/generate_construction_sequence_canonical_edit_dataset.py
+    lines: [69, 79, 83, 405, 502, 709, 1105, 1211, 1214, 1253]
+  - id: E27
+    path: /root/.codex/worktrees/8767/data/catalog/code_inventory.yaml
+    lines: [108, 109, 110, 112]
+  - id: E28
+    path: /root/.codex/worktrees/8767/data/docs/handoff/GenDiff_unified_canonicalizer_spec_v1.md
+    sections: [4, 6, 8, 9, 10, 12, 15, 16, 17]
+  - id: E29
+    path: /mnt/d/projects/GenDiff/tools/pack_area_edit_v2_dataset.py
+    lines: [19, 20, 410, 413, 461, 465]

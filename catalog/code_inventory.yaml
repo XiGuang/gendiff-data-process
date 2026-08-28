@@ -1,7 +1,8 @@
 schema_version: code_inventory_v1
 cataloged_at: "2026-08-28"
 repository: gendiff-data-process
-branch: organize/catalog-and-code-snapshot-20260828
+branch: organize/finalize-project-organization-20260828
+code_snapshot_commit: ddd7a68685042dc93331a105d0f8b7449c8e467a
 classification_rule: "current 需要正式下游运行证据；仅因文件较新不能标为 current"
 
 status_definitions:

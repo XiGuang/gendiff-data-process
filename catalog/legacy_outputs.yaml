@@ -8,15 +8,15 @@ roots:
     git_ignored: true
     entries:
       - {name: top_level_ply_files, kind: scratch_group, file_count: 19, size_bytes: 10557645, producer: unknown}
-      - {name: construction_proxy, kind: candidate_run, file_count: 9, size_bytes: 143903, producer: construction.proxy_stage.v1}
-      - {name: construction_sequence, kind: candidate_run, file_count: 16, size_bytes: 305841, producer: construction.sequence.v1}
+      - {name: construction_proxy, kind: candidate_run, file_count: 9, size_bytes: 143903, producer: construction.proxy_stage.v1, consumers: [unknown]}
+      - {name: construction_sequence, kind: candidate_run, file_count: 16, size_bytes: 305841, producer: construction.sequence.v1, consumers: [unknown]}
       - {name: cube_error, kind: diagnostic, file_count: 2, size_bytes: 9735, producer: unknown}
       - {name: flat_test, kind: experiment, file_count: 69, size_bytes: 955228, producer: polygon_proxy.batch_flat.v1}
       - {name: floating_error, kind: diagnostic, file_count: 3, size_bytes: 4637, producer: support.floating_polygon_detect.v1}
       - {name: oblique, kind: experiment, file_count: 6, size_bytes: 1446083, producer: support.oblique_path.v1}
-      - {name: polygon_proxy, kind: candidate_run, file_count: 9, size_bytes: 864491, producer: polygon_proxy.cli_tiles.v2}
-      - {name: polygon_proxy_components, kind: candidate_run, file_count: 6, size_bytes: 462893, producer: polygon_proxy.cli_components.v2}
-      - {name: polygon_proxy_components_flat, kind: candidate_run, file_count: 69, size_bytes: 1764970, producer: polygon_proxy.batch_flat.v1}
+      - {name: polygon_proxy, kind: candidate_run, file_count: 9, size_bytes: 864491, producer: polygon_proxy.cli_tiles.v2, consumers: [unknown]}
+      - {name: polygon_proxy_components, kind: candidate_run, file_count: 6, size_bytes: 462893, producer: polygon_proxy.cli_components.v2, consumers: [unknown]}
+      - {name: polygon_proxy_components_flat, kind: candidate_run, file_count: 69, size_bytes: 1764970, producer: polygon_proxy.batch_flat.v1, consumers: [unknown]}
       - {name: polygon_proxy_components_flat_smoke, kind: experiment, file_count: 3, size_bytes: 45159, producer: polygon_proxy.batch_flat.v1}
       - {name: polygon_proxy_components_smoke, kind: experiment, file_count: 3, size_bytes: 452418, producer: polygon_proxy.cli_components.v2}
       - {name: polygon_proxy_fix_tmp, kind: experiment, file_count: 3, size_bytes: 328275, producer: unknown}
@@ -27,15 +27,15 @@ roots:
       - {name: polygon_proxy_smoke_tmp, kind: experiment, file_count: 15, size_bytes: 1505622, producer: polygon_proxy.smoke.v1}
       - {name: test_edit, kind: experiment, file_count: 11, size_bytes: 116436, producer: construction.sequence_edit_dataset.v1}
       - {name: to, kind: experiment, file_count: 41, size_bytes: 1093407, producer: unknown}
-      - {name: yingrenshi_polygon_proxy_components_flat, kind: candidate_run, file_count: 69, size_bytes: 1764970, producer: polygon_proxy.batch_flat.v1}
-      - {name: yingrenshi_polygon_proxy_components_flat_new, kind: candidate_run, file_count: 69, size_bytes: 1665871, producer: polygon_proxy.batch_flat.v1}
+      - {name: yingrenshi_polygon_proxy_components_flat, kind: candidate_run, file_count: 69, size_bytes: 1764970, producer: polygon_proxy.batch_flat.v1, consumers: [unknown]}
+      - {name: yingrenshi_polygon_proxy_components_flat_new, kind: candidate_run, file_count: 69, size_bytes: 1665871, producer: polygon_proxy.batch_flat.v1, consumers: [unknown]}
 
   - path: /mnt/d/data/outputs
     role: canonical_candidate_runs
     git_ignored: true
     entries:
-      - {name: canonical, kind: candidate_run, file_count: 50, size_bytes: 1810449, producer: construction.canonical_edit_dataset.v1}
-      - {name: canonical_obj, kind: candidate_run, file_count: 54, size_bytes: 1969954, producer: construction.canonical_edit_dataset.v1}
+      - {name: canonical, kind: candidate_run, file_count: 50, size_bytes: 1810449, producer: construction.canonical_edit_dataset.v1, consumers: [unknown], observed_gendiff_loader_compatibility: blocked}
+      - {name: canonical_obj, kind: candidate_run, file_count: 54, size_bytes: 1969954, producer: construction.canonical_edit_dataset.v1, consumers: [unknown], observed_gendiff_loader_compatibility: blocked}
 
   - path: /mnt/d/data/pipeline/output
     role: legacy_point_cloud_pipeline_outputs
@@ -48,4 +48,9 @@ roots:
 
 unresolved:
   - 所有 producer 映射均缺少原始 command/config/commit，最高只能视为 medium confidence
+  - candidate run 的实际 consumers 均为 unknown；当前 GenDiff packed loader 不构成这些目录的消费证据
   - 应在迁移前为需要保留的运行目录生成独立 run manifest 和内容 hash
+
+consumer_evidence:
+  - catalog/training_consumer_manifest.yaml
+  - docs/TRAINING_CONSUMER_AUDIT.md

@@ -42,11 +42,23 @@ known_legacy_outputs:
   - /mnt/d/data/outputs/canonical
   - /mnt/d/data/outputs/canonical_obj
 
+observed_training_consumer:
+  evidence_manifest: catalog/training_consumer_manifest.yaml
+  audit: docs/TRAINING_CONSUMER_AUDIT.md
+  training_repository_checkout_commit: c6bcd8fda184dfa4042c8158a8fd8c797fb57fbc
+  historical_run_commit: unknown
+  loader: /mnt/d/projects/GenDiff/craftsman/data/packed_area_edit_v2_data_module.py
+  required_pack_schema: area_v2_packed_v1
+  required_edit_schema: area_v2_absolute_target_coord_no_anchor
+  candidate_direct_compatibility: blocked
+  canonical_edit_v3_adapter: unknown_missing
+
 unresolved_risks:
   - canonical edit 序列是否对等价几何具有唯一表示尚未验证
   - layer/point 排序、对称 footprint、浮点容差和 nearest-match 可能造成一对多表示
   - 未对完整数据集执行 canonicalize -> apply -> compare round-trip
-  - 未确认 GenDiff 当前训练 loader 实际消费哪一版 schema
+  - 已确认 GenDiff loader 消费 packed area_v2 schema，但 construction candidate 缺显式、可逆、versioned adapter
+  - 候选 output run 的 exact command/config/commit 与实际 consumers 仍为 unknown
   - 当前 Python 环境缺少 torch/trimesh/shapely，无法执行 CLI 集成验证
 
 promotion_gate:
