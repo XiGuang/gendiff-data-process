@@ -15,7 +15,9 @@ DiffGen 的数据生成、转换、验证和目录工具。
 | 哪些结论仍无法复现？ | 查看 `docs/UNRESOLVED_PROVENANCE.md`。 |
 | Canonicalizer Phase 2 如何实现？ | 查看 `docs/CANONICALIZER_PHASE2_DECISIONS.md` 和 `configs/canonicalizer_v1.yaml`。 |
 | Canonicalizer Phase 2 验收结果是什么？ | 查看 `docs/CANONICALIZER_PHASE2_REPORT.md` 和 `catalog/canonicalizer_phase2_test_report.yaml`。 |
-| Pilot 使用什么冻结合同和失败门槛？ | 查看 `docs/CANONICALIZER_PILOT_CONTRACT.md`。 |
+| 历史 construction-only pilot 使用什么合同？ | 查看 `docs/CANONICALIZER_PILOT_CONTRACT.md`。 |
+| 新建与拆除如何统一生成？ | 查看 `docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md`、`configs/canonicalizer_bidirectional_v1.yaml` 和 `catalog/canonicalizer_bidirectional_test_report.yaml`。 |
+| 如何查看 raw 或 packed 区域编辑数据？ | 查看 `viewer/README.md` 和 `docs/area_edit_v2_viewer_migration.md`；运行入口在 `viewer/`，只读 Python helper 在 `tools/`。 |
 | 项目整理是否通过验收？ | 查看 `docs/ORGANIZATION_ACCEPTANCE.md`。 |
 
 字段含义和查询顺序见 `catalog/README.md`，代码、数据与产物边界见
@@ -33,6 +35,24 @@ DiffGen 的数据生成、转换、验证和目录工具。
 - `docs/TRAINING_CONSUMER_AUDIT.md`：供人工审阅的完整证据链。
 - `docs/CANONICALIZER_TEST_PLAN.md`：定义 Phase 2 的测试 gate；2A 到 2E 的 candidate
   验收结果见 `docs/CANONICALIZER_PHASE2_REPORT.md`。
+- `docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md`：定义纯施工/纯拆除双向 pair、方向化
+  condition、mixed 失败关闭和下一轮 100-building gate。
+
+## 数据查看器
+
+GenDiff 原 `construction_edit_animation_viewer` 已迁入本仓库：
+
+```text
+viewer/                                      # React/Three.js 前端
+tools/dataset_browser_api.py                 # raw/packed 摘要、分页与 condition
+tools/export_edit_animation_viewer_data.py   # raw/packed pair 转查看格式
+gendiff_data_process/viewer_packed.py         # packed schema、index、shard 定位
+tests/viewer/                                 # 双向 packed 查看器测试
+```
+
+查看器支持 legacy raw area-v2 和 candidate `area_v2_packed_v1`，并显示
+`construction`/`demolition`、`pair_hash`、`INSERT_LAYER` 与 `DELETE_LAYER`。它是只读
+诊断工具；查看成功不等于数据生成或训练 gate 已通过。
 
 ## 候选处理链路入口
 

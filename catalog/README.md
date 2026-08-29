@@ -15,10 +15,14 @@
   只读证据。
 - `canonicalizer_phase2_test_report.yaml`：2A 到 2E 的配置 hash、运行环境、定向测试、
   仓库校验和未解除阻塞项。
+- `canonicalizer_bidirectional_test_report.yaml`：施工/拆除双向 candidate 的配置 hash、
+  100-building 有界分类、定向测试与未执行 gate。
 - `legacy_outputs.yaml`：仍位于 Git 外的 `output/`、`outputs/` 和
   `pipeline/output/` 生成产物目录。
 - `legacy_yaml_indexes.yaml`：此前被全局 `*.yaml` ignore 隐藏的大型生成 YAML
   pair index 的 hash 和行数。
+- 查看器本身不另建 catalog；其 Python 入口与 packed 读取层登记在
+  `code_inventory.yaml`，迁移和兼容证据见 `docs/area_edit_v2_viewer_migration.md`。
 
 ## 置信度规则
 
@@ -38,6 +42,8 @@
    相似推断关系。
 5. `pipelines/*.yaml` 表示 DAG 意图，`docs/CURRENT_PIPELINE.md` 表示当前决策。
    两者都不能在缺少 consumer 证据时提升数据集状态。
+6. 查看某个 raw/packed pair 时，从 `viewer/README.md` 进入；查看器只读并校验 schema，
+   但视觉可读性不能替代生成、collision、split 或训练 consumer gate。
 
 ## 更新数据目录
 
@@ -69,5 +75,6 @@ Canonicalizer Phase 2 的 candidate 实现边界见
 `docs/CANONICALIZER_PHASE2_DECISIONS.md`，测试状态见
 `docs/CANONICALIZER_TEST_PLAN.md`，验收证据见
 `docs/CANONICALIZER_PHASE2_REPORT.md`；pilot 的冻结合同见
-`docs/CANONICALIZER_PILOT_CONTRACT.md`。小型 loader smoke 或 preflight 通过不等于
-pipeline 或 dataset 已提升为 `current`。
+`docs/CANONICALIZER_PILOT_CONTRACT.md`，双向扩展见
+`docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md`。小型 loader smoke、fingerprint 或
+partial pilot 通过不等于 pipeline 或 dataset 已提升为 `current`。

@@ -38,13 +38,13 @@ candidate canonical 输出。
 train、validation 和 test 都 alias 同一批 20,000 个样本，因此已观测指标不能作为
 held-out 证据。
 
-## 施工规范化候选链路
+## 施工/拆除规范化候选链路
 
 ```text
 component/tile OBJ
   -> polygon proxy YAML
-  -> construction sequence
-  -> loose canonical edit objects and v2 sequences
+  -> stage sequence
+  -> canonical edit + directional condition + area-v2 packed candidate
   -X-> observed packed GenDiff loader
 ```
 
@@ -56,6 +56,20 @@ container/edit schema，normalization 和 edit value 语义不兼容，split 互
 Phase 1 时也缺少经过审阅的 adapter。Phase 2E 现已有
 `canonical_edit_v3 -> area_v2_absolute_target_coord_no_anchor` candidate adapter 和
 小型 loader smoke，但旧脚本尚未迁移，真实 release 兼容性仍为 blocked。
+
+第一轮 `construction_only` 100-building pilot 已从 clean commit
+`ca2a1ecb1e851f56506de9437d8e3598d9bc6efe` 执行。其 100 栋中 60 栋成功、39 栋因
+`E_CONSTRUCTION_REMOVAL` 失败、1 栋因 `E_HOLE_UNSUPPORTED` 失败；validator 自身的
+source/hash/split/collision/determinism/真实 loader 检查没有附加失败，但 generation gate
+按合同为 FAIL。artifact 位于
+`/mnt/d/artifacts/gendiff-data-process/runs/canonicalizer_pilot_v1_ca2a1ecb1e85_b0001_b0100`。
+
+用户随后确认任务还包括从完整建筑逐步拆除。当前 candidate 分支
+`codex/canonicalizer-bidirectional-v1` 新增独立
+`configs/canonicalizer_bidirectional_v1.yaml` 和
+`docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md`：纯新增/纯删除都合法，每个单调 pair
+生成 construction 与 demolition 两个方向，mixed 同步新增删除仍显式失败。现有 100 栋
+的有界复核表明原 39 栋失败 building 都包含 mixed，而不是 39 栋纯拆除。
 
 已观测的 `/mnt/d/data/outputs/canonical` 和 `canonical_obj` 目录属于 candidate
 run。其脚本家族级 producer 已知，但精确 command/config/commit/consumer 为
@@ -72,26 +86,41 @@ run。其脚本家族级 producer 已知，但精确 command/config/commit/consu
 两者的 schema 和几何行为尚未证明等价。run manifest 必须明确记录入口和 producer
 commit；只写 "polygon proxy" 存在歧义。
 
+## 只读查看工具
+
+GenDiff commit `c6bcd8fda184dfa4042c8158a8fd8c797fb57fbc` 中的
+`construction_edit_animation_viewer/` 已迁到本仓库 `viewer/`，运行时 helper 位于
+`tools/dataset_browser_api.py`、`tools/export_edit_animation_viewer_data.py` 和
+`gendiff_data_process/viewer_packed.py`。当前查看器同时支持 legacy raw area-v2 与
+candidate `area_v2_packed_v1`，能区分 `construction`、`demolition` 并播放
+`INSERT_LAYER`/`DELETE_LAYER`。
+
+该工具不生产或修改数据。三样本 synthetic packed fixture、真实 GenDiff loader 和浏览器
+视觉检查通过，只证明查看合同可用；正式双向 100-building packed pilot 尚未生成，因此
+不能据此解除本节上方的 release/training 阻塞。迁移证据与命令见
+`docs/area_edit_v2_viewer_migration.md`。
+
 ## 验证状态
 
 - 整理阶段已验证 code inventory 覆盖率和 synthetic polygon proxy test，详见
   `docs/ORGANIZATION_ACCEPTANCE.md`。
 - Phase 1 训练审计为有界只读检查；未生成数据、训练、安装依赖或修改
   `/mnt/d/projects/GenDiff`。
-- `docs/CANONICALIZER_TEST_PLAN.md` 中 canonicalizer candidate 已有 53 个
-  core/property/golden/adapter 测试和 2 个显式 GenDiff loader smoke 通过。
-  5-building 临时 preflight 的 15 个槽位中，12 个 emitted pair 被真实 loader 全量读取，
-  3 个槽位因 1 个明确 construction removal 计为 explicit failures；整体按门槛标为 FAIL，
-  正式 100-building pilot 尚未执行。
+- construction-only clean commit 的 53 个 core/property/golden/adapter 测试和 2 个
+  GenDiff loader smoke 已通过；正式 pilot 结果如上，不能提升为 release。
+- 双向 candidate 当前已通过 60 个 canonicalization 定向测试（其中未设置显式 GenDiff
+  路径的 1 个 loader suite 跳过）和 2 个显式真实 GenDiff loader smoke。精确最终数量与
+  command 以 `catalog/canonicalizer_bidirectional_test_report.yaml` 为准；该报告在本分支
+  完成全部验证后更新。
 
 ## 精确提升门槛
 
-项目整理及 fresh clone 验证已经完成。Phase 2A 到 2E 的 test、版本化
-v3-to-area-v2 adapter 和 canonical core 已在独立 candidate 分支实现；pilot 已获明确授权，
-release 尚未批准。用户已批准且代码已冻结 normalization/split/condition/package 合同，
-下一步是在审阅后 clean commit 上构造 versioned 100-building pilot；pilot 的 determinism、
-round-trip、collision、capacity 和 building-level split gate 全部通过后，才能进行
-bounded overfit。本文档不授权批量生成或训练。
+项目整理、fresh clone、Phase 2A 到 2E 和第一轮 pilot 均已有证据。当前提升门槛改为：
+审阅双向合同与代码，在新 clean commit 上构建 `gendiff-data-process==0.2.0` wheel，再执行
+不超过同一 100 栋/400 YAML 的双向 pilot。现有 48 个 mixed transition 与
+`building_0032` 的 hole 预计仍会使 gate 为 FAIL；不得筛掉后提升状态。只有这些阻塞被
+修复或有独立版本化任务合同接收，且双向 determinism、round-trip、collision、capacity、
+split 和真实 loader gate 全部通过后，才可另行申请训练。本文档不授权训练。
 
 机器可读 pipeline 状态位于 `catalog/pipelines/construction_sequence_v1.yaml` 和
 `catalog/pipelines/history_area_edit_v2.yaml`。

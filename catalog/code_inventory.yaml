@@ -1,9 +1,9 @@
 schema_version: code_inventory_v1
 cataloged_at: "2026-08-29"
 repository: gendiff-data-process
-branch: codex/canonicalizer-v1-phase2a-2e
-code_snapshot_commit: unknown_uncommitted_phase2_worktree
-base_commit: 612d50df3e598ae86d1a4f4ab6ef3b12c1d5fbdd
+branch: codex/canonicalizer-bidirectional-v1
+code_snapshot_commit: unknown_uncommitted_bidirectional_worktree
+base_commit: ca2a1ecb1e851f56506de9437d8e3598d9bc6efe
 classification_rule: "current 需要正式下游运行证据；仅因文件较新不能标为 current"
 
 status_definitions:
@@ -20,9 +20,9 @@ scripts:
     path: gendiff_data_process/canonicalization/condition.py
     status: candidate
     group: canonicalization_condition
-    purpose: 从 canonical addition solid 生成 largest-remainder、Halton 和 FPS 确定性条件点
+    purpose: 从 canonical addition/removal delta solid 生成带方向 hash 的确定性条件点
     io: "canonical source/target stages -> quantized condition points + hash"
-    verification: pilot_contract_tests_passed_2026_08_29
+    verification: bidirectional_unit_tests_passed_2026_08_29
 
   - script_id: canonicalization.release_contracts.v1
     path: gendiff_data_process/canonicalization/release_contracts.py
@@ -44,15 +44,15 @@ scripts:
     path: gendiff_data_process/canonicalization/pilot.py
     status: candidate
     group: canonicalization_release
-    purpose: 构造 versioned pilot、packed shards、fingerprint、run manifest 和失败核算
+    purpose: 构造双向 versioned pilot、packed shards、fingerprint、run manifest 和 pair 失败核算
     io: "bounded history stages -> artifact run + packed pilot + reports"
-    verification: five_building_preflight_passed_with_explicit_failure_2026_08_29
+    verification: bidirectional_bounded_fingerprint_passed_with_explicit_mixed_failures_2026_08_29
 
   - script_id: test.canonicalization.condition.v1
     path: tests/canonicalization/test_condition.py
     status: experiment
     group: canonicalization_tests
-    purpose: 验证 condition 点数、surface、排序、确定性、no-op 和 removal 失败关闭
+    purpose: 验证 construction/demolition condition、方向 hash、no-op 和 mixed 失败关闭
     io: synthetic_tests
     verification: pilot_contract_tests_passed_2026_08_29
 
@@ -76,7 +76,7 @@ scripts:
     path: tests/canonicalization/test_pilot.py
     status: experiment
     group: canonicalization_tests
-    purpose: 验证 history adapter、有界选择、package identity 和跨 worker fingerprint
+    purpose: 验证有界选择、双向 pair、mixed 核算、package identity 和跨 worker fingerprint
     io: synthetic_temp_history_tests
     verification: pilot_contract_tests_passed_2026_08_29
 
@@ -84,7 +84,7 @@ scripts:
     path: tools/build_canonicalizer_pilot.py
     status: candidate
     group: canonicalization_release
-    purpose: 从 clean commit 生成或只读 fingerprint 最多 100-building pilot
+    purpose: 从 clean commit 生成或只读分类/fingerprint 最多 100-building 双向 pilot
     io: "explicit bounded input -> versioned artifact or JSON fingerprint"
     verification: five_building_preflight_passed_with_explicit_failure_2026_08_29
 
@@ -92,7 +92,7 @@ scripts:
     path: tools/validate_canonicalizer_pilot.py
     status: candidate
     group: canonicalization_validation
-    purpose: 验证 source/wheel/tree hash、split、collision、determinism 和真实 GenDiff loader
+    purpose: 验证 source/wheel/tree hash、方向、split、collision、determinism 和真实 GenDiff loader
     io: "versioned pilot artifact -> final validation report"
     verification: five_building_preflight_loader_passed_2026_08_29
 
@@ -100,7 +100,7 @@ scripts:
     path: gendiff_data_process/__init__.py
     status: candidate
     group: canonicalization_api
-    purpose: 导出 gendiff-data-process 可版本化 Python 包版本
+    purpose: 导出 gendiff-data-process 0.2 双向 candidate Python 包版本
     io: internal_library
     verification: phase2_tests_passed_2026_08_29
 
@@ -116,7 +116,7 @@ scripts:
     path: gendiff_data_process/canonicalization/config.py
     status: candidate
     group: canonicalization_core
-    purpose: 解析版本化 canonicalizer bundle 并计算分层配置 hash
+    purpose: 解析 construction-only/双向单调 bundle 并计算分层配置 hash
     io: "canonicalizer bundle YAML -> typed config + hashes"
     verification: phase2_tests_passed_2026_08_29
 
@@ -156,8 +156,8 @@ scripts:
     path: gendiff_data_process/canonicalization/solid_partition.py
     status: candidate
     group: canonicalization_geometry
-    purpose: 对 raw extruded solid 做 fixed-grid union 和无交叠 slab decomposition
-    io: "quantized layers -> canonical slab cells + warnings"
+    purpose: 对 raw solid 做 slab decomposition，并按 added/removed volume 分类 transition
+    io: "quantized layers/stages -> canonical slab cells + change kind"
     verification: phase2_tests_passed_2026_08_29
 
   - script_id: canonicalization.serialize.v1
@@ -196,7 +196,7 @@ scripts:
     path: gendiff_data_process/canonicalization/core.py
     status: candidate
     group: canonicalization_core
-    purpose: 编排 stage canonicalization、sequence lineage、edit 和 round-trip
+    purpose: 编排 stage canonicalization、双向可用 lineage、edit 和 round-trip
     io: "raw building sequence -> canonical building sequence"
     verification: phase2_tests_passed_2026_08_29
 
@@ -212,9 +212,17 @@ scripts:
     path: gendiff_data_process/canonicalization/packed_contract.py
     status: candidate
     group: canonicalization_adapter
-    purpose: 在 GenDiff loader 前校验 packed schema 与 canonical metadata
+    purpose: 在 GenDiff loader 前校验 packed schema、change_kind、pair hash 与 canonical metadata
     io: "packed metadata/sample -> pass or stable error"
     verification: phase2_loader_smoke_passed_2026_08_29
+
+  - script_id: viewer.packed_reader.v1
+    path: gendiff_data_process/viewer_packed.py
+    status: support
+    group: viewer
+    purpose: 校验 area_v2 packed release，并按 split index、shard locator 有界读取 state、sample 和 condition
+    io: "packed dataset root -> validated metadata/states/sample records"
+    verification: viewer_python_and_browser_tests_passed_2026_08_29
 
   - script_id: canonicalization.adapter_package.v1
     path: gendiff_data_process/canonicalization/adapters/__init__.py
@@ -228,7 +236,7 @@ scripts:
     path: gendiff_data_process/canonicalization/adapters/area_v2.py
     status: candidate
     group: canonicalization_adapter
-    purpose: 将 canonical edit v3 映射为 area-v2 absolute-target 合同
+    purpose: 将任意有向 canonical edit v3 映射为带 change_kind 的 area-v2 absolute-target 合同
     io: "canonical stages/edit + explicit normalization -> area-v2 sample"
     verification: phase2_loader_smoke_passed_2026_08_29
 
@@ -244,7 +252,7 @@ scripts:
     path: tests/canonicalization/helpers.py
     status: experiment
     group: canonicalization_tests
-    purpose: 加载 tracked fixture 并构造 adapter 全动作样例
+    purpose: 加载 tracked fixture，并构造 adapter 全动作及三 split 双向 packed 样例
     io: "tracked fixtures -> typed test values"
     verification: phase2_tests_passed_2026_08_29
 
@@ -303,6 +311,38 @@ scripts:
     purpose: 用临时三 building packed release 只读验证真实 GenDiff DataModule
     io: "temporary packed fixture -> GenDiff batch tensors"
     verification: phase2_loader_smoke_passed_2026_08_29
+
+  - script_id: viewer.dataset_browser_api.v1
+    path: tools/dataset_browser_api.py
+    status: support
+    group: viewer
+    purpose: 为本地查看器提供 raw/packed 摘要、pair 分页搜索和 condition 点云读取
+    io: "dataset root + bounded query -> JSON API payload"
+    verification: viewer_python_and_browser_tests_passed_2026_08_29
+
+  - script_id: viewer.exporter.v1
+    path: tools/export_edit_animation_viewer_data.py
+    status: support
+    group: viewer
+    purpose: 将 legacy raw 或 canonical packed pair 转成 2D/3D 查看器 JSON
+    io: "raw/packed pair -> edit_sequence_multiview_animation_v1 JSON"
+    verification: viewer_python_and_browser_tests_passed_2026_08_29
+
+  - script_id: test.viewer.package.v1
+    path: tests/viewer/__init__.py
+    status: experiment
+    group: viewer_tests
+    purpose: 标记查看器兼容性测试包
+    io: test_package
+    verification: viewer_tests_passed_2026_08_29
+
+  - script_id: test.viewer.packed_and_raw.v1
+    path: tests/viewer/test_packed_viewer.py
+    status: experiment
+    group: viewer_tests
+    purpose: 验证 raw 回归、packed split/shard、construction/demolition、DELETE_LAYER 和 condition
+    io: "temporary raw/bidirectional packed fixtures -> API/export assertions"
+    verification: four_viewer_tests_passed_2026_08_29
 
   - script_id: package.polygon_proxy.v1
     path: polygon_proxy/__init__.py
