@@ -27,7 +27,13 @@ REQUIRED_SAMPLE_FIELDS = REQUIRED_CANONICAL_FIELDS + (
     "building_uid",
     "split",
 )
-DIRECTIONAL_SAMPLE_FIELDS = ("change_kind", "pair_hash")
+DIRECTIONAL_CONTRACT_FIELDS = (
+    "task_contract_id",
+    "validation_mode",
+    "condition_surface_mode",
+)
+DIRECTION_MARKER_FIELDS = ("change_kind", "pair_hash")
+DIRECTIONAL_SAMPLE_FIELDS = DIRECTIONAL_CONTRACT_FIELDS + DIRECTION_MARKER_FIELDS
 ALLOWED_CHANGE_KINDS = {"construction", "demolition", "mixed"}
 
 
@@ -65,6 +71,8 @@ def validate_packed_release_meta(meta: Mapping) -> None:
             "E_PACKED_CANONICAL_METADATA", "缺少 canonical_contract"
         )
     _require_fields(contract, REQUIRED_CANONICAL_FIELDS, "dataset_meta")
+    if any(field in contract for field in DIRECTIONAL_CONTRACT_FIELDS):
+        _require_fields(contract, DIRECTIONAL_CONTRACT_FIELDS, "dataset_meta")
 
 
 def validate_packed_sample(sample: Mapping) -> None:
@@ -74,7 +82,7 @@ def validate_packed_sample(sample: Mapping) -> None:
             "E_PACKED_CANONICAL_METADATA", "sample 缺少 canonical_metadata"
         )
     _require_fields(metadata, REQUIRED_SAMPLE_FIELDS, "sample")
-    if not any(field in metadata for field in DIRECTIONAL_SAMPLE_FIELDS):
+    if not any(field in metadata for field in DIRECTION_MARKER_FIELDS):
         return
     _require_fields(metadata, DIRECTIONAL_SAMPLE_FIELDS, "directional sample")
     if metadata.get("change_kind") not in ALLOWED_CHANGE_KINDS:

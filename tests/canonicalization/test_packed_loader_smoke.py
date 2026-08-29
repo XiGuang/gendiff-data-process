@@ -113,6 +113,11 @@ class PackedLoaderSmokeTests(unittest.TestCase):
             with self.assertRaises(CanonicalizationError):
                 validate_packed_release_meta(broken)
 
+            incomplete_directional = copy.deepcopy(meta)
+            incomplete_directional["canonical_contract"].pop("task_contract_id")
+            with self.assertRaises(CanonicalizationError):
+                validate_packed_release_meta(incomplete_directional)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -78,6 +78,9 @@ class AreaV2AdapterTests(unittest.TestCase):
             self.bundle.canonicalizer.canonicalizer_config_hash,
         )
         self.assertEqual(metadata["normalization_profile_id"], "fixture_explicit_v1")
+        self.assertEqual(metadata["task_contract_id"], "construction_only_v1")
+        self.assertEqual(metadata["validation_mode"], "construction_only")
+        self.assertEqual(metadata["condition_surface_mode"], "addition_exterior")
         self.assertEqual(metadata["pair_hash"], canonical_pair_hash(metadata))
         self.assertEqual(metadata["change_kind"], "mixed")
 
@@ -93,6 +96,11 @@ class AreaV2AdapterTests(unittest.TestCase):
             split="train",
         )
         metadata = pair["sample"]["canonical_metadata"]
+        self.assertEqual(metadata["task_contract_id"], "bidirectional_monotonic_v1")
+        self.assertEqual(metadata["validation_mode"], "bidirectional_monotonic")
+        self.assertEqual(
+            metadata["condition_surface_mode"], "directional_delta_exterior"
+        )
         self.assertEqual(metadata["change_kind"], "demolition")
         self.assertIn(
             "DELETE", {edit["action"] for edit in pair["sample"]["edit_object"]}
@@ -110,9 +118,21 @@ class AreaV2AdapterTests(unittest.TestCase):
         self.assertEqual(caught.exception.code, "E_PACKED_CANONICAL_METADATA")
 
         legacy = copy.deepcopy(pair["sample"])
-        legacy["canonical_metadata"].pop("change_kind")
-        legacy["canonical_metadata"].pop("pair_hash")
+        for field in (
+            "task_contract_id",
+            "validation_mode",
+            "condition_surface_mode",
+            "change_kind",
+            "pair_hash",
+        ):
+            legacy["canonical_metadata"].pop(field)
         validate_packed_sample(legacy)
+
+        incomplete = copy.deepcopy(pair["sample"])
+        incomplete["canonical_metadata"].pop("task_contract_id")
+        with self.assertRaises(CanonicalizationError) as caught:
+            validate_packed_sample(incomplete)
+        self.assertEqual(caught.exception.code, "E_PACKED_CANONICAL_METADATA")
 
     def test_capacity_failure_happens_before_tensorization(self) -> None:
         adapter = AreaV2Adapter(

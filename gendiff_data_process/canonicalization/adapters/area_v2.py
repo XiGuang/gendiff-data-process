@@ -399,6 +399,9 @@ class AreaV2Adapter:
                 "E_CONDITION_EMPTY", "adapter 不接受 no-op pair"
             )
         canonical_metadata = {
+            "task_contract_id": self.canonical_contract()["task_contract_id"],
+            "validation_mode": self.bundle.validation_profile.mode,
+            "condition_surface_mode": self.bundle.condition_sampling.surface_mode,
             "canonicalizer_version": sequence.canonicalizer_version,
             "geometry_version": sequence.geometry_version,
             "geometry_config_hash": sequence.geometry_config_hash,
