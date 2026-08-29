@@ -1,7 +1,7 @@
 # 统一规范化器 v1 测试计划
 
-状态：Phase 2A 到 2E candidate 验收通过；construction-only 100-building pilot 已执行并
-FAIL；双向单调 candidate 已实现并等待 clean commit/pilot；bounded overfit 和训练未授权
+状态：Phase 2A 到 2E candidate 验收通过；construction-only 与双向单调 100-building
+pilot 均已执行并因真实数据门禁 FAIL；bounded overfit 和训练未授权
 
 依据：`docs/handoff/GenDiff_unified_canonicalizer_spec_v1.md`、
 `docs/TRAINING_CONSUMER_AUDIT.md`、
@@ -189,11 +189,11 @@ SHA256 在复制时写入 fixture manifest。
   `E_CONSTRUCTION_REMOVAL`、1 个 `E_HOLE_UNSUPPORTED`，122 个 emitted sample 被真实
   loader 全量读取；generation/overall 为 FAIL。
 - 双向 candidate 的常规 discover 为 60 passed、0 failed、1 个显式路径 loader suite
-  skipped；另以 `GENDIFF_REPO=/mnt/d/projects/GenDiff` 执行真实 loader smoke 2/2 通过，
-  覆盖 demolition `DELETE_LAYER` 和反向 construction。
-- 双向有界分类得到 187 construction、4 demolition、58 no-op、48 mixed；39 个原 removal
-  failure building 均含 mixed。双向正式 pilot、forward、1501-building acceptance 和训练
-  均未执行。
+  skipped；另以 `GENDIFF_REPO=/mnt/d/projects/GenDiff` 执行真实 loader smoke 2/2 通过。
+- 双向正式 pilot 得到 187 construction、4 demolition、58 no-op、48 mixed；生成 191 条
+  construction 和 191 条 demolition，真实 loader 全量读取 382 条。validator
+  `failures: []`，但 96 个有向 mixed failure 和 `building_0032` 的 hole 使 generation/
+  overall 为 FAIL。forward、1501-building acceptance 和训练均未执行。
 
 ## 测试矩阵
 
@@ -424,18 +424,20 @@ silent_drop_count: 0
 failure 或 silent drop 都使 gate 失败。
 
 历史结果保留在 `catalog/canonicalizer_phase2_test_report.yaml`；当前双向 candidate 使用
-`catalog/canonicalizer_bidirectional_test_report.yaml`，在提交前必须如实记录
-`dirty: true`、`worktree_commit: unknown_uncommitted` 和未执行正式 pilot，不能冒充 clean
-release 证据。
+`catalog/canonicalizer_bidirectional_test_report.yaml`。正式 pilot 已固定 clean producer
+commit、wheel SHA-256、精确 argv、400 个 source hash 和 artifact tree hash。其 generation
+状态为 FAIL，validator `failures: []`；必须同时保留这两个事实，不能把 partial packed
+验证通过写成 clean release PASS。
 
 ## 精确下一门槛
 
-2A 到 2E、四项冻结合同、黄金双路径审阅和 construction-only pilot 已完成。下一任务是
-完成双向 candidate 的 bounded gate，经审阅后从 clean commit 构建
-`gendiff-data-process==0.2.0` wheel，并执行最多同一 100 栋的双向 versioned pilot。
-Pilot 验证通过后才可请求 bounded overfit 授权；若因 mixed/hole 等 FAIL，必须先审阅完整
-失败清单，不得筛掉失败 pair/building 后直接继续。Bounded overfit 通过后仍需再次 review，
-才可讨论 bulk regeneration。
+2A 到 2E、四项冻结合同、黄金双路径审阅、construction-only pilot 和双向正式 pilot 均已
+完成。双向结果为 382 条 emitted sample 的 validator 检查通过，但 48 个 mixed transition
+和 `building_0032` 的 hole 使 generation gate FAIL。下一任务是给 mixed 确定业务语义并
+修复上游，或新增独立版本化 replacement 合同，同时修复 hole；之后在相同 100 栋边界重跑。
+只有 generation 与 validator 同时 PASS 后才可请求 bounded overfit 授权。Bounded overfit
+通过后仍需再次 review，才可讨论 bulk regeneration。
 
-本轮精确结果、环境、命令和阻塞项见 `docs/CANONICALIZER_PHASE2_REPORT.md` 与
-`catalog/canonicalizer_phase2_test_report.yaml`。
+本轮精确结果、环境、命令和阻塞项见 `docs/CANONICALIZER_PHASE2_REPORT.md`、
+`docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md` 与
+`catalog/canonicalizer_bidirectional_test_report.yaml`。

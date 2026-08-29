@@ -44,8 +44,33 @@ canonical candidate，它显示 `change_kind`、`pair_hash` 和精确 shard loca
 - canvas 像素检查：desktop 1080x1000，RGB 标准差 16.997、6747 种颜色；mobile
   390x389，RGB 标准差 19.951、2546 种颜色，均非空白。
 
-这些结果来自三条 synthetic packed sample，不是正式双向 100-building artifact。正式
-双向 packed pilot 路径与其视觉抽检结果仍为 `unknown`，不得据此解除生成或训练 gate。
+以上基础结果先来自三条 synthetic packed sample。随后对正式双向 100-building artifact
+完成了只读 API 与浏览器抽检：
+
+- 数据路径：
+  `/mnt/d/artifacts/gendiff-data-process/runs/canonicalizer_pilot_bidirectional_v1_f0de8c4de1cf_b0001_b0100/outputs/canonicalizer_pilot_bidirectional_v1`；
+- `PYTHONPATH=. /mnt/d/anaconda3/envs/gendiff/bin/python tools/dataset_browser_api.py summary
+  --dataset-dir <上述路径>` 返回 packed area、382 pairs、296 states、split 278/66/38 和
+  `hasConditions: true`；
+- construction 抽样 `building_0002_stage_0_to_stage_1` 位于 `packed:train:0:0`，
+  `pair_hash=e530c7249fa0317e42602d39bba673ca29724943b99aad9ac62c26df000e6a84`；
+- demolition 抽样 `building_0002_stage_1_to_stage_0` 位于 `packed:train:0:1`，
+  `pair_hash=545882e60aea5b134d248abd747591c95923c606b61a89b45b882ab374f965a6`；
+- 两个方向都由 API 返回 `validationOk: true` 和 2048 个 condition 点；demolition condition
+  的实际 shard locator 为 `shards/train/train_00000.pt#samples[1].condition`；
+- Playwright 使用系统 Chrome 打开 `http://127.0.0.1:5174/`，分别检查 demolition 3D、
+  demolition condition、demolition playback 和 construction playback，画面均非空白，
+  console error 与 page error 均为 0；6 条 warning 仅为 `THREE.Clock` deprecation 和 headless
+  WebGL `ReadPixels` 性能提示；
+- 四张运行时截图 SHA-256 依次为
+  `47b5c89c9e9bb818cab2a23b7d5916ea24bfec7c9d0290bb953179dcc4b6f987`、
+  `5b83912ffb0d3dabbbb0ad3720d25745a9f85a0dd50aa09f730071a0980a4238`、
+  `f71ebf76f0ee7302c1e6c145a24e39db54837dc655503376e889415edb9a7e0c`、
+  `37f47722682d996743498cf96c1a35020d75638b84363a4265fc16ca579446da`；截图位于
+  `/tmp/.playwright-cli/`，属于易失运行时证据，不替代 artifact 内的稳定 hash。
+
+正式 artifact 的 viewer 兼容性因此为 PASS，但 generation 仍因 mixed transition 和 hole
+标为 FAIL；视觉通过不得解除 release、bounded overfit 或训练 gate。
 
 本文档面向原有 edit viewer 的改造。目标是让 viewer 可以正确读取当前改版后的区域级数据集，并可视化从 `t0` 到 `t1` 的编辑过程。
 

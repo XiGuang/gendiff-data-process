@@ -2,8 +2,8 @@
 
 日期：2026-08-29
 
-状态：**candidate 范围通过；construction-only 100-building pilot 已执行并 FAIL，release
-和训练门槛未通过。**
+状态：**candidate 范围通过；construction-only 与 bidirectional 100-building pilot 均已执行
+并因真实数据门禁 FAIL，release 和训练门槛未通过。**
 
 ## 结论
 
@@ -78,11 +78,12 @@ GENDIFF_REPO=/mnt/d/projects/GenDiff \
 为 `c6bcd8fda184dfa4042c8158a8fd8c797fb57fbc`。其 dirty 路径与 Phase 1 manifest 完全
 一致；本轮没有修改这些路径。
 
-仓库级结构化校验结果：129 个 catalog YAML 和 16 个 config/fixture YAML 可解析；103 个
-Python 文件与 `catalog/code_inventory.yaml` 一一对应并用 `tokenize.open()` 加 `compile()`
+仓库级最终结构化校验结果：130 个 catalog YAML、2 个 config YAML 和 15 个 canonicalizer
+fixture YAML 可解析；108 个 Python 文件与 `catalog/code_inventory.yaml` 一一对应并用
+`tokenize.open()` 加 `compile()`
 验证且不写 `pyc`；119 个 dataset manifest 与 index 的 5,672,789 个文件、
 3,587,926,590,672 bytes 聚合一致；11 个黄金来源 SHA256 全部一致。原有 polygon proxy
-合成测试 5/5 通过；21 个 package source 文件通过 mypy；Git 禁用路径计数为 0，
+合成测试 5/5 通过；22 个 package source 文件通过 mypy；Git 禁用路径计数为 0，
 `git diff --check` 和 `uv lock --check` 通过。
 
 本次测试解释器是 `/mnt/d/anaconda3/envs/gendiff/bin/python`，Python 3.11.13、PyYAML
@@ -97,18 +98,21 @@ run 的关系仍为 `unknown`，不能称为正式 release environment。
    已启动并按 construction-only 合同 FAIL，不能据此提升 release。
 2. GenDiff 尚未固定本包的 wheel/Git commit，现有 loader 也不会原生强制 canonical metadata；
    pilot validator 只能在调用 loader 前执行合同检查。
-3. 双向合同的 clean commit/wheel/pilot、forward contract、bounded overfit、训练和 bulk
-   regeneration 均未运行。
+3. 双向合同已形成 clean producer commit
+   `f0de8c4de1cfe3f666d5f466de998c635ebdae0d`、固定 wheel 并执行正式 pilot；382 条
+   sample 的 validator 检查通过，但 48 个 mixed transition 和一个 hole 使 generation gate
+   FAIL。bounded overfit、训练和 bulk regeneration 均未运行。
 4. 历史 packed release 的 producer commit/command、dirty diff hash 和训练 Python/lock 仍为
    `unknown`；已观测 train/val/test alias 问题也未被本轮改写。
+5. 已审计 GenDiff loader 不消费独立 `change_kind` 通道；该设计的模型可学性仍为
+   `unknown`，必须在 pilot PASS 后由独立实验判断。
 
 ## 精确下一门槛
 
-按 `docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md` 审阅纯施工/纯拆除双向扩展。经授权
-形成新 clean commit 后构建 `gendiff-data-process==0.2.0` wheel，并只重跑相同边界的
-100-building pilot，输出 direction、determinism、round-trip、capacity、collision、split 和
-silent-drop 报告。Pilot FAIL 时停在失败审阅；PASS 后仍需另行授权 bounded overfit。在
-bounded overfit PASS 前不得进行全量生成或训练。
+先确定 48 个 mixed transition 的业务语义并修复上游，或用独立版本化 replacement 合同
+接收；同时修复 `building_0032` 的 hole。然后在同一 100-building 边界和新 clean
+commit/wheel 上重跑正式 pilot，generation 与 validator 必须同时 PASS。PASS 后仍需另行
+授权 bounded overfit；在 bounded overfit PASS 前不得进行全量生成或训练。
 
 ## 后续授权更新
 
@@ -123,3 +127,14 @@ emitted sample 被真实 loader 全量读取，generation/overall 状态为 FAIL
 用户随后明确任务还包括从完整到逐步拆除。该需求不篡改上述历史结果；新的
 `bidirectional_monotonic_v1` 设计、100-building transition 分类和 mixed 阻塞见
 `docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md`。
+
+双向实现、viewer 和文档分别由 commit `3043c02`、`3667ec2`、`f0ad0ca` 提交并推送。
+第一次正式尝试在 `f0ad0ca542cf356c894855ca4029a2515e5b4fb1` 上发现 packed sample
+缺少 `task_contract_id`，其失败 artifact 被保留；修复 commit
+`f0de8c4de1cfe3f666d5f466de998c635ebdae0d` 后重新生成。最终 artifact 位于
+`/mnt/d/artifacts/gendiff-data-process/runs/canonicalizer_pilot_bidirectional_v1_f0de8c4de1cf_b0001_b0100`：
+99 栋成功、1 栋 hole 失败，191 条 construction、191 条 demolition，train/val/test 为
+278/66/38，duplicate、conflict、split overlap、silent drop 均为 0。真实 GenDiff loader
+读取全部 382 条，validator `failures: []`；overall FAIL 只继承 96 个 mixed 有向失败槽位和
+6 个 hole building 槽位。机器可读 hash 和命令见
+`catalog/canonicalizer_bidirectional_test_report.yaml`。

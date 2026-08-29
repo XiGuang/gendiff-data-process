@@ -77,11 +77,14 @@ bidirectional_candidate:
   contract_id: bidirectional_monotonic_v1
   branch: codex/canonicalizer-bidirectional-v1
   base_commit: ca2a1ecb1e851f56506de9437d8e3598d9bc6efe
-  worktree_commit: unknown_uncommitted
-  dirty: true
+  implementation_commit: 3043c02aa30890822063fe70b9e1241041f99a51
+  formal_pilot_producer_commit: f0de8c4de1cfe3f666d5f466de998c635ebdae0d
+  dirty_at_formal_pilot_start: false
   config: configs/canonicalizer_bidirectional_v1.yaml
   contract: docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md
+  test_report: catalog/canonicalizer_bidirectional_test_report.yaml
   package_version: 0.2.0
+  formal_pilot_wheel_sha256: d38fb04cb6f2e2319f4cf7da292e4faca77eadbabbb6377c67ed755f4aeabdb1
   pair_policy: 每个非 no-op 单调相邻阶段对生成 construction 和 demolition 两个方向
   mixed_policy: explicit_pair_failure_E_MIXED_CHANGE_UNSUPPORTED
   bounded_source_transition_counts:
@@ -93,7 +96,26 @@ bidirectional_candidate:
   bounded_fingerprint: 3946e58c0b9b153909937571fa76d3188e7539ce14c2c846316f3ed80d5c6b0e
   worker_and_hash_seed_mismatch_count: 0
   tests: {canonicalization_passed: 60, explicit_gendiff_loader_passed: 2}
-  formal_pilot_status: not_run_pending_review_and_clean_commit
+  first_formal_attempt:
+    producer_commit: f0ad0ca542cf356c894855ca4029a2515e5b4fb1
+    status: fail_sample_contract_missing_task_contract_id
+    resolution_commit: f0de8c4de1cfe3f666d5f466de998c635ebdae0d
+    artifact_preserved: /mnt/d/artifacts/gendiff-data-process/runs/canonicalizer_pilot_bidirectional_v1_f0ad0ca542cf_b0001_b0100
+  formal_pilot_status: fail_dataset_gate_validator_checks_passed
+  formal_pilot_artifact: /mnt/d/artifacts/gendiff-data-process/runs/canonicalizer_pilot_bidirectional_v1_f0de8c4de1cf_b0001_b0100
+  formal_pilot_buildings: {successful: 99, failed: 1}
+  formal_pilot_directed_slots:
+    attempted: 600
+    emitted: 382
+    noop_skipped: 116
+    explicit_failures: 102
+    silent_drop: 0
+  formal_pilot_pair_counts: {construction: 191, demolition: 191}
+  formal_pilot_split_samples: {train: 278, val: 66, test: 38}
+  formal_pilot_collision: {duplicates: 0, conflicting_rows: 0}
+  formal_pilot_validator_failures: []
+  formal_pilot_real_loader: pass_all_382
+  formal_pilot_training_run: false
 
 unresolved_risks:
   - 小型等价变换 fixture 已通过，但全数据 canonical edit 唯一性尚未验证
@@ -106,8 +128,7 @@ unresolved_risks:
   - 已审计 GenDiff loader 不消费独立 change_kind 通道，XYZ + source 的拆除可学性为 unknown
 
 promotion_gate:
-  - 固定输入和 seed 重复运行，逐字节比较 canonical outputs
-  - 对顶点循环移位、反向、layer 顺序置换和微小浮点扰动做等价性测试
-  - 全量 round-trip 后几何误差为零或低于显式阈值
-  - 统计 duplicate canonical key、冲突 target 和无法匹配 lineage
-  - 在 fresh environment 中用训练 loader 读取并完成小批过拟合测试
+  - 先确定 48 个 mixed transition 的业务语义并修复上游，或用独立版本化 replacement 合同接收
+  - 修复 building_0032 的 hole，保留输入、命令、commit 与验证证据
+  - 在相同 100-building 边界重跑正式 pilot，generation 与 validator 都必须 PASS
+  - Pilot PASS 后另行授权 bounded overfit；通过前不得全量生成或训练

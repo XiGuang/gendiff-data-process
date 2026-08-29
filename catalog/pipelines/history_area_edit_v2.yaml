@@ -63,14 +63,24 @@ phase2_candidate_evidence:
 bidirectional_candidate_evidence:
   branch: codex/canonicalizer-bidirectional-v1
   base_commit: ca2a1ecb1e851f56506de9437d8e3598d9bc6efe
-  worktree_commit: unknown_uncommitted
-  dirty: true
+  formal_pilot_producer_commit: f0de8c4de1cfe3f666d5f466de998c635ebdae0d
+  dirty_at_formal_pilot_start: false
   config: configs/canonicalizer_bidirectional_v1.yaml
   contract: docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md
-  metadata: [change_kind, pair_hash]
+  report: catalog/canonicalizer_bidirectional_test_report.yaml
+  metadata:
+    - task_contract_id
+    - validation_mode
+    - condition_surface_mode
+    - change_kind
+    - condition_hash
+    - pair_hash
   tensor_contract: condition_xyz_2048x3_unchanged
   explicit_loader_smoke: pass
-  formal_pilot: not_run
+  formal_pilot: fail_dataset_gate_validator_checks_passed
+  formal_pilot_artifact: /mnt/d/artifacts/gendiff-data-process/runs/canonicalizer_pilot_bidirectional_v1_f0de8c4de1cf_b0001_b0100
+  formal_pilot_samples: {construction: 191, demolition: 191}
+  formal_pilot_real_loader: pass_all_382
 
 required_invariants:
   - canonicalize(x) == canonicalize(equivalent_permutation(x))

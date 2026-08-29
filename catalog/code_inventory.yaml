@@ -2,7 +2,7 @@ schema_version: code_inventory_v1
 cataloged_at: "2026-08-29"
 repository: gendiff-data-process
 branch: codex/canonicalizer-bidirectional-v1
-code_snapshot_commit: unknown_uncommitted_bidirectional_worktree
+code_snapshot_commit: f0de8c4de1cfe3f666d5f466de998c635ebdae0d
 base_commit: ca2a1ecb1e851f56506de9437d8e3598d9bc6efe
 classification_rule: "current 需要正式下游运行证据；仅因文件较新不能标为 current"
 
@@ -46,7 +46,7 @@ scripts:
     group: canonicalization_release
     purpose: 构造双向 versioned pilot、packed shards、fingerprint、run manifest 和 pair 失败核算
     io: "bounded history stages -> artifact run + packed pilot + reports"
-    verification: bidirectional_bounded_fingerprint_passed_with_explicit_mixed_failures_2026_08_29
+    verification: formal_pilot_validator_passed_generation_gate_failed_on_mixed_and_hole_2026_08_29
 
   - script_id: test.canonicalization.condition.v1
     path: tests/canonicalization/test_condition.py
@@ -86,7 +86,7 @@ scripts:
     group: canonicalization_release
     purpose: 从 clean commit 生成或只读分类/fingerprint 最多 100-building 双向 pilot
     io: "explicit bounded input -> versioned artifact or JSON fingerprint"
-    verification: five_building_preflight_passed_with_explicit_failure_2026_08_29
+    verification: formal_100_building_pilot_completed_with_explicit_failures_2026_08_29
 
   - script_id: canonicalization.pilot_validator_cli.v1
     path: tools/validate_canonicalizer_pilot.py
@@ -94,7 +94,7 @@ scripts:
     group: canonicalization_validation
     purpose: 验证 source/wheel/tree hash、方向、split、collision、determinism 和真实 GenDiff loader
     io: "versioned pilot artifact -> final validation report"
-    verification: five_building_preflight_loader_passed_2026_08_29
+    verification: formal_pilot_all_382_samples_loader_passed_2026_08_29
 
   - script_id: package.gendiff_data_process.v1
     path: gendiff_data_process/__init__.py

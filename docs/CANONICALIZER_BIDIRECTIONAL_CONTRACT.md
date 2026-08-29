@@ -3,8 +3,8 @@
 - 日期：2026-08-29
 - 合同 ID：`bidirectional_monotonic_v1`
 - 配置：`configs/canonicalizer_bidirectional_v1.yaml`
-- 状态：candidate；代码、定向测试和只读 100-building fingerprint 已完成，正式双向
-  pilot 尚待审阅与 clean commit
+- 状态：candidate；代码、定向测试和正式 100-building pilot 已完成；pilot 因真实数据中的
+  mixed transition 与 hole 标为 FAIL，release 仍被阻塞
 - 训练：未授权，本合同不包含训练
 
 ## 1. 业务目标
@@ -84,6 +84,9 @@ demolition   condition solid = source - target
 
 以下字段必须进入 packed sample 的 `canonical_metadata`：
 
+- `task_contract_id`；
+- `validation_mode`；
+- `condition_surface_mode`；
 - `change_kind`；
 - `condition_hash`，其 payload 包含 `change_kind`；
 - `pair_hash`，覆盖 source/target/edit/condition hash 和 `change_kind`。
@@ -133,27 +136,54 @@ building-level overfit/held-out 实验判断；本阶段不训练，也不修改
 
 39 栋 building 含至少一个 mixed transition；并非 39 栋都是合法 demolition。
 
-当前 candidate 的有向核算为：600 个尝试槽位 = 打包去重前 382 个候选 pair + 116 个
-no-op 跳过槽位 + 96 个 mixed pair failure + 6 个 hole building 失败槽位，
-`silent_drop_count=0`。
-workers 1/2/8 和 `PYTHONHASHSEED=0/1/9876` 的 fingerprint 均为
-`3946e58c0b9b153909937571fa76d3188e7539ce14c2c846316f3ed80d5c6b0e`。这是 dirty
-worktree 的只读 fingerprint，不是正式 artifact；机器可读证据见
-`catalog/canonicalizer_bidirectional_test_report.yaml`。
+正式 pilot 固定在 clean commit
+`f0de8c4de1cfe3f666d5f466de998c635ebdae0d` 和
+`gendiff-data-process==0.2.0` wheel SHA-256
+`d38fb04cb6f2e2319f4cf7da292e4faca77eadbabbb6377c67ed755f4aeabdb1`。artifact 为：
+
+```text
+/mnt/d/artifacts/gendiff-data-process/runs/
+  canonicalizer_pilot_bidirectional_v1_f0de8c4de1cf_b0001_b0100
+```
+
+有向核算为：600 个尝试槽位 = 382 个 emitted pair + 116 个 no-op 跳过槽位 +
+96 个 mixed pair failure + 6 个 hole building 失败槽位，duplicate、conflict 和
+`silent_drop_count` 均为 0。382 个样本按 construction/demolition 各 191 条，split 为
+train 278、val 66、test 38；296 个 state。workers 1/2/8 和
+`PYTHONHASHSEED=0/1/9876` 的 fingerprint 均为
+`3946e58c0b9b153909937571fa76d3188e7539ce14c2c846316f3ed80d5c6b0e`。
+
+Validator 的 `failures` 为空，并验证 clean Git、wheel、400 个 source hash、全部配置 hash、
+canonical/packed tree hash、train-only normalization、determinism、split、collision 和真实
+GenDiff loader 全量读取 278/66/38 条样本。最终 `status: fail` 仅继承 generation gate：
+48 个 mixed transition 产生 96 个有向 `E_MIXED_CHANGE_UNSUPPORTED`，`building_0032`
+因 `E_HOLE_UNSUPPORTED` 失败。机器可读证据见
+`catalog/canonicalizer_bidirectional_test_report.yaml` 和 artifact 内
+`reports/generation_report.yaml`、`reports/validation_report.yaml`。
+
+第一次正式尝试固定在 commit `f0ad0ca542cf356c894855ca4029a2515e5b4fb1`，validator
+发现 sample 缺少 `task_contract_id`。该 artifact 保留在同级
+`canonicalizer_pilot_bidirectional_v1_f0ad0ca542cf_b0001_b0100`；修复 commit
+`f0de8c4de1cfe3f666d5f466de998c635ebdae0d` 让方向任务合同字段在 sample 级失败关闭。
 
 可复现命令：
 
 ```bash
 /mnt/d/anaconda3/envs/gendiff/bin/python tools/build_canonicalizer_pilot.py \
-  --fingerprint-only \
   --dataset-root /mnt/d/projects/GenDiff/datasets/history_stages_all_new \
   --config configs/canonicalizer_bidirectional_v1.yaml \
   --building-start 1 --building-count 100 --stage-indices 0,1,2,3 \
-  --workers 1
+  --determinism-workers 1,2,8 \
+  --producer-commit f0de8c4de1cfe3f666d5f466de998c635ebdae0d \
+  --package-wheel <reviewed-wheel> --run-root <new-run-root>
+
+/mnt/d/anaconda3/envs/gendiff/bin/python tools/validate_canonicalizer_pilot.py \
+  --run-root <run-root> --gendiff-repo /mnt/d/projects/GenDiff \
+  --hash-seed-workers 0:1,1:2,9876:8
 ```
 
-命令输出必须报告 `source_transition_counts`、有向 `change_kind_counts`、building error、
-pair error 和 fingerprint。正式 artifact 仍必须在 clean commit 和对应 wheel SHA256 上生成。
+以上命令的精确 argv 已写入正式 artifact 的 `run.yaml` 与 generation report；临时 wheel
+输入路径不是长期证据，artifact 内复制的 wheel 及其 SHA-256 才是固定 package 证据。
 
 ## 7. Gate
 
@@ -167,6 +197,7 @@ pair error 和 fingerprint。正式 artifact 仍必须在 clean commit 和对应
 6. 真实 GenDiff loader 读取全部三个 split；
 7. mixed、hole 和其他 hard error 被修复或由明确的新任务合同接收，不能筛掉后宣称 PASS。
 
-当前精确下一 gate：审阅当前代码与配置 hash，补充双向 condition 黄金 hash；经授权提交并
-推送 clean commit 后，重跑最多 100-building 双向 pilot。预计现有源数据仍会因 48 个 mixed
-transition 和 `building_0032` 的 hole 标为 FAIL；这是数据/任务阻塞证据，不是实现失败。
+当前精确下一 gate：先对 48 个 mixed transition 做业务判定并修复上游，或新增独立、版本化
+的 replacement 合同；同时修复 `building_0032` 的 hole。然后在同一 100-building 边界、
+clean commit 和新 wheel 上重跑正式 pilot。只有 generation 与 validator 同时 PASS 后，才可
+另行授权 bounded overfit；当前不得开始全量生成或训练。

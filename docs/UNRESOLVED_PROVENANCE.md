@@ -15,8 +15,9 @@
   manifest 证据 ID `E14`/`E15`。
 - 本仓库的旧 canonical construction candidate 与已观测 loader 不直接兼容。Phase 2E
   已增加有版本的 `canonical_edit_v3 -> area_v2_absolute_target_coord_no_anchor`
-  candidate adapter，但尚未完成旧 producer 迁移、GenDiff 集成或 pilot；原有
-  normalization/schema 差异和 12 项审计 mismatch 仍阻塞正式 producer-to-consumer 结论。
+  candidate adapter；双向正式 pilot 的 382 条 packed sample 已被真实 loader 全量读取。
+  旧 producer 仍未迁移，GenDiff 也未固定消费该 wheel；原有 12 项历史审计 mismatch 仍阻塞
+  “旧 producer 已兼容”的结论。
 - Canonical edit 唯一性已在 synthetic、七个裁剪黄金案例和 construction-only
   100-building pilot 中做有界测量；该 pilot 的 122 emitted pair 均通过 round-trip、
   collision、determinism 和真实 loader 检查，但 generation 因 40 栋 hard failure 标为
@@ -26,8 +27,11 @@
   mixed；不能通过把所有 removal 视为 demolition 关闭问题。证据和命令见
   `docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md`。
 - 双向 candidate 已实现纯 construction/demolition 的正反 pair、方向化 condition、
-  `change_kind`/`pair_hash` 和 pair 级失败核算，但 clean commit/wheel 与正式双向 pilot
-  尚未生成。48 个 mixed transition 的业务语义和修复来源仍为 `unknown`。
+  `change_kind`/`pair_hash` 和 pair 级失败核算。正式 pilot 固定在 clean commit
+  `f0de8c4de1cfe3f666d5f466de998c635ebdae0d`；382 条 sample 的 split、collision、
+  determinism 和真实 loader 检查通过，但 generation 因 96 个有向 mixed failure 和
+  `building_0032` 的 hole 标为 FAIL。48 个 mixed transition 的业务语义和修复来源仍为
+  `unknown`，不得筛掉后提升 release。
 - GenDiff 当前 loader 不把 `change_kind` 作为独立模型输入；XYZ + source 是否足以稳定
   区分施工和拆除仍为 `unknown`，需要后续训练实验，当前未授权。
 - `/mnt/d/anaconda3/envs/gendiff/bin/python` 可运行 bounded canonicalizer、wheel build 和
