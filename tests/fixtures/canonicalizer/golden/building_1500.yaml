@@ -1,0 +1,11 @@
+schema_version: raw_building_sequence_v1
+building_key: building_1500_selected_layers
+coordinate_frame: world_xzy
+fixture_scope: selected_layers_only
+stages:
+  - stage_index: 2
+    layers:
+      - proxy_id: 3
+        min_height: 0.0
+        max_height: 0.0
+        footprint: [[0.0, 0.0], [57.398682, 13.447983], [67.342987, -29.099556], [9.884705, -42.465759]]

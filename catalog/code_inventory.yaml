@@ -1,8 +1,9 @@
 schema_version: code_inventory_v1
-cataloged_at: "2026-08-28"
+cataloged_at: "2026-08-29"
 repository: gendiff-data-process
-branch: organize/finalize-project-organization-20260828
-code_snapshot_commit: ddd7a68685042dc93331a105d0f8b7449c8e467a
+branch: codex/canonicalizer-v1-phase2a-2e
+code_snapshot_commit: unknown_uncommitted_phase2_worktree
+base_commit: 612d50df3e598ae86d1a4f4ab6ef3b12c1d5fbdd
 classification_rule: "current 需要正式下游运行证据；仅因文件较新不能标为 current"
 
 status_definitions:
@@ -15,6 +16,294 @@ status_definitions:
   deprecated: 已有明确候选替代者，待迁移验收后归档
 
 scripts:
+  - script_id: canonicalization.condition.v1
+    path: gendiff_data_process/canonicalization/condition.py
+    status: candidate
+    group: canonicalization_condition
+    purpose: 从 canonical addition solid 生成 largest-remainder、Halton 和 FPS 确定性条件点
+    io: "canonical source/target stages -> quantized condition points + hash"
+    verification: pilot_contract_tests_passed_2026_08_29
+
+  - script_id: canonicalization.release_contracts.v1
+    path: gendiff_data_process/canonicalization/release_contracts.py
+    status: candidate
+    group: canonicalization_release
+    purpose: 实现 building split、UID 和 train-only normalization profile 冻结合同
+    io: "building identities/canonical train sequences -> split/profile"
+    verification: pilot_contract_tests_passed_2026_08_29
+
+  - script_id: canonicalization.history_adapter.v1
+    path: gendiff_data_process/canonicalization/history_adapter.py
+    status: candidate
+    group: canonicalization_adapter
+    purpose: 有界只读加载显式 GenDiff history stage YAML 并记录逐文件 SHA256
+    io: "explicit building/stage paths -> raw sequence + source evidence"
+    verification: five_building_preflight_passed_with_explicit_failure_2026_08_29
+
+  - script_id: canonicalization.pilot.v1
+    path: gendiff_data_process/canonicalization/pilot.py
+    status: candidate
+    group: canonicalization_release
+    purpose: 构造 versioned pilot、packed shards、fingerprint、run manifest 和失败核算
+    io: "bounded history stages -> artifact run + packed pilot + reports"
+    verification: five_building_preflight_passed_with_explicit_failure_2026_08_29
+
+  - script_id: test.canonicalization.condition.v1
+    path: tests/canonicalization/test_condition.py
+    status: experiment
+    group: canonicalization_tests
+    purpose: 验证 condition 点数、surface、排序、确定性、no-op 和 removal 失败关闭
+    io: synthetic_tests
+    verification: pilot_contract_tests_passed_2026_08_29
+
+  - script_id: test.canonicalization.release_contracts.v1
+    path: tests/canonicalization/test_release_contracts.py
+    status: experiment
+    group: canonicalization_tests
+    purpose: 验证 split 不变性、固定 bucket 和 train-only normalization 合同
+    io: synthetic_tests
+    verification: pilot_contract_tests_passed_2026_08_29
+
+  - script_id: test.canonicalization.reviewed_golden.v1
+    path: tests/canonicalization/test_reviewed_golden.py
+    status: experiment
+    group: canonicalization_tests
+    purpose: 用独立 solid/edit/stdlib-hash oracle 复核七个固定黄金案例
+    io: "reviewed fixture hashes -> independent assertions"
+    verification: three_review_groups_passed_2026_08_29
+
+  - script_id: test.canonicalization.pilot.v1
+    path: tests/canonicalization/test_pilot.py
+    status: experiment
+    group: canonicalization_tests
+    purpose: 验证 history adapter、有界选择、package identity 和跨 worker fingerprint
+    io: synthetic_temp_history_tests
+    verification: pilot_contract_tests_passed_2026_08_29
+
+  - script_id: canonicalization.pilot_builder_cli.v1
+    path: tools/build_canonicalizer_pilot.py
+    status: candidate
+    group: canonicalization_release
+    purpose: 从 clean commit 生成或只读 fingerprint 最多 100-building pilot
+    io: "explicit bounded input -> versioned artifact or JSON fingerprint"
+    verification: five_building_preflight_passed_with_explicit_failure_2026_08_29
+
+  - script_id: canonicalization.pilot_validator_cli.v1
+    path: tools/validate_canonicalizer_pilot.py
+    status: candidate
+    group: canonicalization_validation
+    purpose: 验证 source/wheel/tree hash、split、collision、determinism 和真实 GenDiff loader
+    io: "versioned pilot artifact -> final validation report"
+    verification: five_building_preflight_loader_passed_2026_08_29
+
+  - script_id: package.gendiff_data_process.v1
+    path: gendiff_data_process/__init__.py
+    status: candidate
+    group: canonicalization_api
+    purpose: 导出 gendiff-data-process 可版本化 Python 包版本
+    io: internal_library
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.api.v1
+    path: gendiff_data_process/canonicalization/__init__.py
+    status: candidate
+    group: canonicalization_api
+    purpose: 导出 Unified Canonicalizer v1 公共 API
+    io: internal_library
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.config.v1
+    path: gendiff_data_process/canonicalization/config.py
+    status: candidate
+    group: canonicalization_core
+    purpose: 解析版本化 canonicalizer bundle 并计算分层配置 hash
+    io: "canonicalizer bundle YAML -> typed config + hashes"
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.types.v1
+    path: gendiff_data_process/canonicalization/types.py
+    status: candidate
+    group: canonicalization_core
+    purpose: 定义 raw/canonical stage、lineage 和 edit v3 数据类型
+    io: internal_library
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.errors.v1
+    path: gendiff_data_process/canonicalization/errors.py
+    status: candidate
+    group: canonicalization_core
+    purpose: 提供带稳定错误码和上下文的失败关闭异常
+    io: internal_library
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.quantize.v1
+    path: gendiff_data_process/canonicalization/quantize.py
+    status: candidate
+    group: canonicalization_geometry
+    purpose: 实现 half-away-from-zero 整数量化和反量化
+    io: "finite coordinates -> integer grid coordinates"
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.polygon.v1
+    path: gendiff_data_process/canonicalization/polygon.py
+    status: candidate
+    group: canonicalization_geometry
+    purpose: 清理、验证并唯一化整数 polygon ring
+    io: "integer ring -> canonical CCW ring"
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.solid_partition.v1
+    path: gendiff_data_process/canonicalization/solid_partition.py
+    status: candidate
+    group: canonicalization_geometry
+    purpose: 对 raw extruded solid 做 fixed-grid union 和无交叠 slab decomposition
+    io: "quantized layers -> canonical slab cells + warnings"
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.serialize.v1
+    path: gendiff_data_process/canonicalization/serialize.py
+    status: candidate
+    group: canonicalization_core
+    purpose: 生成 UTF-8 NFC canonical JSON 字节和 SHA256
+    io: "canonical values -> bytes/hash"
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.layer_matching.v1
+    path: gendiff_data_process/canonicalization/layer_matching.py
+    status: candidate
+    group: canonicalization_lineage
+    purpose: 使用整数多目标 assignment 和显式 tie-break 匹配 layer
+    io: "adjacent canonical stages -> deterministic layer matches"
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.point_matching.v1
+    path: gendiff_data_process/canonicalization/point_matching.py
+    status: candidate
+    group: canonicalization_lineage
+    purpose: 使用 cyclic order-preserving DP 匹配点并失败关闭
+    io: "matched layer rings -> point alignment"
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.edit_v3.v1
+    path: gendiff_data_process/canonicalization/edit_v3.py
+    status: candidate
+    group: canonicalization_edit
+    purpose: 构建、hash 和执行 canonical edit v3
+    io: "lineaged source/target stages -> canonical edit -> reconstructed stage"
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.core.v1
+    path: gendiff_data_process/canonicalization/core.py
+    status: candidate
+    group: canonicalization_core
+    purpose: 编排 stage canonicalization、sequence lineage、edit 和 round-trip
+    io: "raw building sequence -> canonical building sequence"
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.collision.v1
+    path: gendiff_data_process/canonicalization/collision.py
+    status: candidate
+    group: canonicalization_validation
+    purpose: 检测重复 canonical row 和冲突 supervision target
+    io: "canonical sample keys -> collision report/error"
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: canonicalization.packed_contract.v1
+    path: gendiff_data_process/canonicalization/packed_contract.py
+    status: candidate
+    group: canonicalization_adapter
+    purpose: 在 GenDiff loader 前校验 packed schema 与 canonical metadata
+    io: "packed metadata/sample -> pass or stable error"
+    verification: phase2_loader_smoke_passed_2026_08_29
+
+  - script_id: canonicalization.adapter_package.v1
+    path: gendiff_data_process/canonicalization/adapters/__init__.py
+    status: candidate
+    group: canonicalization_adapter
+    purpose: 导出版本化 consumer adapter API
+    io: internal_library
+    verification: phase2_loader_smoke_passed_2026_08_29
+
+  - script_id: canonicalization.area_v2_adapter.v1
+    path: gendiff_data_process/canonicalization/adapters/area_v2.py
+    status: candidate
+    group: canonicalization_adapter
+    purpose: 将 canonical edit v3 映射为 area-v2 absolute-target 合同
+    io: "canonical stages/edit + explicit normalization -> area-v2 sample"
+    verification: phase2_loader_smoke_passed_2026_08_29
+
+  - script_id: test.canonicalization.package.v1
+    path: tests/canonicalization/__init__.py
+    status: experiment
+    group: canonicalization_tests
+    purpose: Canonicalizer 测试包标记
+    io: test_package
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: test.canonicalization.helpers.v1
+    path: tests/canonicalization/helpers.py
+    status: experiment
+    group: canonicalization_tests
+    purpose: 加载 tracked fixture 并构造 adapter 全动作样例
+    io: "tracked fixtures -> typed test values"
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: test.canonicalization.quantize_ring.v1
+    path: tests/canonicalization/test_quantize_ring.py
+    status: experiment
+    group: canonicalization_tests
+    purpose: 验证量化边界、ring 不变性与配置 hash 分层
+    io: synthetic_tests
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: test.canonicalization.solid_partition.v1
+    path: tests/canonicalization/test_solid_partition.py
+    status: experiment
+    group: canonicalization_tests
+    purpose: 验证 union/slab、MultiPolygon、hole、自交和容量错误
+    io: synthetic_tests
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: test.canonicalization.lineage_edit.v1
+    path: tests/canonicalization/test_lineage_edit.py
+    status: experiment
+    group: canonicalization_tests
+    purpose: 验证确定性 layer/point lineage、no-op 和 edit round-trip
+    io: synthetic_tests
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: test.canonicalization.golden.v1
+    path: tests/canonicalization/test_golden_cases.py
+    status: experiment
+    group: canonicalization_tests
+    purpose: 验证七个审计真实案例的最小 golden fixture
+    io: bounded_golden_tests
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: test.canonicalization.determinism_collision.v1
+    path: tests/canonicalization/test_determinism_collision.py
+    status: experiment
+    group: canonicalization_tests
+    purpose: 验证随机等价排列不变性和 supervision collision 失败关闭
+    io: property_style_tests
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: test.canonicalization.area_v2_adapter.v1
+    path: tests/canonicalization/test_area_v2_adapter.py
+    status: experiment
+    group: canonicalization_tests
+    purpose: 验证全动作 area-v2 映射、绝对 target value、hash 和容量
+    io: adapter_contract_tests
+    verification: phase2_tests_passed_2026_08_29
+
+  - script_id: test.canonicalization.packed_loader_smoke.v1
+    path: tests/canonicalization/test_packed_loader_smoke.py
+    status: experiment
+    group: canonicalization_tests
+    purpose: 用临时三 building packed release 只读验证真实 GenDiff DataModule
+    io: "temporary packed fixture -> GenDiff batch tensors"
+    verification: phase2_loader_smoke_passed_2026_08_29
+
   - script_id: package.polygon_proxy.v1
     path: polygon_proxy/__init__.py
     status: support

@@ -1,0 +1,13 @@
+schema_version: canonical_adapter_fixture_v1
+fixture_id: SYN_ADAPTER_001
+normalization:
+  profile_id: fixture_explicit_v1
+  center_x: 0.0
+  center_z: 0.0
+  scale_xz: 10.0
+  center_y: 0.0
+  scale_y: 10.0
+expected:
+  pack_schema_version: area_v2_packed_v1
+  edit_schema_version: area_v2_absolute_target_coord_no_anchor
+  move_insert_value_semantics: normalized_absolute_target_xz

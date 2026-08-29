@@ -1,0 +1,10 @@
+schema_version: raw_building_sequence_v1
+building_key: SYN_HOLE_001
+coordinate_frame: world_xzy
+stages:
+  - stage_index: 0
+    layers:
+      - {proxy_id: 1, min_height: 0.0, max_height: 1.0, footprint: [[0, 0], [4, 0], [4, 1], [0, 1]]}
+      - {proxy_id: 2, min_height: 0.0, max_height: 1.0, footprint: [[0, 3], [4, 3], [4, 4], [0, 4]]}
+      - {proxy_id: 3, min_height: 0.0, max_height: 1.0, footprint: [[0, 1], [1, 1], [1, 3], [0, 3]]}
+      - {proxy_id: 4, min_height: 0.0, max_height: 1.0, footprint: [[3, 1], [4, 1], [4, 3], [3, 3]]}

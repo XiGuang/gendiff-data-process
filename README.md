@@ -13,6 +13,9 @@ DiffGen 的数据生成、转换、验证和目录工具。
 | 数据或产物由谁产生、被谁消费？ | 查看单数据集的 `producer`/`consumers` 字段，以及 `catalog/legacy_outputs.yaml` 和 `catalog/training_consumer_manifest.yaml`；证据不足时明确写 `unknown`。 |
 | 哪些 pipeline 是 legacy、candidate 或 blocked？ | 查看 `docs/CURRENT_PIPELINE.md` 和 `catalog/pipelines/`。 |
 | 哪些结论仍无法复现？ | 查看 `docs/UNRESOLVED_PROVENANCE.md`。 |
+| Canonicalizer Phase 2 如何实现？ | 查看 `docs/CANONICALIZER_PHASE2_DECISIONS.md` 和 `configs/canonicalizer_v1.yaml`。 |
+| Canonicalizer Phase 2 验收结果是什么？ | 查看 `docs/CANONICALIZER_PHASE2_REPORT.md` 和 `catalog/canonicalizer_phase2_test_report.yaml`。 |
+| Pilot 使用什么冻结合同和失败门槛？ | 查看 `docs/CANONICALIZER_PILOT_CONTRACT.md`。 |
 | 项目整理是否通过验收？ | 查看 `docs/ORGANIZATION_ACCEPTANCE.md`。 |
 
 字段含义和查询顺序见 `catalog/README.md`，代码、数据与产物边界见
@@ -28,7 +31,8 @@ DiffGen 的数据生成、转换、验证和目录工具。
 - `catalog/training_consumer_manifest.yaml`：commit/config/command、loader
   合同、路径、证据 ID、mismatch 和显式 unknown。
 - `docs/TRAINING_CONSUMER_AUDIT.md`：供人工审阅的完整证据链。
-- `docs/CANONICALIZER_TEST_PLAN.md`：仅定义计划中的 gate，尚未开始实现。
+- `docs/CANONICALIZER_TEST_PLAN.md`：定义 Phase 2 的测试 gate；2A 到 2E 的 candidate
+  验收结果见 `docs/CANONICALIZER_PHASE2_REPORT.md`。
 
 ## 候选处理链路入口
 

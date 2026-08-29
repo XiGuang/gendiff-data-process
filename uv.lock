@@ -457,35 +457,6 @@ wheels = [
 ]
 
 [[package]]
-name = "data"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "bpy" },
-    { name = "fpsample" },
-    { name = "pillow" },
-    { name = "pyyaml" },
-    { name = "scikit-image" },
-    { name = "scipy" },
-    { name = "shapely" },
-    { name = "tqdm" },
-    { name = "trimesh", extra = ["all"] },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "bpy", specifier = ">=4.5.4" },
-    { name = "fpsample", specifier = ">=0.3.3" },
-    { name = "pillow", specifier = ">=12.0.0" },
-    { name = "pyyaml", specifier = ">=6.0.3" },
-    { name = "scikit-image", specifier = ">=0.25.2" },
-    { name = "scipy", specifier = ">=1.16.3" },
-    { name = "shapely", specifier = ">=2.1.2" },
-    { name = "tqdm", specifier = ">=4.66.0" },
-    { name = "trimesh", extras = ["all"], specifier = ">=4.9.0" },
-]
-
-[[package]]
 name = "decorator"
 version = "5.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -671,6 +642,35 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/c5/7b/873d9f8d834cdcdd49ca0971d0ec9fdb0da9d8de122b71ba5bfbad6a1dee/fpsample-0.3.3-cp312-cp312-manylinux_2_28_s390x.whl", hash = "sha256:2880e47e49b6dc8d46bb21e69d8ca39b4c64c43646b09d5d57f96202fc1245c2", size = 368940, upload-time = "2024-08-31T18:43:52.454Z" },
     { url = "https://files.pythonhosted.org/packages/07/60/c108359f1a415b666bb0158535e2f45754af93c3e662fd08ae6c672577ea/fpsample-0.3.3-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:178ea8ddc9a6e6da4d578ff0337087cbe462187f81be5761de7828b3422c6f50", size = 331276, upload-time = "2024-08-31T18:43:53.569Z" },
     { url = "https://files.pythonhosted.org/packages/36/ae/9454eaaacda5b08d29b1983a8d5cdfcb3a03db2cf7e887b5417e0742d129/fpsample-0.3.3-cp312-none-win_amd64.whl", hash = "sha256:c7acfeed3c382b2ce8c4b8383d1f548df15d30c4586701091ea511e8cc7817c8", size = 175340, upload-time = "2024-08-31T18:43:55.24Z" },
+]
+
+[[package]]
+name = "gendiff-data-process"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "bpy" },
+    { name = "fpsample" },
+    { name = "pillow" },
+    { name = "pyyaml" },
+    { name = "scikit-image" },
+    { name = "scipy" },
+    { name = "shapely" },
+    { name = "tqdm" },
+    { name = "trimesh", extra = ["all"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "bpy", specifier = ">=4.5.4" },
+    { name = "fpsample", specifier = ">=0.3.3" },
+    { name = "pillow", specifier = ">=12.0.0" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
+    { name = "scikit-image", specifier = ">=0.25.2" },
+    { name = "scipy", specifier = ">=1.16.3" },
+    { name = "shapely", specifier = ">=2.1.2" },
+    { name = "tqdm", specifier = ">=4.66.0" },
+    { name = "trimesh", extras = ["all"], specifier = ">=4.9.0" },
 ]
 
 [[package]]

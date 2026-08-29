@@ -53,8 +53,9 @@ candidate 入口为
 由 commit `b4c15a89852df01c836dded8aef75a6d5b320bb2` 引入，catalog 状态为
 `candidate`。Phase 1 确认其直接兼容性为 **blocked**：它不生成所需 packed
 container/edit schema，normalization 和 edit value 语义不兼容，split 互为 alias，
-并且缺少经过审阅的
-`canonical_edit_v3 -> area_v2_absolute_target_coord_no_anchor` adapter。
+Phase 1 时也缺少经过审阅的 adapter。Phase 2E 现已有
+`canonical_edit_v3 -> area_v2_absolute_target_coord_no_anchor` candidate adapter 和
+小型 loader smoke，但旧脚本尚未迁移，真实 release 兼容性仍为 blocked。
 
 已观测的 `/mnt/d/data/outputs/canonical` 和 `canonical_obj` 目录属于 candidate
 run。其脚本家族级 producer 已知，但精确 command/config/commit/consumer 为
@@ -77,14 +78,18 @@ commit；只写 "polygon proxy" 存在歧义。
   `docs/ORGANIZATION_ACCEPTANCE.md`。
 - Phase 1 训练审计为有界只读检查；未生成数据、训练、安装依赖或修改
   `/mnt/d/projects/GenDiff`。
-- `docs/CANONICALIZER_TEST_PLAN.md` 中的 canonicalizer test 仍处于计划状态，
-  尚未实现或通过。
+- `docs/CANONICALIZER_TEST_PLAN.md` 中 canonicalizer candidate 已有 53 个
+  core/property/golden/adapter 测试和 2 个显式 GenDiff loader smoke 通过。
+  5-building 临时 preflight 的 15 个槽位中，12 个 emitted pair 被真实 loader 全量读取，
+  3 个槽位因 1 个明确 construction removal 计为 explicit failures；整体按门槛标为 FAIL，
+  正式 100-building pilot 尚未执行。
 
 ## 精确提升门槛
 
-必须先完成项目整理及 fresh clone 验证。经过单独审阅批准后，先实现 test 和有版本的
-v3-to-area-v2 adapter，再实现 canonical core。unit/golden/property/adapter/
-loader-smoke gate 全部通过后，才能构造小型 versioned pilot；pilot 的 determinism、
+项目整理及 fresh clone 验证已经完成。Phase 2A 到 2E 的 test、版本化
+v3-to-area-v2 adapter 和 canonical core 已在独立 candidate 分支实现；pilot 已获明确授权，
+release 尚未批准。用户已批准且代码已冻结 normalization/split/condition/package 合同，
+下一步是在审阅后 clean commit 上构造 versioned 100-building pilot；pilot 的 determinism、
 round-trip、collision、capacity 和 building-level split gate 全部通过后，才能进行
 bounded overfit。本文档不授权批量生成或训练。
 

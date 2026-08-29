@@ -1,0 +1,22 @@
+schema_version: raw_building_sequence_v1
+building_key: SYN_OVERLAP_001
+coordinate_frame: world_xzy
+stages:
+  - stage_index: 0
+    stage_key: overlapping
+    layers:
+      - proxy_id: 1
+        min_height: 0.0
+        max_height: 2.0
+        footprint: [[0.0, 0.0], [2.0, 0.0], [2.0, 2.0], [0.0, 2.0]]
+      - proxy_id: 2
+        min_height: 0.0
+        max_height: 2.0
+        footprint: [[1.0, 0.0], [3.0, 0.0], [3.0, 2.0], [1.0, 2.0]]
+  - stage_index: 1
+    stage_key: single_union
+    layers:
+      - proxy_id: 999
+        min_height: 0.0
+        max_height: 2.0
+        footprint: [[0.0, 0.0], [3.0, 0.0], [3.0, 2.0], [0.0, 2.0]]

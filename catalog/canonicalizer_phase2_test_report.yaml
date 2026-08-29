@@ -1,0 +1,161 @@
+schema_version: canonicalizer_test_report_v1
+recorded_at: "2026-08-29T12:25:31+08:00"
+scope: phase_2a_to_pilot_precommit_candidate
+
+gate:
+  phase_2a_to_2e_candidate: pass
+  pilot: authorized_pending_clean_commit
+  release: blocked
+  bounded_overfit: blocked_not_authorized
+
+repository:
+  path: /mnt/d/projects/gendiff-data-process
+  branch: codex/canonicalizer-v1-phase2a-2e
+  base_commit: 612d50df3e598ae86d1a4f4ab6ef3b12c1d5fbdd
+  worktree_commit: unknown_uncommitted
+  dirty: true
+  dirty_state_recorded: true
+  note: 本报告属于未提交的可审查 Phase 2 工作树，不是 release 证据。
+
+training_repository:
+  path: /mnt/d/projects/GenDiff
+  inspected_commit: c6bcd8fda184dfa4042c8158a8fd8c797fb57fbc
+  dirty: true
+  writes_performed: false
+  dirty_paths_match_phase_1_manifest: true
+
+config:
+  path: configs/canonicalizer_v1.yaml
+  canonicalizer_version: canonicalizer_v1
+  geometry_version: canonical_geometry_v1
+  geometry_config_hash: c8f736f06c62f27c99cba90acdcab19040f2a3a712198c870d0310ee52fd00b2
+  canonicalizer_config_hash: d673c61a6f57c79324ea2d4c3fd399b3af313b3fc86238774e05c586a34b2a77
+  validation_profile_hash: ad1765586be24597cea933d37e5b247e6d7e519fc0313b0d30ec639c177b44fc
+  condition_config_hash: 36c429c3b150e08791d833fc15ec75558d18a3482d83dab8d07a21a46cc710ce
+  normalization_config_hash: b08e9097fdd36042cfcc653b503ab7986a17ffb38c087cc2914eec4a425ab02c
+  split_config_hash: bf3f4022280abc55053134f836d057802a8bb6b626804f33aec380fdf01bf500
+  package_config_hash: 85bd1db09086bba923a9f3f1235842ccc2bde88468f5501896e1c3790e2db0f9
+
+runtime:
+  executable: /mnt/d/anaconda3/envs/gendiff/bin/python
+  relationship_to_historical_training_run: unknown
+  python: 3.11.13
+  pyyaml: 6.0.1
+  shapely: 2.1.2
+  geos: 3.13.1
+  scipy: 1.13.0
+  torch: 2.4.0+cu121
+
+tests:
+  core_property_golden_adapter:
+    command: >-
+      /mnt/d/anaconda3/envs/gendiff/bin/python -m unittest
+      tests.canonicalization.test_quantize_ring
+      tests.canonicalization.test_solid_partition
+      tests.canonicalization.test_lineage_edit
+      tests.canonicalization.test_golden_cases
+      tests.canonicalization.test_determinism_collision
+      tests.canonicalization.test_release_contracts
+      tests.canonicalization.test_condition
+      tests.canonicalization.test_reviewed_golden
+      tests.canonicalization.test_pilot
+      tests.canonicalization.test_area_v2_adapter
+    passed: 53
+    failed: 0
+    skipped: 0
+    elapsed_seconds: 1.693
+  explicit_gendiff_loader_smoke:
+    command: >-
+      GENDIFF_REPO=/mnt/d/projects/GenDiff
+      /mnt/d/anaconda3/envs/gendiff/bin/python -m unittest
+      tests.canonicalization.test_packed_loader_smoke
+    passed: 2
+    failed: 0
+    skipped: 0
+    elapsed_seconds: 4.169
+  legacy_polygon_proxy_synthetic:
+    command: >-
+      /mnt/d/anaconda3/envs/gendiff/bin/python -m unittest
+      tests.test_polygon_proxy.PolygonProxySyntheticTests
+    passed: 5
+    failed: 0
+    skipped: 0
+    elapsed_seconds: 0.010
+
+bounded_evidence:
+  golden_source_file_count: 11
+  golden_source_sha256_mismatch_count: 0
+  golden_extraction_scope: selected_layers_only
+  full_building_fixture_claimed: false
+  bulk_dataset_scan_performed: false
+  reviewed_golden_manifest: tests/fixtures/canonicalizer/golden/reviewed_hashes.yaml
+  reviewed_pass_fixture_count: 3
+  reviewed_error_fixture_count: 4
+  external_human_review: not_performed
+  authorized_agent_two_path_review: pass
+  real_input_preflight:
+    building_count: 5
+    successful_buildings: 4
+    explicit_failed_buildings: 1
+    attempted_pair_slots: 15
+    emitted_pairs: 12
+    explicit_failed_pair_slots: 3
+    split_sample_counts: {train: 6, val: 3, test: 3}
+    artifact_config_hash_validation: pass
+    package_wheel_identity: gendiff-data-process==0.1.0
+    package_wheel_file_count: 21
+    packed_validation: pass
+    real_gendiff_loader_all_samples: pass
+    silent_drop_count: 0
+    gate_status: fail_due_to_explicit_construction_removal
+
+metrics:
+  determinism:
+    randomized_equivalent_permutations: 100
+    repeated_sequence_equality: pass
+    worker_counts: [1, 2]
+    python_hash_seeds: [0, 1, 9876]
+    reviewed_golden_hash_seed_mismatch_count: 0
+    five_building_fingerprint_mismatch_count: 0
+  round_trip:
+    bounded_sequence_internal_check: pass
+    failed: 0
+    exact_checked_transition_count: unknown_not_instrumented
+  collisions:
+    duplicate_row_case: detected
+    conflicting_target_case: rejected_with_E_SUPERVISION_COLLISION
+    building_uid_collision_case: rejected_with_E_BUILDING_UID_COLLISION
+    real_dataset_scan: not_run
+  split_overlap:
+    smoke_building_count: 3
+    train_val: 0
+    train_test: 0
+    val_test: 0
+  silent_drop_count:
+    bounded_capacity_tests: 0
+    five_building_preflight: 0
+    formal_pilot_or_release: not_run
+
+repository_validation:
+  catalog_yaml_count: 129
+  config_and_fixture_yaml_count: 16
+  python_inventory_count: 103
+  python_compile_count: 103
+  pyc_written_by_validation: false
+  mypy_source_file_count: 21
+  mypy_issue_count: 0
+  dataset_manifest_count: 119
+  dataset_total_file_count: 5672789
+  dataset_total_size_bytes: 3587926590672
+  training_consumer_evidence_count: 29
+  training_consumer_mismatch_count: 12
+  git_boundary_violation_count: 0
+  prohibited_root_count: 0
+  git_diff_check: pass
+  uv_lock_check: pass
+
+known_blockers:
+  - 四项合同和黄金双路径审阅已通过，但当前 worktree 尚未提交，正式 wheel SHA256 只能在 clean commit 后生成。
+  - GenDiff 尚未固定本包依赖，也未原生强制 canonical metadata；pilot validator 只能在 loader 前置检查。
+  - 正式 100-building pilot、forward contract、全数据 collision/determinism 和任何训练均未运行。
+  - 历史训练 run 的精确 Python/lock、producer commit/command 和 dirty diff hash 仍为 unknown。

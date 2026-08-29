@@ -1,0 +1,65 @@
+schema_version: canonicalizer_golden_source_manifest_v1
+captured_at: unknown
+source_hashes_verified_at: "2026-08-29T00:55:46+08:00"
+source_repository:
+  path: /mnt/d/projects/GenDiff
+  inspected_commit: c6bcd8fda184dfa4042c8158a8fd8c797fb57fbc
+  dirty_at_audit: true
+fixtures:
+  - fixture_id: building_0097
+    purpose: cyclic start 和共享点索引变化
+    local_fixture: tests/fixtures/canonicalizer/golden/building_0097.yaml
+    extraction_scope: selected_layers_only
+    source_files:
+      - path: /mnt/d/projects/GenDiff/datasets/history_stages_all_new/building_0097/stage_1/stage_1.yaml
+        sha256: 132425787e8ac2bad82d42f7d08b562a276776da40fd024d25affdf34135aeab
+      - path: /mnt/d/projects/GenDiff/datasets/history_stages_all_new/building_0097/stage_2/stage_2.yaml
+        sha256: 95235a652db69f7988883b8d696ce9e920a138f01970250dadf0c77dda5f45d7
+  - fixture_id: building_0099
+    purpose: winding 和起点差异
+    local_fixture: tests/fixtures/canonicalizer/golden/building_0099.yaml
+    extraction_scope: selected_layers_only
+    source_files:
+      - path: /mnt/d/projects/GenDiff/datasets/history_stages_all_new/building_0099/stage_2/stage_2.yaml
+        sha256: 3b9c009e79c5270e9858db81c3d5e2201ebd5b6a6e522b77c82e43eaab318c17
+      - path: /mnt/d/projects/GenDiff/datasets/history_stages_all_new/building_0099/stage_3/stage_3.yaml
+        sha256: b698fc13209fd6793ca646ac0e997901707da953dc2e78172546d5009b07a7e0
+  - fixture_id: building_0112
+    purpose: 共享顶点改变数组下标
+    local_fixture: tests/fixtures/canonicalizer/golden/building_0112.yaml
+    extraction_scope: selected_layers_only
+    source_files:
+      - path: /mnt/d/projects/GenDiff/datasets/history_stages_all_new/building_0112/stage_2/stage_2.yaml
+        sha256: 0556557d2f36250a91661f6eb01fa658eef36c0885e0f2e2e8fff25a2397b2c0
+      - path: /mnt/d/projects/GenDiff/datasets/history_stages_all_new/building_0112/stage_3/stage_3.yaml
+        sha256: 69a898c2de7da161329ed24fc8eb595dd780d037d644311bb3205a1fe3da97ca
+  - fixture_id: building_0299
+    purpose: 33 点容量 hard fail
+    local_fixture: tests/fixtures/canonicalizer/golden/building_0299.yaml
+    extraction_scope: selected_layers_only
+    source_files:
+      - path: /mnt/d/projects/GenDiff/datasets/history_stages_all_new/building_0299/stage_1/stage_1.yaml
+        sha256: 3fe3e8e502258e17f121416c5f717b36ee02a56d5c3033274ab355f05264340a
+  - fixture_id: building_1500
+    purpose: 量化后无效高度边界
+    local_fixture: tests/fixtures/canonicalizer/golden/building_1500.yaml
+    extraction_scope: selected_layers_only
+    source_files:
+      - path: /mnt/d/projects/GenDiff/datasets/history_stages_all_new/building_1500/stage_2/stage_2.yaml
+        sha256: 02ce56a915292a93de28df7211811efca698c5a874e014c6eb6fbe4fe168eb50
+  - fixture_id: building_0006
+    purpose: raw overlap union warning
+    local_fixture: tests/fixtures/canonicalizer/golden/building_0006.yaml
+    extraction_scope: selected_layers_only
+    source_files:
+      - path: /mnt/d/projects/GenDiff/datasets/history_stages_all_new/building_0006/stage_1/stage_1.yaml
+        sha256: 701f6cdc5f22cb74e83d8208b7fa26053479df38c714337b3e742d2323f5f005
+  - fixture_id: building_0007
+    purpose: construction 体积回退
+    local_fixture: tests/fixtures/canonicalizer/golden/building_0007.yaml
+    extraction_scope: selected_layers_only
+    source_files:
+      - path: /mnt/d/projects/GenDiff/datasets/history_stages_all_new/building_0007/stage_1/stage_1.yaml
+        sha256: 95f6a09e84ff91f376c9ffe74e2fa301fc4a04db7b12ae9ef88e2dc67eb9048c
+      - path: /mnt/d/projects/GenDiff/datasets/history_stages_all_new/building_0007/stage_3/stage_3.yaml
+        sha256: d64f9b9abc0b4423b6802d09e5e641b6203dd3f9f240356f94e0b64d3b1167bc

@@ -41,7 +41,24 @@ candidate_implementation:
   introducing_commit: b4c15a89852df01c836dded8aef75a6d5b320bb2
   direct_observed_loader_compatibility: blocked
   required_adapter: canonical_edit_v3_to_area_v2_absolute_target_coord_no_anchor
-  adapter_status: unknown_missing
+  adapter_status: candidate_phase2e_loader_smoke_passed
+
+phase2_candidate_evidence:
+  repository: /mnt/d/projects/gendiff-data-process
+  branch: codex/canonicalizer-v1-phase2a-2e
+  base_commit: 612d50df3e598ae86d1a4f4ab6ef3b12c1d5fbdd
+  worktree_commit: unknown_uncommitted
+  core: gendiff_data_process/canonicalization
+  adapter: gendiff_data_process/canonicalization/adapters/area_v2.py
+  packed_contract: gendiff_data_process/canonicalization/packed_contract.py
+  test_plan: docs/CANONICALIZER_TEST_PLAN.md
+  core_property_golden_adapter_tests: 53_passed
+  explicit_gendiff_loader_smoke_tests: 2_passed
+  real_input_preflight: 5_buildings_15_slots_12_emitted_loader_passed_3_explicit_failed_slots
+  formal_pilot_or_checkpoint_validation: not_run
+  pilot_authorization: approved_2026_08_29
+  frozen_pilot_contract: docs/CANONICALIZER_PILOT_CONTRACT.md
+  status: blocked_pending_clean_commit_and_formal_pilot
 
 required_invariants:
   - canonicalize(x) == canonicalize(equivalent_permutation(x))
@@ -55,4 +72,4 @@ missing_evidence:
   - packed dataset 的 exact generation/packing command、producer commit 与 dirty diff hash
   - history_stages/area 数据的确切 producer command
   - canonical key 冲突率、round-trip 失败率和训练可学性统计
-  - canonical_edit_v3 到现有 area-v2 schema 的 reviewed adapter 与 golden tests
+  - canonical_edit_v3 到 area-v2 已通过双路径黄金审阅和 5-building preflight，但仍缺正式 100-building pilot 与 GenDiff dependency pin 集成

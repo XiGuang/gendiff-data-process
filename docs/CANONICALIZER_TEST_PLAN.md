@@ -1,10 +1,13 @@
 # 统一规范化器 v1 测试计划
 
-状态：Phase 1 计划，尚未实现
+状态：Phase 2A 到 2E candidate 验收通过；100-building pilot 已授权，等待 clean commit；
+bounded overfit 和训练仍未授权
 
 依据：`docs/handoff/GenDiff_unified_canonicalizer_spec_v1.md`、
 `docs/TRAINING_CONSUMER_AUDIT.md`、
 `catalog/training_consumer_manifest.yaml`
+
+实现边界和已冻结决策见 `docs/CANONICALIZER_PHASE2_DECISIONS.md`。
 
 ## 目的与边界
 
@@ -18,8 +21,11 @@ raw building stages
   -> area_v2_packed_v1 loader tensors / model decode / apply
 ```
 
-Phase 1 不创建 canonicalizer、不修改 `/mnt/d/projects/GenDiff`、不复制真实大数据、
-不生成 pilot，也不训练。本计划中的所有测试状态均为 `planned`。
+Phase 1 没有创建 canonicalizer。Phase 2A 到 2E 已在本仓库实现 candidate core、
+tracked 小 fixture、area-v2 adapter 和临时 packed loader smoke；仍不修改
+`/mnt/d/projects/GenDiff`、不复制真实大数据，也不训练。用户后续批准了四项 release
+合同和最多 100-building pilot；冻结内容见 `docs/CANONICALIZER_PILOT_CONTRACT.md`。
+Forward 和 bounded overfit 测试仍为 `planned`。
 
 ## 固定语义
 
@@ -45,50 +51,61 @@ Phase 1 不创建 canonicalizer、不修改 `/mnt/d/projects/GenDiff`、不复�
 任何上述语义变化都必须升级 canonicalizer/config version，并更新 reviewed golden；
 不能只改测试期望值。
 
-## 建议测试布局
+## 当前测试布局
 
-规范建议实现位于 GenDiff：
+Phase 2 决策将唯一实现源放在本仓库：
 
 ```text
-craftsman/data/canonicalization/
+gendiff_data_process/canonicalization/
+  __init__.py
   config.py
+  types.py
+  errors.py
   quantize.py
   polygon.py
   solid_partition.py
   layer_matching.py
   point_matching.py
-  lineage.py
+  core.py
   edit_v3.py
-  adapters_v2.py
+  collision.py
+  condition.py
+  release_contracts.py
+  history_adapter.py
+  pilot.py
+  packed_contract.py
+  adapters/area_v2.py
   serialize.py
-  validate.py
 ```
 
 测试和 fixtures：
 
 ```text
 tests/canonicalization/
-  test_quantize.py
-  test_ring.py
+  helpers.py
+  test_quantize_ring.py
   test_solid_partition.py
-  test_lineage.py
-  test_edit_roundtrip.py
-  test_determinism.py
-  test_collision_audit.py
+  test_lineage_edit.py
+  test_golden_cases.py
+  test_determinism_collision.py
+  test_condition.py
+  test_release_contracts.py
+  test_reviewed_golden.py
+  test_pilot.py
   test_area_v2_adapter.py
   test_packed_loader_smoke.py
-  test_forward_contract.py
-  test_bounded_overfit.py
 
 tests/fixtures/canonicalizer/
   synthetic/
   golden/
   adapter/
-  packed_smoke/
 ```
 
-实际 implementation location 需要 review 批准。若 core 最终放在数据仓库，GenDiff 只能
-通过 versioned package/import 消费，不能复制一份分叉实现；测试 ID 和断言保持不变。
+Packed smoke fixture 由测试在系统临时目录即时构造，不写入仓库。Forward contract 和
+bounded overfit 仍是 pilot 之后的计划项，因此当前没有伪造对应测试文件。
+
+该位置已在 `docs/CANONICALIZER_PHASE2_DECISIONS.md` 冻结。GenDiff 只能通过
+versioned package/import 消费，不能复制一份分叉实现；测试 ID 和断言保持不变。
 
 ## 测试样例合同
 
@@ -109,6 +126,10 @@ expected:
 
 `unknown_pending_reviewed_reference` 不能由待测实现自动写回。首次 golden hash 必须由
 独立参考计算、round-trip 和人工审阅同时确认后显式固定。
+
+本轮用户授权的 Codex 双路径审阅已将七个裁剪案例固定在
+`tests/fixtures/canonicalizer/golden/reviewed_hashes.yaml`。Manifest 明确记录外部人工
+审阅为 `not_performed`；生产 core 与不调用生产 solid/apply/serialize 的独立 oracle 一致。
 
 ### 合成测试样例
 
@@ -147,8 +168,23 @@ SHA256 在复制时写入 fixture manifest。
 
 这些路径来自
 `docs/handoff/GenDiff_unified_canonicalizer_spec_v1.md:723` 和现有 server audit；Phase 1
-没有复制或读取这些 case。实施任务开始时先确认源文件可访问；不可访问时 fixture
-source/hash 写 `unknown`，不得用相似 case 冒充。
+没有复制或读取这些 case。Phase 2B 已复制每个风险所需的最小层到 tracked fixture，
+并在 `tests/fixtures/canonicalizer/golden/source_manifest.yaml` 记录原始路径、SHA256 和
+`selected_layers_only` 范围；裁剪 fixture 不冒充完整 building。
+
+## Phase 2A 到 2E 当前结果
+
+- Core/property/golden/condition/release/pilot/adapter：53 个测试通过；常规 discover 中
+  loader smoke 因要求显式
+  `GENDIFF_REPO` 而跳过一次。
+- 显式 loader gate：2 个测试通过，真实读取
+  `/mnt/d/projects/GenDiff/craftsman/data/packed_area_edit_v2_data_module.py`，临时 release
+  含三个互不相同的 building 和 split shard。
+- 测试只写系统临时目录；没有写 GenDiff checkout、legacy data 或正式 output。
+- 5-building 临时 preflight 共选择 15 个 transition 槽位，其中 12 个 emitted pair 已通过
+  packed 和真实 loader 全量读取，另 3 个槽位因 `building_0004` construction removal
+  计为 explicit failures；整体按门槛标为 FAIL。正式 100-building pilot、
+  forward、1501-building acceptance 和训练均未执行。
 
 ## 测试矩阵
 
@@ -302,28 +338,32 @@ validation/test: 不互为 alias；overfit 只报告 train
 
 loss 下降本身不算通过；必须以 free-run executable edit 和 target canonical hash 为准。
 
-## 实现任务的命令
+## 当前可执行命令
 
-在批准且环境固定后，建议按以下顺序执行。`<approved-python>` 当前为 `unknown`；
-Phase 1 只确认 `/mnt/d/anaconda3/envs/gendiff/bin/python` 能导入 torch 2.4.0，不能把它
-自动当作 release environment。
-
-```bash
-<approved-python> -m pytest -q tests/canonicalization/test_quantize.py tests/canonicalization/test_ring.py tests/canonicalization/test_solid_partition.py
-<approved-python> -m pytest -q tests/canonicalization/test_lineage.py tests/canonicalization/test_edit_roundtrip.py
-<approved-python> -m pytest -q tests/canonicalization/test_determinism.py tests/canonicalization/test_collision_audit.py
-<approved-python> -m pytest -q tests/canonicalization/test_area_v2_adapter.py tests/canonicalization/test_packed_loader_smoke.py
-<approved-python> -m pytest -q tests/canonicalization/test_forward_contract.py
-```
-
-小 fixture determinism CLI：
+2A 到 2E 的有界 candidate 验收使用下列精确命令。该解释器与历史训练 run 的关系仍为
+`unknown`，不能自动当作 release environment。
 
 ```bash
-<approved-python> -m craftsman.data.canonicalization.cli determinism-check \
-  --input tests/fixtures/canonicalizer/synthetic \
-  --workers 1,2,8 \
-  --runs 3
+/mnt/d/anaconda3/envs/gendiff/bin/python -m unittest \
+  tests.canonicalization.test_quantize_ring \
+  tests.canonicalization.test_solid_partition \
+  tests.canonicalization.test_lineage_edit \
+  tests.canonicalization.test_golden_cases \
+  tests.canonicalization.test_determinism_collision \
+  tests.canonicalization.test_release_contracts \
+  tests.canonicalization.test_condition \
+  tests.canonicalization.test_reviewed_golden \
+  tests.canonicalization.test_pilot \
+  tests.canonicalization.test_area_v2_adapter
+
+GENDIFF_REPO=/mnt/d/projects/GenDiff \
+  /mnt/d/anaconda3/envs/gendiff/bin/python -m unittest \
+  tests.canonicalization.test_packed_loader_smoke
 ```
+
+最多 100-building 的 pilot CLI 和跨 worker/hash-seed fingerprint validator 已实现；精确
+命令见 `docs/CANONICALIZER_PILOT_CONTRACT.md`。全数据 CLI 和 forward contract 仍未实现，
+不能从 unit/loader smoke 或 5-building preflight 推断已通过。
 
 bounded overfit 必须使用独立 config，例如
 `configs/canonicalizer_overfit_v1.yaml`，并记录 exact command、clean commit、config hash、
@@ -337,7 +377,7 @@ environment 和 output manifest。建议命令形状：
   trainer.max_steps=2000
 ```
 
-以上命令均未在 Phase 1 执行。
+上述训练命令未执行，也未创建 overfit config。
 
 ## 验收报告
 
@@ -365,10 +405,17 @@ silent_drop_count: 0
 任何 `unknown` hash、dirty unrecorded diff、skipped blocking test、collision、round-trip
 failure 或 silent drop 都使 gate 失败。
 
+`catalog/canonicalizer_phase2_test_report.yaml` 如实记录 `dirty: true` 和
+`worktree_commit: unknown_uncommitted`，因此只表示 candidate 2A 到 2E 通过；它明确将
+pilot 标为已授权但等待 clean commit、release 标为 blocked，不满足本节的 clean release gate。
+
 ## 精确下一门槛
 
-下一任务先由 reviewer 批准本测试语义和 adapter 边界，然后实现 fixtures 和 tests，让
-现有 candidate 的已知不兼容点以明确失败呈现；之后才实现 canonical core 与 adapter。
-必须先达到 unit/golden/property/adapter/loader smoke 全绿，才可生成一个 versioned small
-pilot。pilot 验证通过后才可执行 bounded overfit；bounded overfit 通过后仍需再次 review，
-才可讨论 bulk regeneration。Phase 1 在此停止。
+2A 到 2E、四项冻结合同和黄金双路径审阅已完成。下一任务是完成所有 bounded gate，
+从 clean commit 构建带 SHA256 的 wheel，并执行已授权的 100-building versioned pilot。
+Pilot 验证通过后才可请求 bounded overfit 授权；若 pilot FAIL，必须先审阅完整失败清单，
+不得筛掉失败 building 后直接继续。Bounded overfit 通过后仍需再次 review，才可讨论
+bulk regeneration。
+
+本轮精确结果、环境、命令和阻塞项见 `docs/CANONICALIZER_PHASE2_REPORT.md` 与
+`catalog/canonicalizer_phase2_test_report.yaml`。

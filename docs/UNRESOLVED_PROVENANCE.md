@@ -13,16 +13,19 @@
 - 已观测 packed release 不是有效的 held-out release：train、validation 和 test
   alias 同一批 20,000 个样本。证据见 `docs/TRAINING_CONSUMER_AUDIT.md` 和
   manifest 证据 ID `E14`/`E15`。
-- 本仓库的 canonical construction candidate 与已观测 loader 不直接兼容。缺失有版本的
-  `canonical_edit_v3 -> area_v2_absolute_target_coord_no_anchor` adapter,
-  normalization/schema 差异和 12 项已分类 mismatch 共同阻塞 producer-to-consumer
-  结论。
-- Canonical edit 唯一性尚未测量。polygon 循环起点、winding、对称形状、layer 顺序、
-  nearest match 和浮点容差都可能使等价几何产生多个序列。
+- 本仓库的旧 canonical construction candidate 与已观测 loader 不直接兼容。Phase 2E
+  已增加有版本的 `canonical_edit_v3 -> area_v2_absolute_target_coord_no_anchor`
+  candidate adapter，但尚未完成旧 producer 迁移、GenDiff 集成或 pilot；原有
+  normalization/schema 差异和 12 项审计 mismatch 仍阻塞正式 producer-to-consumer 结论。
+- Canonical edit 唯一性已在 synthetic、七个裁剪黄金案例和 5-building preflight 中做
+  有界测量；完整 100-building pilot 和全数据分布仍未测量。
 - Canonical candidate 尚无全数据集 round-trip、collision、ambiguity 或
   duplicate-key 报告。
-- 当前 active environment 无法运行 construction CLI，因为声明的项目环境与历史
-  Conda/Pip snapshot 不一致，且 uv 项目依赖中没有 `torch`。
+- Phase 2A 到 2E 及用户批准的 normalization/split/condition/package 合同已有实现和
+  小型 preflight，但不能替代正式 100-building pilot。冻结算法见
+  `docs/CANONICALIZER_PILOT_CONTRACT.md`。
+- `/mnt/d/anaconda3/envs/gendiff/bin/python` 可运行 bounded canonicalizer、wheel build 和
+  loader preflight，但它与历史训练环境的关系仍为 `unknown`，不能据此重建历史 run。
 
 ## P1：阻塞可靠再生成
 

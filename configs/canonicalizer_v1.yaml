@@ -1,0 +1,67 @@
+schema_version: canonicalizer_bundle_v1
+
+canonicalizer:
+  canonicalizer_version: canonicalizer_v1
+  geometry_version: canonical_geometry_v1
+  coordinate_frame: world_xzy
+  grid_xz: "0.001"
+  grid_y: "0.001"
+  rounding: half_away_from_zero
+  polygon:
+    remove_collinear: true
+    reject_self_intersection: true
+    reject_holes: true
+    multipolygon_policy: split
+    raw_overlap_policy: union_with_warning
+  layer_matching:
+    require_positive_intersection: true
+    min_iou_q: 10000
+    min_smaller_coverage_q: 500000
+    metric_scale: 1000000
+    optimal_tie_break: lexicographic
+  point_matching:
+    max_move_distance_ratio: "0.25"
+    min_move_distance_q: 5
+    fallback: delete_then_insert
+
+validation_profile:
+  mode: construction_only
+  removed_volume_tolerance_q3: 0
+  drop_noop_pairs: true
+  max_layers: 64
+  max_points_per_layer: 32
+  max_buildings_per_tile: 16
+  overflow_policy: error
+
+condition_sampling:
+  surface_mode: addition_exterior
+  point_count: 2048
+  sampler: deterministic_stratified_fps
+  candidate_multiplier: 2
+  allocation: largest_remainder
+  low_discrepancy_sequence: halton_2_3
+  fps_start: lexicographic_minimum
+  final_order: lexicographic_xyz
+  seed_material: source_target_condition_config_hash
+
+normalization:
+  method: train_bbox_uniform_v1
+  source_split: train_only
+  coordinate_order: world_xzy
+  min_scale: "0.001"
+  scale_policy: max_xyz_span
+  profile_id_prefix: train_bbox_uniform_v1
+
+split:
+  algorithm: sha256_threshold_v1
+  seed: canonicalizer_split_20260829_v1
+  modulus: 10000
+  train_threshold: 8000
+  validation_threshold: 9000
+
+package:
+  distribution_name: gendiff-data-process
+  import_name: gendiff_data_process
+  version: "0.1.0"
+  pin_mode: git_commit_and_wheel_sha256
+  source_copy_policy: forbidden

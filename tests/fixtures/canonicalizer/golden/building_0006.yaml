@@ -1,0 +1,11 @@
+schema_version: raw_building_sequence_v1
+building_key: building_0006_selected_layers
+coordinate_frame: world_xzy
+fixture_scope: selected_layers_only
+stages:
+  - stage_index: 1
+    layers:
+      - {proxy_id: 0, min_height: 0.0, max_height: 5.568, footprint: [[0.0, 0.0], [4.078, 8.568], [13.367, 4.156], [9.385, -4.467]]}
+      - {proxy_id: 1, min_height: 0.0, max_height: 5.568, footprint: [[-3.133, -4.615], [3.635, -7.825], [9.142, 3.945], [2.388, 7.147]]}
+      - {proxy_id: 2, min_height: 0.0, max_height: 5.568, footprint: [[3.451, 1.630], [6.260, 7.532], [-0.586, 10.783], [-3.392, 4.887]]}
+      - {proxy_id: 3, min_height: 0.0, max_height: 5.568, footprint: [[-2.581, 1.827], [2.792, -0.730], [5.746, 5.562], [0.375, 8.106]]}

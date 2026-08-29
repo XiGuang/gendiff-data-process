@@ -1,0 +1,27 @@
+schema_version: raw_building_sequence_v1
+building_key: SYN_RING_RECT_001
+coordinate_frame: world_xzy
+stages:
+  - stage_index: 0
+    stage_key: stage_0
+    layers:
+      - proxy_id: 99
+        min_height: 0.0
+        max_height: 1.0
+        footprint:
+          - [0.0, 0.0]
+          - [4.0, 0.0]
+          - [4.0, 2.0]
+          - [0.0, 2.0]
+  - stage_index: 1
+    stage_key: stage_1
+    layers:
+      - proxy_id: -7
+        min_height: 0.0
+        max_height: 2.0
+        footprint:
+          - [4.0, 2.0]
+          - [4.0, 0.0]
+          - [0.0, 0.0]
+          - [0.0, 2.0]
+          - [4.0, 2.0]

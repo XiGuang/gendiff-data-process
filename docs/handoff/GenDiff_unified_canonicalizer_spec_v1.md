@@ -1,10 +1,14 @@
 # GenDiff 统一规范化器 v1 规范
 
-- 状态：Draft for implementation review
+- 状态：Phase 2 candidate implementation；尚未通过 pilot/release gate
 - 版本：`canonicalizer_v1`
 - 日期：2026-08-28
 - 目标仓库：`/mnt/d/projects/GenDiff`
 - 关联审计：`D:\Projects\DroneDiff\GenDiff_server_audit_2026-08-28.md`
+
+2026-08-29 的实现归属决策将 canonical core 的唯一源调整为本仓库
+`gendiff_data_process/canonicalization/`，GenDiff 通过版本化 adapter/依赖消费。
+决策证据见 `docs/CANONICALIZER_PHASE2_DECISIONS.md`；本规范的几何语义不变。
 
 ## 1. 目的
 
@@ -596,11 +600,16 @@ removal_solid   = source - target
 | `E_CONSTRUCTION_REMOVAL` | 后一阶段未包含前一阶段 |
 | `E_LAYER_CAPACITY` | canonical layer 数超过模型容量 |
 | `E_POINT_CAPACITY` | 任一 canonical ring 超过点容量 |
+| `E_BUILDING_CAPACITY` | 单 tile 的 building 数超过 adapter 容量 |
 | `E_ID_OVERFLOW` | compatibility ID 超出 stride 合同 |
 | `E_BUILDING_UID_COLLISION` | 截断后的 building UID 在同一数据集内冲突 |
 | `E_ROUNDTRIP_MISMATCH` | apply edit 后 hash 不等于 target |
 | `E_SUPERVISION_COLLISION` | 同一 source+condition 对应不同监督 |
 | `E_NONDETERMINISTIC_OUTPUT` | 重跑或不同 worker 数得到不同 hash |
+| `E_CONDITION_EMPTY` | 非训练 no-op 未产生 addition surface |
+| `E_CONDITION_SAMPLING` | 去重后 condition 候选不足或点数合同不一致 |
+| `E_NORMALIZATION_PROFILE` | train-only normalization 无几何或 grid 合同不一致 |
+| `E_INPUT_ADAPTER` | Pilot 的显式 stage 路径或 YAML schema 无法读取 |
 
 ### 12.2 Warnings
 
@@ -618,91 +627,83 @@ removal_solid   = source - target
 
 ## 13. API 设计
 
-建议模块位置：
+Phase 2 实际模块位置：
 
 ```text
-craftsman/data/canonicalization/
+gendiff_data_process/canonicalization/
   __init__.py
   config.py
   types.py
+  errors.py
   quantize.py
   polygon.py
   solid_partition.py
   layer_matching.py
   point_matching.py
-  lineage.py
+  core.py
   edit_v3.py
+  collision.py
   condition.py
+  release_contracts.py
+  history_adapter.py
+  pilot.py
   serialize.py
-  validate.py
-  adapters_v2.py
-  cli.py
+  adapters/area_v2.py
+  packed_contract.py
 ```
 
 核心纯函数接口：
 
 ```python
 def canonicalize_stage(
-    raw_layers: Sequence[RawLayer],
-    cfg: CanonicalizerConfig,
-) -> CanonicalStageGeometry:
+    raw_stage: RawStage,
+    bundle: CanonicalizerBundle,
+) -> CanonicalStage:
     ...
 
 def canonicalize_building_sequence(
     sequence: RawBuildingSequence,
-    cfg: CanonicalizerConfig,
+    bundle: CanonicalizerBundle,
 ) -> CanonicalBuildingSequence:
-    ...
-
-def match_adjacent_stages(
-    source: CanonicalStage,
-    target: CanonicalStage,
-    lineage_state: LineageState,
-    cfg: CanonicalizerConfig,
-) -> StageCorrespondence:
     ...
 
 def build_canonical_edit(
     source: CanonicalStage,
     target: CanonicalStage,
-    correspondence: StageCorrespondence,
     cfg: CanonicalizerConfig,
-) -> CanonicalEditV3:
+) -> CanonicalEdit:
     ...
 
 def apply_canonical_edit(
     source: CanonicalStage,
-    edit: CanonicalEditV3,
-) -> CanonicalStage:
-    ...
-
-def validate_sequence(
-    sequence: CanonicalBuildingSequence,
+    edit: CanonicalEdit,
     cfg: CanonicalizerConfig,
-) -> ValidationReport:
+) -> CanonicalStage:
     ...
 ```
 
 核心函数必须无全局随机状态、无文件系统枚举依赖。文件读取、坐标 adapter 和并行调度放在 core 之外。
 
-## 14. CLI 设计
+## 14. 后续 CLI 目标（Phase 2 未实现）
+
+以下是 pilot 前需要另行审阅和实现的目标形状，不是当前可调用入口：
 
 ```bash
-python -m craftsman.data.canonicalization.cli canonicalize-building \
+python -m gendiff_data_process.canonicalization.cli canonicalize-building \
   --input <building_dir> \
   --output <versioned_output_dir> \
   --config configs/canonicalizer_v1.yaml
 
-python -m craftsman.data.canonicalization.cli validate-dataset \
+python -m gendiff_data_process.canonicalization.cli validate-dataset \
   --input <canonical_dataset_dir> \
   --manifest <dataset_manifest.yaml> \
   --workers 56
 
-python -m craftsman.data.canonicalization.cli compare \
+python -m gendiff_data_process.canonicalization.cli compare \
   --left <canonical_sequence_a.yaml> \
   --right <canonical_sequence_b.yaml>
 
-python -m craftsman.data.canonicalization.cli determinism-check \
+python -m gendiff_data_process.canonicalization.cli determinism-check \
   --input <raw_dataset_dir> \
   --workers 1,8,56 \
   --runs 3

@@ -1,0 +1,47 @@
+schema_version: canonicalizer_reviewed_golden_v1
+reviewed_at: "2026-08-29"
+review_method: independent_solid_edit_and_stdlib_hash_oracle
+reviewer: codex_agent_authorized_by_user
+human_external_review: not_performed
+canonicalizer_version: canonicalizer_v1
+geometry_config_hash: c8f736f06c62f27c99cba90acdcab19040f2a3a712198c870d0310ee52fd00b2
+canonicalizer_config_hash: d673c61a6f57c79324ea2d4c3fd399b3af313b3fc86238774e05c586a34b2a77
+
+fixtures:
+  building_0006:
+    status: pass
+    stage_hashes:
+      - 6962192e5cf6c0490cdf5326f2273e547d1e74cb87836f92fe2badd3b0930931
+    edit_hashes: []
+    sequence_hash: 080cbb3b1b6f651dea5f3ac9b10f8ff33d1581b7f29b2b34b2f804f7ae1c6bc4
+    warnings: [W_RAW_OVERLAP_CANONICALIZED]
+  building_0007:
+    status: error
+    error_code: E_CONSTRUCTION_REMOVAL
+  building_0097:
+    status: pass
+    stage_hashes:
+      - 24850079980253a39b9163b3483f2c9271da8a06cdf7c99981c7a515dd8f9c08
+      - dc69413075efcc4294024747c40673ce4f97914467e9b03cab4e40f8c63ddb66
+    edit_hashes:
+      - 8e6f46551e423d35ebe2a3bb61757e79e86868931e33c5e8cf25836f8b8824b8
+    sequence_hash: 0ea87b1e042abc4393a468f9a94026891fddc30be21b5ada2589fc366161b4a3
+    warnings: []
+  building_0099:
+    status: error
+    error_code: E_CONSTRUCTION_REMOVAL
+  building_0112:
+    status: pass
+    stage_hashes:
+      - 39b0a419a9703eb7068266b0a9af258056afa2a14db6b446fd3d988aae6af55a
+      - a6e9cf27d85d40ed10067e428da881fb02902cb4fa837c2aa9c0f61c5a3e80ef
+    edit_hashes:
+      - 03ed2d934837116691f5381157a92e39615f31c542244fa46cad9aac75542ba4
+    sequence_hash: fcbe5562ac8d1716d213297f4b00377d9377f052141e16864d11c9d22b9c963e
+    warnings: []
+  building_0299:
+    status: error
+    error_code: E_POINT_CAPACITY
+  building_1500:
+    status: error
+    error_code: E_INVALID_HEIGHT

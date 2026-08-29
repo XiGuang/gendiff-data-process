@@ -1,7 +1,7 @@
 [project]
-name = "data"
+name = "gendiff-data-process"
 version = "0.1.0"
-description = "Add your description here"
+description = "DiffGen 数据规范化、构造与验证工具"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -15,3 +15,10 @@ dependencies = [
     "scikit-image>=0.25.2",
     "shapely>=2.1.2",
 ]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["gendiff_data_process*"]

@@ -51,15 +51,30 @@ observed_training_consumer:
   required_pack_schema: area_v2_packed_v1
   required_edit_schema: area_v2_absolute_target_coord_no_anchor
   candidate_direct_compatibility: blocked
-  canonical_edit_v3_adapter: unknown_missing
+  canonical_edit_v3_adapter: candidate_phase2e_loader_smoke_passed
+
+phase2_candidate:
+  branch: codex/canonicalizer-v1-phase2a-2e
+  base_commit: 612d50df3e598ae86d1a4f4ab6ef3b12c1d5fbdd
+  worktree_commit: unknown_uncommitted
+  core: gendiff_data_process/canonicalization
+  adapter: gendiff_data_process/canonicalization/adapters/area_v2.py
+  direct_release_compatibility: blocked_pending_pilot_and_gendiff_integration
+  bounded_tests:
+    core_property_golden_adapter: 53_passed
+    explicit_gendiff_loader_smoke: 2_passed
+    real_input_preflight: 5_buildings_15_slots_12_emitted_loader_passed_3_explicit_failed_slots
+  frozen_pilot_contract: docs/CANONICALIZER_PILOT_CONTRACT.md
+  pilot_authorization: approved_2026_08_29
+  formal_pilot_status: not_run_pending_clean_commit
 
 unresolved_risks:
-  - canonical edit 序列是否对等价几何具有唯一表示尚未验证
+  - 小型等价变换 fixture 已通过，但全数据 canonical edit 唯一性尚未验证
   - layer/point 排序、对称 footprint、浮点容差和 nearest-match 可能造成一对多表示
   - 未对完整数据集执行 canonicalize -> apply -> compare round-trip
-  - 已确认 GenDiff loader 消费 packed area_v2 schema，但 construction candidate 缺显式、可逆、versioned adapter
+  - Phase 2 已有显式 versioned adapter 并通过小型 loader smoke，但旧 construction producer 尚未迁移且真实 release 未验证
   - 候选 output run 的 exact command/config/commit 与实际 consumers 仍为 unknown
-  - 当前 Python 环境缺少 torch/trimesh/shapely，无法执行 CLI 集成验证
+  - 项目默认 uv 环境仍不是正式训练环境；Phase 2 smoke 使用已观测 gendiff Python，release environment 尚未批准
 
 promotion_gate:
   - 固定输入和 seed 重复运行，逐字节比较 canonical outputs

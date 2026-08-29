@@ -13,6 +13,8 @@
 - `training_consumer_manifest.yaml`：实际 GenDiff checkout、run
   command/config、packed loader 合同、producer 兼容性及未解决字段的 Phase 1
   只读证据。
+- `canonicalizer_phase2_test_report.yaml`：2A 到 2E 的配置 hash、运行环境、定向测试、
+  仓库校验和未解除阻塞项。
 - `legacy_outputs.yaml`：仍位于 Git 外的 `output/`、`outputs/` 和
   `pipeline/output/` 生成产物目录。
 - `legacy_yaml_indexes.yaml`：此前被全局 `*.yaml` ignore 隐藏的大型生成 YAML
@@ -62,3 +64,10 @@ python tools/build_data_catalog.py \
 
 当前没有任何数据生成 pipeline 被提升为 `current`。canonical construction
 pipeline 仍是 candidate，与已观测 packed GenDiff loader 的直接兼容性为 blocked。
+
+Canonicalizer Phase 2 的 candidate 实现边界见
+`docs/CANONICALIZER_PHASE2_DECISIONS.md`，测试状态见
+`docs/CANONICALIZER_TEST_PLAN.md`，验收证据见
+`docs/CANONICALIZER_PHASE2_REPORT.md`；pilot 的冻结合同见
+`docs/CANONICALIZER_PILOT_CONTRACT.md`。小型 loader smoke 或 preflight 通过不等于
+pipeline 或 dataset 已提升为 `current`。
