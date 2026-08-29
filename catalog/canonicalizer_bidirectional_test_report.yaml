@@ -1,0 +1,175 @@
+schema_version: canonicalizer_bidirectional_test_report_v1
+recorded_at: "2026-08-29T13:55:45+08:00"
+scope: bidirectional_monotonic_v1_candidate_and_bounded_fingerprint
+
+gate:
+  code_and_unit_tests: pass
+  bounded_100_building_fingerprint: deterministic_but_dataset_gate_fail
+  formal_versioned_pilot: not_run_pending_review_and_clean_commit
+  release: blocked
+  bounded_overfit: blocked_not_authorized
+  training: not_run_not_authorized
+
+repository:
+  path: /mnt/d/projects/gendiff-data-process
+  branch: codex/canonicalizer-bidirectional-v1
+  base_commit: ca2a1ecb1e851f56506de9437d8e3598d9bc6efe
+  worktree_commit: unknown_uncommitted
+  dirty: true
+  note: 本报告属于可审查工作树，不是 clean release 或正式 pilot 证据。
+
+training_repository:
+  path: /mnt/d/projects/GenDiff
+  inspected_commit: c6bcd8fda184dfa4042c8158a8fd8c797fb57fbc
+  dirty: true
+  writes_performed: false
+  data_root_read_only: /mnt/d/projects/GenDiff/datasets/history_stages_all_new
+
+contract:
+  id: bidirectional_monotonic_v1
+  document: docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md
+  config: configs/canonicalizer_bidirectional_v1.yaml
+  package_version: 0.2.0
+  canonicalizer_version: canonicalizer_v1
+  geometry_version: canonical_geometry_v1
+  geometry_config_hash: c8f736f06c62f27c99cba90acdcab19040f2a3a712198c870d0310ee52fd00b2
+  canonicalizer_config_hash: d673c61a6f57c79324ea2d4c3fd399b3af313b3fc86238774e05c586a34b2a77
+  validation_profile_hash: 9321949d1a782d37c35dc92275e487d1bcd0a7165297fd6c48cf387e95423098
+  condition_config_hash: 0aaf58acfe85443eef29641aae1fd1859134b944d17b550d6d7a20b8a7c4f206
+  normalization_config_hash: b08e9097fdd36042cfcc653b503ab7986a17ffb38c087cc2914eec4a425ab02c
+  split_config_hash: bf3f4022280abc55053134f836d057802a8bb6b626804f33aec380fdf01bf500
+  package_config_hash: 203a9b53a9ec267f527a8de9c732b727d757db0cfddead8a02a64438bd5be390
+
+bounded_fingerprint:
+  command: >-
+    /mnt/d/anaconda3/envs/gendiff/bin/python
+    tools/build_canonicalizer_pilot.py --fingerprint-only
+    --dataset-root /mnt/d/projects/GenDiff/datasets/history_stages_all_new
+    --config configs/canonicalizer_bidirectional_v1.yaml
+    --building-start 1 --building-count 100 --stage-indices 0,1,2,3
+    --workers <1|2|8>
+  selected_buildings: 100
+  explicit_stage_yaml_count: 400
+  adjacent_source_transition_slots: 300
+  successful_sequence_buildings: 99
+  building_errors: {E_HOLE_UNSUPPORTED: 1}
+  source_transition_counts:
+    construction: 187
+    demolition: 4
+    noop: 58
+    mixed: 48
+  directed_slot_accounting:
+    attempted: 600
+    candidate_pairs_before_pack_and_dedup: 382
+    construction: 191
+    demolition: 191
+    noop_skipped: 116
+    pair_failures: 96
+    failed_building_slots: 6
+    pair_errors: {E_MIXED_CHANGE_UNSUPPORTED: 96}
+    silent_drop_count: 0
+  fingerprint: 3946e58c0b9b153909937571fa76d3188e7539ce14c2c846316f3ed80d5c6b0e
+  worker_fingerprints:
+    1: 3946e58c0b9b153909937571fa76d3188e7539ce14c2c846316f3ed80d5c6b0e
+    2: 3946e58c0b9b153909937571fa76d3188e7539ce14c2c846316f3ed80d5c6b0e
+    8: 3946e58c0b9b153909937571fa76d3188e7539ce14c2c846316f3ed80d5c6b0e
+  python_hash_seed_fingerprints:
+    0: 3946e58c0b9b153909937571fa76d3188e7539ce14c2c846316f3ed80d5c6b0e
+    1: 3946e58c0b9b153909937571fa76d3188e7539ce14c2c846316f3ed80d5c6b0e
+    9876: 3946e58c0b9b153909937571fa76d3188e7539ce14c2c846316f3ed80d5c6b0e
+  mismatch_count: 0
+  artifact_written: false
+  packed_collision_and_loader_validation: not_run_in_fingerprint_mode
+
+tests:
+  canonicalization_discover:
+    command: >-
+      /mnt/d/anaconda3/envs/gendiff/bin/python -m unittest discover
+      -s tests/canonicalization -t .
+    passed: 60
+    failed: 0
+    skipped: 1
+    skipped_reason: 真实 loader suite 要求显式 GENDIFF_REPO，并由下一项单独执行
+    elapsed_seconds: 2.215
+  explicit_gendiff_loader_smoke:
+    command: >-
+      GENDIFF_REPO=/mnt/d/projects/GenDiff
+      /mnt/d/anaconda3/envs/gendiff/bin/python -m unittest
+      tests.canonicalization.test_packed_loader_smoke
+    passed: 2
+    failed: 0
+    skipped: 0
+    elapsed_seconds: 4.110
+    coverage:
+      - canonical metadata 与互斥 split shard
+      - point KEEP/MOVE/DELETE/INSERT
+      - demolition DELETE_LAYER
+      - 同一单调 pair 的反向 construction
+      - condition tensor shape 8x3 的小型 fixture
+  legacy_polygon_proxy_synthetic:
+    command: >-
+      /mnt/d/anaconda3/envs/gendiff/bin/python -m unittest
+      tests.test_polygon_proxy.PolygonProxySyntheticTests
+    passed: 5
+    failed: 0
+    skipped: 0
+    elapsed_seconds: 0.011
+  mypy:
+    command: >-
+      /mnt/d/anaconda3/bin/mypy --ignore-missing-imports
+      --python-executable /mnt/d/anaconda3/envs/gendiff/bin/python
+      gendiff_data_process
+    source_file_count: 21
+    issue_count: 0
+  pilot_tools_mypy:
+    command: >-
+      /mnt/d/anaconda3/bin/mypy --ignore-missing-imports
+      --python-executable /mnt/d/anaconda3/envs/gendiff/bin/python
+      tools/build_canonicalizer_pilot.py tools/validate_canonicalizer_pilot.py
+    source_file_count: 2
+    issue_count: 0
+
+behavioral_evidence:
+  old_construction_only_config_preserved: true
+  old_reviewed_golden_tests_passed: true
+  pure_demolition_round_trip: pass
+  reverse_construction_round_trip: pass
+  directional_condition_same_points_and_seed: pass
+  directional_condition_distinct_hash_by_change_kind: pass
+  packed_pair_hash_tamper_rejected: pass
+  legacy_area_v2_metadata_without_direction_fields_readable: pass
+  mixed_transition_emitted_to_training_shard: false
+
+repository_validation:
+  yaml_parse:
+    catalog: 130
+    configs: 2
+    canonicalizer_fixtures: 15
+    total: 147
+    errors: 0
+  code_inventory:
+    tracked_python: 103
+    inventory_entries: 103
+    missing: 0
+    extra: 0
+    duplicate_paths: 0
+    compile_without_pyc: 103
+  dataset_index:
+    manifests: 119
+    file_count: 5672789
+    size_bytes: 3587926590672
+    mismatch_count: 0
+  prohibited_tracked_roots: 0
+  uv_lock_check: pass
+  black_modified_files_check: pass
+  git_diff_check: pass
+  gendiff_head_after_checks: c6bcd8fda184dfa4042c8158a8fd8c797fb57fbc
+  gendiff_writes_performed: false
+
+known_blockers:
+  - 当前 worktree 未提交，尚无 0.2.0 clean commit 或 wheel SHA256，不能生成正式 versioned pilot。
+  - 48 个 mixed source transition 对应 96 个有向失败槽位；其业务语义和上游修复方式为 unknown。
+  - building_0032 仍因 E_HOLE_UNSUPPORTED 失败，hole 的上游修复证据为 unknown。
+  - 已审计 GenDiff loader 不把 change_kind 作为独立模型输入；XYZ + source 是否足以学习拆除为 unknown。
+  - fingerprint mode 不写 packed artifact，因此尚未完成 382 个候选 pair 的 dedup、collision、split shard 和真实 loader 全量验证。
+  - 历史训练 run 的 commit/environment 与 packed 数据 producer command 仍为 unknown。

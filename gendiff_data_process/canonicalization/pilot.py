@@ -15,11 +15,17 @@ from typing import Iterable
 
 import yaml  # type: ignore[import-untyped]
 
-from .adapters.area_v2 import AreaNormalizationStats, AreaV2Adapter
+from .adapters.area_v2 import (
+    AreaNormalizationStats,
+    AreaV2Adapter,
+    AreaV2Capacity,
+    validate_area_v2_edit_capacity,
+)
 from .collision import audit_supervision_collisions
 from .condition import CanonicalCondition, build_canonical_condition
 from .config import CanonicalizerBundle, load_bundle
 from .core import canonicalize_building_sequence
+from .edit_v3 import apply_canonical_edit, build_canonical_edit
 from .errors import CanonicalizationError
 from .history_adapter import SourceFileEvidence, load_history_sequence
 from .packed_contract import validate_packed_release_meta, validate_packed_sample
@@ -29,7 +35,8 @@ from .release_contracts import (
     compute_train_normalization_profile,
 )
 from .serialize import canonical_hash, canonical_value
-from .types import CanonicalBuildingSequence
+from .solid_partition import classify_stage_change
+from .types import CanonicalBuildingSequence, CanonicalEdit
 
 
 @dataclass(frozen=True)
@@ -42,14 +49,34 @@ class PilotTask:
 
 
 @dataclass(frozen=True)
+class PilotPairResult:
+    source_position: int
+    target_position: int
+    change_kind: str
+    edit: CanonicalEdit
+    condition: CanonicalCondition
+
+
+@dataclass(frozen=True)
+class PilotPairFailure:
+    source_position: int
+    target_position: int
+    change_kind: str
+    error_code: str
+    error_message: str
+    error_context: dict
+
+
+@dataclass(frozen=True)
 class PilotBuildingResult:
     building_key: str
     building_uid: str
     split: str
     source_files: tuple[SourceFileEvidence, ...]
     sequence: CanonicalBuildingSequence | None
-    conditions: tuple[tuple[int, CanonicalCondition], ...]
-    noop_pair_indices: tuple[int, ...]
+    pairs: tuple[PilotPairResult, ...]
+    noop_transition_indices: tuple[int, ...]
+    pair_failures: tuple[PilotPairFailure, ...]
     error_code: str | None = None
     error_message: str | None = None
     error_context: dict | None = None
@@ -73,26 +100,114 @@ def _process_task(task: PilotTask) -> PilotBuildingResult:
         )
         source_files = loaded.source_files
         sequence = canonicalize_building_sequence(loaded.sequence, bundle)
-        conditions: list[tuple[int, CanonicalCondition]] = []
+        pairs: list[PilotPairResult] = []
         noops: list[int] = []
+        pair_failures: list[PilotPairFailure] = []
+        bidirectional = bundle.validation_profile.mode == "bidirectional_monotonic"
+        area_capacity = AreaV2Capacity(
+            bundle.validation_profile.max_layers,
+            bundle.validation_profile.max_points_per_layer,
+            bundle.validation_profile.max_buildings_per_tile,
+        )
         for pair_index, edit in enumerate(sequence.adjacent_edits):
             source = sequence.stages[pair_index]
             target = sequence.stages[pair_index + 1]
-            if source.stage_hash == target.stage_hash:
+            change = classify_stage_change(
+                source,
+                target,
+                volume_tolerance_q3=bundle.validation_profile.removed_volume_tolerance_q3,
+            )
+            if change.change_kind == "noop":
                 noops.append(pair_index)
                 continue
-            condition = build_canonical_condition(source, target, bundle.condition_sampling)
-            if edit.target_stage_hash != target.stage_hash:
-                raise CanonicalizationError("E_ROUNDTRIP_MISMATCH", "pair edit target hash 不一致")
-            conditions.append((pair_index, condition))
+            if bidirectional and change.change_kind == "mixed":
+                context = {
+                    "added_volume2_q3": change.added_volume2_q3,
+                    "removed_volume2_q3": change.removed_volume2_q3,
+                }
+                for source_position, target_position in (
+                    (pair_index, pair_index + 1),
+                    (pair_index + 1, pair_index),
+                ):
+                    pair_failures.append(
+                        PilotPairFailure(
+                            source_position,
+                            target_position,
+                            "mixed",
+                            "E_MIXED_CHANGE_UNSUPPORTED",
+                            "同一 transition 同时新增和删除体积",
+                            context,
+                        )
+                    )
+                continue
+
+            directed_edits = [(pair_index, pair_index + 1, edit)]
+            if bidirectional:
+                reverse_edit = build_canonical_edit(
+                    target, source, bundle.canonicalizer
+                )
+                directed_edits.append((pair_index + 1, pair_index, reverse_edit))
+            for source_position, target_position, directed_edit in directed_edits:
+                directed_source = sequence.stages[source_position]
+                directed_target = sequence.stages[target_position]
+                try:
+                    condition = build_canonical_condition(
+                        directed_source,
+                        directed_target,
+                        bundle.condition_sampling,
+                        volume_tolerance_q3=bundle.validation_profile.removed_volume_tolerance_q3,
+                    )
+                    applied = apply_canonical_edit(
+                        directed_source,
+                        directed_edit,
+                        bundle.canonicalizer,
+                    )
+                    if applied.stage_hash != directed_target.stage_hash:
+                        raise CanonicalizationError(
+                            "E_ROUNDTRIP_MISMATCH",
+                            "directed pair edit target hash 不一致",
+                        )
+                    validate_area_v2_edit_capacity(
+                        directed_source,
+                        directed_edit,
+                        area_capacity,
+                    )
+                    pairs.append(
+                        PilotPairResult(
+                            source_position,
+                            target_position,
+                            condition.change_kind,
+                            directed_edit,
+                            condition,
+                        )
+                    )
+                except CanonicalizationError as exc:
+                    if not bidirectional:
+                        raise
+                    directed_change = classify_stage_change(
+                        directed_source,
+                        directed_target,
+                        volume_tolerance_q3=bundle.validation_profile.removed_volume_tolerance_q3,
+                    )
+                    pair_failures.append(
+                        PilotPairFailure(
+                            source_position,
+                            target_position,
+                            directed_change.change_kind,
+                            exc.code,
+                            exc.message,
+                            dict(exc.context),
+                        )
+                    )
         return PilotBuildingResult(
             task.building_key,
             building_uid,
             task.split,
             source_files,
             sequence,
-            tuple(conditions),
+            tuple(pairs),
             tuple(noops),
+            tuple(pair_failures),
         )
     except CanonicalizationError as exc:
         return PilotBuildingResult(
@@ -101,6 +216,7 @@ def _process_task(task: PilotTask) -> PilotBuildingResult:
             task.split,
             source_files,
             None,
+            (),
             (),
             (),
             exc.code,
@@ -116,13 +232,16 @@ def _process_task(task: PilotTask) -> PilotBuildingResult:
             None,
             (),
             (),
+            (),
             "E_INPUT_ADAPTER",
             str(exc),
             {"exception_type": type(exc).__name__},
         )
 
 
-def process_pilot_tasks(tasks: tuple[PilotTask, ...], workers: int) -> tuple[PilotBuildingResult, ...]:
+def process_pilot_tasks(
+    tasks: tuple[PilotTask, ...], workers: int
+) -> tuple[PilotBuildingResult, ...]:
     if workers <= 0:
         raise ValueError("workers 必须为正数")
     if workers == 1:
@@ -140,11 +259,31 @@ def pilot_fingerprint(results: Iterable[PilotBuildingResult]) -> str:
                 "building_uid": result.building_uid,
                 "split": result.split,
                 "source_sha256": [item.sha256 for item in result.source_files],
-                "sequence_hash": result.sequence.sequence_hash if result.sequence else None,
-                "stage_hashes": [stage.stage_hash for stage in result.sequence.stages] if result.sequence else [],
-                "edit_hashes": [edit.edit_hash for edit in result.sequence.adjacent_edits] if result.sequence else [],
-                "condition_hashes": [condition.condition_hash for _, condition in result.conditions],
-                "noop_pair_indices": result.noop_pair_indices,
+                "sequence_hash": (
+                    result.sequence.sequence_hash if result.sequence else None
+                ),
+                "stage_hashes": (
+                    [stage.stage_hash for stage in result.sequence.stages]
+                    if result.sequence
+                    else []
+                ),
+                "edit_hashes": (
+                    [edit.edit_hash for edit in result.sequence.adjacent_edits]
+                    if result.sequence
+                    else []
+                ),
+                "directed_pairs": [
+                    {
+                        "source_position": pair.source_position,
+                        "target_position": pair.target_position,
+                        "change_kind": pair.change_kind,
+                        "edit_hash": pair.edit.edit_hash,
+                        "condition_hash": pair.condition.condition_hash,
+                    }
+                    for pair in result.pairs
+                ],
+                "noop_transition_indices": result.noop_transition_indices,
+                "pair_failures": [asdict(failure) for failure in result.pair_failures],
                 "error_code": result.error_code,
                 "error_context": result.error_context,
             }
@@ -159,19 +298,25 @@ def pair_accounting(
     emitted_sample_count: int,
     duplicate_row_count: int,
     conflicting_row_count: int,
+    directions_per_transition: int = 1,
 ) -> dict[str, int]:
-    pair_slots_per_building = max(0, len(stage_indices) - 1)
+    if directions_per_transition not in {1, 2}:
+        raise ValueError("directions_per_transition 必须是 1 或 2")
+    pair_slots_per_building = max(0, len(stage_indices) - 1) * directions_per_transition
     attempted = len(results) * pair_slots_per_building
-    noop_skipped = sum(len(result.noop_pair_indices) for result in results)
+    noop_skipped = sum(
+        len(result.noop_transition_indices) * directions_per_transition
+        for result in results
+    )
     failed_building_pair_slots = sum(
         pair_slots_per_building for result in results if result.sequence is None
     )
-    explicit_failures = failed_building_pair_slots + conflicting_row_count
+    pair_generation_failures = sum(len(result.pair_failures) for result in results)
+    explicit_failures = (
+        failed_building_pair_slots + pair_generation_failures + conflicting_row_count
+    )
     accounted = (
-        emitted_sample_count
-        + noop_skipped
-        + duplicate_row_count
-        + explicit_failures
+        emitted_sample_count + noop_skipped + duplicate_row_count + explicit_failures
     )
     return {
         "attempted": attempted,
@@ -180,6 +325,7 @@ def pair_accounting(
         "duplicates_deduplicated": duplicate_row_count,
         "explicit_failures": explicit_failures,
         "failed_building_pair_slots": failed_building_pair_slots,
+        "pair_generation_failures": pair_generation_failures,
         "collision_conflicting_rows": conflicting_row_count,
         "silent_drop_count": attempted - accounted,
     }
@@ -230,7 +376,9 @@ def _sha256_file(path: Path) -> str:
 def _canonical_output_hash(root: Path) -> str:
     records = []
     for path in sorted(item for item in root.rglob("*") if item.is_file()):
-        records.append({"path": path.relative_to(root).as_posix(), "sha256": _sha256_file(path)})
+        records.append(
+            {"path": path.relative_to(root).as_posix(), "sha256": _sha256_file(path)}
+        )
     return canonical_hash(records)
 
 
@@ -261,6 +409,12 @@ def _package_version(distribution: str) -> str:
         return "unknown"
 
 
+def _pilot_dataset_name(bundle: CanonicalizerBundle) -> str:
+    if bundle.validation_profile.mode == "bidirectional_monotonic":
+        return "canonicalizer_pilot_bidirectional_v1"
+    return "canonicalizer_pilot_v1"
+
+
 def _source_manifest(results: tuple[PilotBuildingResult, ...]) -> dict:
     return {
         "schema_version": "canonicalizer_pilot_source_manifest_v1",
@@ -285,7 +439,7 @@ def _pack_samples(
 ) -> tuple[dict, dict]:
     import torch
 
-    dataset_root = run_root / "outputs" / "canonicalizer_pilot_v1"
+    dataset_root = run_root / "outputs" / _pilot_dataset_name(bundle)
     dataset_root.mkdir(parents=True)
     normalization = AreaNormalizationStats(
         profile.profile_id,
@@ -303,6 +457,7 @@ def _pack_samples(
     observed_supervision: dict[tuple[str, str], tuple[str, str]] = {}
     duplicate_rows = 0
     conflicting_rows: list[dict[str, object]] = []
+    change_kind_counts: Counter[str] = Counter()
 
     canonical_dir = run_root / "canonical"
     for result in results:
@@ -313,17 +468,16 @@ def _pack_samples(
             canonical_dir / f"{result.building_key}.yaml",
             {
                 "sequence": sequence,
-                "conditions": {
-                    pair_index: condition
-                    for pair_index, condition in result.conditions
-                },
-                "noop_pair_indices": result.noop_pair_indices,
+                "directed_pairs": result.pairs,
+                "noop_transition_indices": result.noop_transition_indices,
+                "pair_failures": result.pair_failures,
             },
         )
-        for pair_index, condition in result.conditions:
-            source = sequence.stages[pair_index]
-            target = sequence.stages[pair_index + 1]
-            edit = sequence.adjacent_edits[pair_index]
+        for directed_pair in result.pairs:
+            source = sequence.stages[directed_pair.source_position]
+            target = sequence.stages[directed_pair.target_position]
+            edit = directed_pair.edit
+            condition = directed_pair.condition
             key = (source.stage_hash, condition.condition_hash)
             supervision = (target.stage_hash, edit.edit_hash)
             previous = observed_supervision.get(key)
@@ -332,7 +486,9 @@ def _pack_samples(
                     conflicting_rows.append(
                         {
                             "building_key": result.building_key,
-                            "pair_index": pair_index,
+                            "source_position": directed_pair.source_position,
+                            "target_position": directed_pair.target_position,
+                            "change_kind": directed_pair.change_kind,
                             "source_stage_hash": key[0],
                             "condition_hash": key[1],
                             "previous": previous,
@@ -360,9 +516,11 @@ def _pack_samples(
                 )
                 for point in condition.points_q
             ]
-            pair = adapter.adapt_pair(
+            pair = adapter.adapt_transition(
                 sequence,
-                pair_index,
+                directed_pair.source_position,
+                directed_pair.target_position,
+                edit,
                 normalized_condition,
                 dense_building_id=0,
                 condition_hash=condition.condition_hash,
@@ -377,11 +535,17 @@ def _pack_samples(
                 state_indices[target_key] = len(states)
                 states.append(pair["target_state"])
             sample = pair["sample"]
+            if sample["canonical_metadata"]["change_kind"] != directed_pair.change_kind:
+                raise CanonicalizationError(
+                    "E_PACKED_CANONICAL_METADATA",
+                    "condition、pair 与 adapter 的 change_kind 不一致",
+                )
             sample["source_state_index"] = state_indices[source_key]
             sample["target_state_index"] = state_indices[target_key]
             sample["condition"] = torch.tensor(sample["condition"], dtype=torch.float32)
             validate_packed_sample(sample)
             samples_by_split[result.split].append(sample)
+            change_kind_counts[sample["canonical_metadata"]["change_kind"]] += 1
 
     collision_report = asdict(audit_supervision_collisions(collision_records))
     collision_report["duplicate_row_count"] = duplicate_rows
@@ -403,7 +567,9 @@ def _pack_samples(
         "states_path": str(dataset_root / "states.pt"),
         "canonical_contract": contract,
         "producer": producer,
-        "split_sample_counts": {split: len(samples) for split, samples in samples_by_split.items()},
+        "split_sample_counts": {
+            split: len(samples) for split, samples in samples_by_split.items()
+        },
     }
     validate_packed_release_meta(meta)
     torch.save(meta, dataset_root / "dataset_meta.pt")
@@ -448,8 +614,13 @@ def _pack_samples(
         {
             "dataset_root": str(dataset_root),
             "state_count": len(states),
-            "split_sample_counts": {split: len(samples) for split, samples in samples_by_split.items()},
-            "emitted_sample_count": sum(len(samples) for samples in samples_by_split.values()),
+            "split_sample_counts": {
+                split: len(samples) for split, samples in samples_by_split.items()
+            },
+            "emitted_sample_count": sum(
+                len(samples) for samples in samples_by_split.values()
+            ),
+            "change_kind_counts": dict(change_kind_counts),
             "duplicate_row_count_before_dedup": duplicate_rows,
             "conflicting_row_count": len(conflicting_rows),
             "collision_report": collision_report,
@@ -492,7 +663,9 @@ def build_pilot(
     for workers in sorted(set(determinism_workers)):
         if workers == 1:
             continue
-        worker_fingerprints[workers] = pilot_fingerprint(process_pilot_tasks(tasks, workers))
+        worker_fingerprints[workers] = pilot_fingerprint(
+            process_pilot_tasks(tasks, workers)
+        )
     deterministic = len(set(worker_fingerprints.values())) == 1
 
     successful = tuple(result for result in results if result.sequence is not None)
@@ -534,10 +707,16 @@ def build_pilot(
     _write_yaml(output_root / "normalization_profile.yaml", profile)
 
     errors = Counter(result.error_code for result in results if result.error_code)
+    pair_errors = Counter(
+        failure.error_code for result in results for failure in result.pair_failures
+    )
     warnings = Counter(
         warning
         for result in successful
         for warning in (result.sequence.warnings if result.sequence else ())
+    )
+    directions_per_transition = (
+        2 if bundle.validation_profile.mode == "bidirectional_monotonic" else 1
     )
     pairs = pair_accounting(
         results,
@@ -545,15 +724,28 @@ def build_pilot(
         emitted_sample_count=pack_report["emitted_sample_count"],
         duplicate_row_count=pack_report["duplicate_row_count_before_dedup"],
         conflicting_row_count=pack_report["conflicting_row_count"],
+        directions_per_transition=directions_per_transition,
     )
     split_buildings = Counter(result.split for result in results)
     successful_split_buildings = Counter(result.split for result in successful)
+    required_change_coverage = (
+        bundle.validation_profile.mode != "bidirectional_monotonic"
+        or all(
+            pack_report["change_kind_counts"].get(kind, 0) > 0
+            for kind in ("construction", "demolition")
+        )
+    )
     generation_pass = (
         deterministic
         and not errors
+        and not pair_errors
         and pairs["silent_drop_count"] == 0
-        and all(pack_report["split_sample_counts"].get(split, 0) > 0 for split in ("train", "val", "test"))
+        and all(
+            pack_report["split_sample_counts"].get(split, 0) > 0
+            for split in ("train", "val", "test")
+        )
         and pack_report["collision_report"]["conflicting_key_count"] == 0
+        and required_change_coverage
     )
     report = {
         "schema_version": "canonicalizer_pilot_generation_report_v1",
@@ -561,12 +753,15 @@ def build_pilot(
         "pilot_fingerprint": baseline_fingerprint,
         "determinism": {
             "worker_fingerprints": worker_fingerprints,
-            "mismatch_count": 0 if deterministic else len(set(worker_fingerprints.values())) - 1,
+            "mismatch_count": (
+                0 if deterministic else len(set(worker_fingerprints.values())) - 1
+            ),
         },
         "selection": {
             "building_start": building_start,
             "building_count": building_count,
             "stage_indices": stage_indices,
+            "directions_per_transition": directions_per_transition,
             "selected_split_building_counts": dict(split_buildings),
             "successful_split_building_counts": dict(successful_split_buildings),
         },
@@ -587,6 +782,20 @@ def build_pilot(
                 if result.error_code
             ],
         },
+        "pair_results": {
+            "errors_by_code": dict(pair_errors),
+            "required_change_coverage": required_change_coverage,
+            "change_kind_counts": pack_report["change_kind_counts"],
+            "failures": [
+                {
+                    "building_key": result.building_key,
+                    "split": result.split,
+                    **asdict(failure),
+                }
+                for result in results
+                for failure in result.pair_failures
+            ],
+        },
         "pairs": pairs,
         "normalization_profile_id": profile.profile_id,
         "normalization_profile_hash": canonical_hash(profile.to_mapping()),
@@ -598,7 +807,11 @@ def build_pilot(
     run_manifest = {
         "schema_version": "gendiff_data_process_run_v1",
         "run_id": output_root.name,
-        "status": "generated_pending_consumer_validation" if generation_pass else "failed_generation_gate",
+        "status": (
+            "generated_pending_consumer_validation"
+            if generation_pass
+            else "failed_generation_gate"
+        ),
         "started_at_utc": started_at,
         "completed_at_utc": datetime.now(timezone.utc).isoformat(),
         "input": {
@@ -621,7 +834,9 @@ def build_pilot(
             "canonical_output_hash": _canonical_output_hash(output_root / "canonical"),
             "canonical_tree": _tree_summary(output_root / "canonical"),
             "packed_tree": _tree_summary(Path(pack_report["dataset_root"])),
-            "generation_report": str(output_root / "reports" / "generation_report.yaml"),
+            "generation_report": str(
+                output_root / "reports" / "generation_report.yaml"
+            ),
         },
         "runtime": {
             "python_executable": sys.executable,

@@ -2,7 +2,7 @@ schema_version: pipeline_catalog_v1
 pipeline_id: construction_sequence_v1
 status: candidate
 confidence: medium
-purpose: 从 polygon proxy 生成多阶段建筑施工序列及 edit 训练数据
+purpose: 从 polygon proxy/stage sequence 生成施工与拆除的 canonical edit 训练数据
 
 stages:
   - order: 1
@@ -56,17 +56,44 @@ observed_training_consumer:
 phase2_candidate:
   branch: codex/canonicalizer-v1-phase2a-2e
   base_commit: 612d50df3e598ae86d1a4f4ab6ef3b12c1d5fbdd
-  worktree_commit: unknown_uncommitted
+  worktree_commit: ca2a1ecb1e851f56506de9437d8e3598d9bc6efe
   core: gendiff_data_process/canonicalization
   adapter: gendiff_data_process/canonicalization/adapters/area_v2.py
-  direct_release_compatibility: blocked_pending_pilot_and_gendiff_integration
+  direct_release_compatibility: blocked_after_failed_construction_only_pilot
   bounded_tests:
     core_property_golden_adapter: 53_passed
     explicit_gendiff_loader_smoke: 2_passed
     real_input_preflight: 5_buildings_15_slots_12_emitted_loader_passed_3_explicit_failed_slots
   frozen_pilot_contract: docs/CANONICALIZER_PILOT_CONTRACT.md
   pilot_authorization: approved_2026_08_29
-  formal_pilot_status: not_run_pending_clean_commit
+  formal_pilot_status: fail
+  formal_pilot_artifact: /mnt/d/artifacts/gendiff-data-process/runs/canonicalizer_pilot_v1_ca2a1ecb1e85_b0001_b0100
+  formal_pilot_buildings: {successful: 60, failed: 40}
+  formal_pilot_errors: {E_CONSTRUCTION_REMOVAL: 39, E_HOLE_UNSUPPORTED: 1}
+  formal_pilot_emitted_samples: 122
+  formal_pilot_real_loader: pass_all_122
+
+bidirectional_candidate:
+  contract_id: bidirectional_monotonic_v1
+  branch: codex/canonicalizer-bidirectional-v1
+  base_commit: ca2a1ecb1e851f56506de9437d8e3598d9bc6efe
+  worktree_commit: unknown_uncommitted
+  dirty: true
+  config: configs/canonicalizer_bidirectional_v1.yaml
+  contract: docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md
+  package_version: 0.2.0
+  pair_policy: 每个非 no-op 单调相邻阶段对生成 construction 和 demolition 两个方向
+  mixed_policy: explicit_pair_failure_E_MIXED_CHANGE_UNSUPPORTED
+  bounded_source_transition_counts:
+    construction: 187
+    demolition: 4
+    noop: 58
+    mixed: 48
+    unclassified_building_errors: {E_HOLE_UNSUPPORTED: 1}
+  bounded_fingerprint: 3946e58c0b9b153909937571fa76d3188e7539ce14c2c846316f3ed80d5c6b0e
+  worker_and_hash_seed_mismatch_count: 0
+  tests: {canonicalization_passed: 60, explicit_gendiff_loader_passed: 2}
+  formal_pilot_status: not_run_pending_review_and_clean_commit
 
 unresolved_risks:
   - 小型等价变换 fixture 已通过，但全数据 canonical edit 唯一性尚未验证
@@ -75,6 +102,8 @@ unresolved_risks:
   - Phase 2 已有显式 versioned adapter 并通过小型 loader smoke，但旧 construction producer 尚未迁移且真实 release 未验证
   - 候选 output run 的 exact command/config/commit 与实际 consumers 仍为 unknown
   - 项目默认 uv 环境仍不是正式训练环境；Phase 2 smoke 使用已观测 gendiff Python，release environment 尚未批准
+  - 当前 48 个 mixed transition 的业务语义与上游修复方式为 unknown
+  - 已审计 GenDiff loader 不消费独立 change_kind 通道，XYZ + source 的拆除可学性为 unknown
 
 promotion_gate:
   - 固定输入和 seed 重复运行，逐字节比较 canonical outputs

@@ -1,6 +1,6 @@
 [project]
 name = "gendiff-data-process"
-version = "0.1.0"
+version = "0.2.0"
 description = "DiffGen 数据规范化、构造与验证工具"
 readme = "README.md"
 requires-python = ">=3.11"

@@ -12,7 +12,7 @@ from .polygon import area2, cleanup_ring
 from .quantize import quantize_points_with_collapse, quantize_scalar
 from .release_contracts import building_uid_from_key
 from .serialize import canonical_hash
-from .solid_partition import SlabCell, build_slab_cells, removed_volume2
+from .solid_partition import build_slab_cells, classify_stage_change
 from .types import (
     CanonicalBuildingSequence,
     CanonicalLayer,
@@ -71,14 +71,24 @@ def stage_from_canonical_layers(
         replace(
             layer,
             canonical_layer_index=index,
-            geometry_hash=_geometry_hash(layer.min_height_q, layer.max_height_q, layer.footprint_q),
+            geometry_hash=_geometry_hash(
+                layer.min_height_q, layer.max_height_q, layer.footprint_q
+            ),
         )
         for index, layer in enumerate(sorted_layers)
     )
-    return CanonicalStage(stage_index, stage_key, normalized, _stage_hash(normalized, cfg), tuple(sorted(set(warnings))))
+    return CanonicalStage(
+        stage_index,
+        stage_key,
+        normalized,
+        _stage_hash(normalized, cfg),
+        tuple(sorted(set(warnings))),
+    )
 
 
-def _quantize_layer(raw: RawLayer, cfg: CanonicalizerConfig) -> tuple[QuantizedLayer, tuple[str, ...]]:
+def _quantize_layer(
+    raw: RawLayer, cfg: CanonicalizerConfig
+) -> tuple[QuantizedLayer, tuple[str, ...]]:
     minimum = quantize_scalar(raw.min_height, cfg.grid_y)
     maximum = quantize_scalar(raw.max_height, cfg.grid_y)
     if maximum <= minimum:
@@ -89,7 +99,9 @@ def _quantize_layer(raw: RawLayer, cfg: CanonicalizerConfig) -> tuple[QuantizedL
             min_height_q=minimum,
             max_height_q=maximum,
         )
-    quantized_points, collapsed = quantize_points_with_collapse(raw.footprint, cfg.grid_xz)
+    quantized_points, collapsed = quantize_points_with_collapse(
+        raw.footprint, cfg.grid_xz
+    )
     ring = cleanup_ring(quantized_points, remove_collinear=cfg.polygon.remove_collinear)
     warnings = ("W_QUANTIZATION_COLLAPSE",) if collapsed else ()
     return QuantizedLayer(minimum, maximum, ring, raw.raw_proxy_id), warnings
@@ -100,7 +112,9 @@ def canonicalize_stage(
     bundle: CanonicalizerBundle,
 ) -> CanonicalStage:
     cfg = bundle.canonicalizer
-    quantized_with_warnings = tuple(_quantize_layer(layer, cfg) for layer in raw_stage.layers)
+    quantized_with_warnings = tuple(
+        _quantize_layer(layer, cfg) for layer in raw_stage.layers
+    )
     quantized = tuple(item[0] for item in quantized_with_warnings)
     cells, solid_warnings = build_slab_cells(quantized)
     warnings = tuple(
@@ -124,7 +138,9 @@ def canonicalize_stage(
     )
     profile = bundle.validation_profile
     if len(layers) > profile.max_layers:
-        raise CanonicalizationError("E_LAYER_CAPACITY", "canonical layer 超过 profile 上限", count=len(layers))
+        raise CanonicalizationError(
+            "E_LAYER_CAPACITY", "canonical layer 超过 profile 上限", count=len(layers)
+        )
     for layer in layers:
         if len(layer.footprint_q) > profile.max_points_per_layer:
             raise CanonicalizationError(
@@ -133,19 +149,21 @@ def canonicalize_stage(
                 layer_index=layer.canonical_layer_index,
                 count=len(layer.footprint_q),
             )
-    return stage_from_canonical_layers(raw_stage.stage_index, raw_stage.stage_key, layers, cfg, warnings)
+    return stage_from_canonical_layers(
+        raw_stage.stage_index, raw_stage.stage_key, layers, cfg, warnings
+    )
 
 
-def _cells(stage: CanonicalStage) -> tuple[SlabCell, ...]:
-    return tuple(SlabCell(layer.min_height_q, layer.max_height_q, layer.footprint_q) for layer in stage.layers)
-
-
-def _initialize_lineage(stage: CanonicalStage) -> tuple[CanonicalStage, int, dict[int, int]]:
+def _initialize_lineage(
+    stage: CanonicalStage,
+) -> tuple[CanonicalStage, int, dict[int, int]]:
     layers: list[CanonicalLayer] = []
     next_point_by_layer: dict[int, int] = {}
     for layer_index, layer in enumerate(stage.layers):
         point_ids = tuple(range(len(layer.footprint_q)))
-        layers.append(replace(layer, layer_lineage_id=layer_index, point_lineage_ids=point_ids))
+        layers.append(
+            replace(layer, layer_lineage_id=layer_index, point_lineage_ids=point_ids)
+        )
         next_point_by_layer[layer_index] = len(point_ids)
     return replace(stage, layers=tuple(layers)), len(layers), next_point_by_layer
 
@@ -158,7 +176,9 @@ def _propagate_lineage(
     cfg: CanonicalizerConfig,
 ) -> tuple[CanonicalStage, int, dict[int, int]]:
     matches, match_warnings = match_layers(source.layers, target.layers, cfg)
-    source_for_target = {match.target_index: source.layers[match.source_index] for match in matches}
+    source_for_target = {
+        match.target_index: source.layers[match.source_index] for match in matches
+    }
     warnings = set(target.warnings) | set(match_warnings)
     target_layers: list[CanonicalLayer] = []
 
@@ -170,12 +190,18 @@ def _propagate_lineage(
             new_point_ids = tuple(range(len(target_layer.footprint_q)))
             next_point_by_layer[lineage] = len(new_point_ids)
             target_layers.append(
-                replace(target_layer, layer_lineage_id=lineage, point_lineage_ids=new_point_ids)
+                replace(
+                    target_layer,
+                    layer_lineage_id=lineage,
+                    point_lineage_ids=new_point_ids,
+                )
             )
             continue
 
         if source_layer.layer_lineage_id is None:
-            raise CanonicalizationError("E_ROUNDTRIP_MISMATCH", "source layer 缺少 lineage")
+            raise CanonicalizationError(
+                "E_ROUNDTRIP_MISMATCH", "source layer 缺少 lineage"
+            )
         lineage = source_layer.layer_lineage_id
         alignment = align_points(source_layer, target_layer.footprint_q, cfg)
         if alignment.warning:
@@ -190,7 +216,9 @@ def _propagate_lineage(
                 target_point_ids[point_edit.target_index] = next_point_by_layer[lineage]
                 next_point_by_layer[lineage] += 1
         if any(point_id is None for point_id in target_point_ids):
-            raise CanonicalizationError("E_ROUNDTRIP_MISMATCH", "point alignment 未覆盖全部 target 点")
+            raise CanonicalizationError(
+                "E_ROUNDTRIP_MISMATCH", "point alignment 未覆盖全部 target 点"
+            )
         complete_point_ids = tuple(
             point_id for point_id in target_point_ids if point_id is not None
         )
@@ -201,7 +229,11 @@ def _propagate_lineage(
                 point_lineage_ids=complete_point_ids,
             )
         )
-    return replace(target, layers=tuple(target_layers), warnings=tuple(sorted(warnings))), next_layer_id, next_point_by_layer
+    return (
+        replace(target, layers=tuple(target_layers), warnings=tuple(sorted(warnings))),
+        next_layer_id,
+        next_point_by_layer,
+    )
 
 
 def canonicalize_building_sequence(
@@ -226,7 +258,9 @@ def canonicalize_building_sequence(
     if raw.expected_stage_indices is not None:
         expected = tuple(sorted(raw.expected_stage_indices))
         if len(expected) != len(set(expected)):
-            raise CanonicalizationError("E_MISSING_STAGE", "expected_stage_indices 包含重复值")
+            raise CanonicalizationError(
+                "E_MISSING_STAGE", "expected_stage_indices 包含重复值"
+            )
         if tuple(indices) != expected:
             raise CanonicalizationError(
                 "E_MISSING_STAGE",
@@ -238,25 +272,43 @@ def canonicalize_building_sequence(
     geometry_stages = [canonicalize_stage(stage, bundle) for stage in ordered_raw]
     if not geometry_stages:
         raise CanonicalizationError("E_MISSING_STAGE", "building sequence 不包含 stage")
-    current, next_layer_id, next_point_by_layer = _initialize_lineage(geometry_stages[0])
+    current, next_layer_id, next_point_by_layer = _initialize_lineage(
+        geometry_stages[0]
+    )
     stages = [current]
     edits = []
     sequence_warnings: set[str] = set(current.warnings)
 
     for geometry_target in geometry_stages[1:]:
-        removed = removed_volume2(_cells(current), _cells(geometry_target))
-        if removed > bundle.validation_profile.removed_volume_tolerance_q3 * 2:
+        change = classify_stage_change(
+            current,
+            geometry_target,
+            volume_tolerance_q3=bundle.validation_profile.removed_volume_tolerance_q3,
+        )
+        if (
+            bundle.validation_profile.mode == "construction_only"
+            and change.change_kind in {"demolition", "mixed"}
+        ):
             raise CanonicalizationError(
                 "E_CONSTRUCTION_REMOVAL",
                 "construction-only sequence 删除了实体体积",
                 source_stage=current.stage_index,
                 target_stage=geometry_target.stage_index,
-                removed_volume2_q3=removed,
+                removed_volume2_q3=change.removed_volume2_q3,
+            )
+        if change.change_kind == "mixed":
+            geometry_target = replace(
+                geometry_target,
+                warnings=tuple(
+                    sorted(set(geometry_target.warnings) | {"W_MIXED_STAGE_CHANGE"})
+                ),
             )
         if current.stage_hash == geometry_target.stage_hash:
             geometry_target = replace(
                 geometry_target,
-                warnings=tuple(sorted(set(geometry_target.warnings) | {"W_NOOP_STAGE"})),
+                warnings=tuple(
+                    sorted(set(geometry_target.warnings) | {"W_NOOP_STAGE"})
+                ),
             )
         target, next_layer_id, next_point_by_layer = _propagate_lineage(
             current,
@@ -268,7 +320,9 @@ def canonicalize_building_sequence(
         edit = build_canonical_edit(current, target, cfg)
         applied = apply_canonical_edit(current, edit, cfg)
         if applied.stage_hash != target.stage_hash:
-            raise CanonicalizationError("E_ROUNDTRIP_MISMATCH", "sequence 内部 round-trip 失败")
+            raise CanonicalizationError(
+                "E_ROUNDTRIP_MISMATCH", "sequence 内部 round-trip 失败"
+            )
         stages.append(target)
         edits.append(edit)
         sequence_warnings.update(target.warnings)

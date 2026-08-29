@@ -49,4 +49,13 @@ lineage/edit/apply、area-v2 adapter 和只读 loader smoke。不会生成 pilot
 
 精确算法、命令和失败门槛见 `docs/CANONICALIZER_PILOT_CONTRACT.md`。这些合同不改变
 core geometry/stage hash；condition、normalization、split 和 package 各自使用独立 config
-hash。正式 pilot 尚未在本文更新时执行，bounded overfit 仍被阻塞。
+hash。该 construction-only pilot 后续已执行并 FAIL，结果见
+`docs/CANONICALIZER_PHASE2_REPORT.md`；bounded overfit 仍被阻塞。
+
+## 后续双向扩展
+
+第一轮 pilot 后，用户明确任务还包括“完整建筑逐步拆除”。该扩展不改写上述 Phase 2
+冻结结果，而是在 `docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md` 中新增
+`bidirectional_monotonic_v1`：纯新增和纯删除均合法，单调 pair 同 split 生成正反两个方向，
+mixed transition 继续以 `E_MIXED_CHANGE_UNSUPPORTED` 失败关闭。对应 candidate package
+版本为 `0.2.0`，配置为 `configs/canonicalizer_bidirectional_v1.yaml`。

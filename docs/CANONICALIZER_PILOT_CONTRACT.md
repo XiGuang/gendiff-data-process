@@ -2,7 +2,13 @@
 
 日期：2026-08-29
 
-状态：用户已批准；代码审阅、黄金 hash gate 和提交通过后方可执行正式 pilot。本文不授权训练。
+状态：历史 construction-only 合同。commit
+`ca2a1ecb1e851f56506de9437d8e3598d9bc6efe` 的 100-building pilot 已执行并按合同标为
+FAIL；本文不授权训练。
+
+施工/拆除双向扩展见 `docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md`。新合同使用独立
+配置 `configs/canonicalizer_bidirectional_v1.yaml`，不得覆盖本合同的 config、hash 或
+artifact。
 
 ## 1. Normalization
 

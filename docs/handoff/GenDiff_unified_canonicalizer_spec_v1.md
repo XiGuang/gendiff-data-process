@@ -6,6 +6,12 @@
 - 目标仓库：`/mnt/d/projects/GenDiff`
 - 关联审计：`D:\Projects\DroneDiff\GenDiff_server_audit_2026-08-28.md`
 
+> 版本边界：本文的 `construction_only` 与“demolition supervision 不在 v1 范围”仍用于
+> 复现第一轮合同。2026-08-29 新增的施工/拆除双向单调任务不会改写本文历史规则；其
+> condition、pair 展开、mixed 失败策略和有界证据见
+> `docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md`，配置见
+> `configs/canonicalizer_bidirectional_v1.yaml`。
+
 2026-08-29 的实现归属决策将 canonical core 的唯一源调整为本仓库
 `gendiff_data_process/canonicalization/`，GenDiff 通过版本化 adapter/依赖消费。
 决策证据见 `docs/CANONICALIZER_PHASE2_DECISIONS.md`；本规范的几何语义不变。

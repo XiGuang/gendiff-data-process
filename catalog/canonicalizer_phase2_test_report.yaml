@@ -1,10 +1,10 @@
 schema_version: canonicalizer_test_report_v1
 recorded_at: "2026-08-29T12:25:31+08:00"
-scope: phase_2a_to_pilot_precommit_candidate
+scope: phase_2a_to_2e_and_construction_only_pilot_history
 
 gate:
   phase_2a_to_2e_candidate: pass
-  pilot: authorized_pending_clean_commit
+  pilot: fail
   release: blocked
   bounded_overfit: blocked_not_authorized
 
@@ -12,10 +12,10 @@ repository:
   path: /mnt/d/projects/gendiff-data-process
   branch: codex/canonicalizer-v1-phase2a-2e
   base_commit: 612d50df3e598ae86d1a4f4ab6ef3b12c1d5fbdd
-  worktree_commit: unknown_uncommitted
-  dirty: true
+  worktree_commit: ca2a1ecb1e851f56506de9437d8e3598d9bc6efe
+  dirty: false
   dirty_state_recorded: true
-  note: 本报告属于未提交的可审查 Phase 2 工作树，不是 release 证据。
+  note: Phase 2 候选已由该 clean commit 固定；后续 construction-only pilot FAIL，仍不是 release 证据。
 
 training_repository:
   path: /mnt/d/projects/GenDiff
@@ -108,6 +108,21 @@ bounded_evidence:
     real_gendiff_loader_all_samples: pass
     silent_drop_count: 0
     gate_status: fail_due_to_explicit_construction_removal
+  formal_construction_only_pilot:
+    artifact: /mnt/d/artifacts/gendiff-data-process/runs/canonicalizer_pilot_v1_ca2a1ecb1e85_b0001_b0100
+    selected_buildings: 100
+    successful_buildings: 60
+    failed_buildings: 40
+    errors: {E_CONSTRUCTION_REMOVAL: 39, E_HOLE_UNSUPPORTED: 1}
+    attempted_pair_slots: 300
+    emitted_samples: 122
+    noop_skipped: 58
+    explicit_failed_slots: 120
+    silent_drop_count: 0
+    worker_fingerprint_mismatch_count: 0
+    real_gendiff_loader_all_122_samples: pass
+    generation_status: fail
+    validation_status: fail_due_to_generation_status
 
 metrics:
   determinism:
@@ -134,7 +149,7 @@ metrics:
   silent_drop_count:
     bounded_capacity_tests: 0
     five_building_preflight: 0
-    formal_pilot_or_release: not_run
+    formal_pilot_or_release: construction_only_pilot_run_release_blocked
 
 repository_validation:
   catalog_yaml_count: 129
@@ -155,7 +170,7 @@ repository_validation:
   uv_lock_check: pass
 
 known_blockers:
-  - 四项合同和黄金双路径审阅已通过，但当前 worktree 尚未提交，正式 wheel SHA256 只能在 clean commit 后生成。
+  - 四项合同、黄金双路径审阅、clean commit 和正式 wheel 已完成，但 construction-only pilot 因 40 栋 hard failure 标为 FAIL。
   - GenDiff 尚未固定本包依赖，也未原生强制 canonical metadata；pilot validator 只能在 loader 前置检查。
-  - 正式 100-building pilot、forward contract、全数据 collision/determinism 和任何训练均未运行。
+  - 正式双向 pilot、forward contract、全数据 collision/determinism 和任何训练均未运行。
   - 历史训练 run 的精确 Python/lock、producer commit/command 和 dirty diff hash 仍为 unknown。

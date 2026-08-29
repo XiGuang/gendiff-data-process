@@ -16,6 +16,7 @@ from .errors import CanonicalizationError
 from .polygon import polygon_from_ring
 from .quantize import quantize_scalar
 from .serialize import canonical_hash
+from .solid_partition import classify_stage_change
 from .types import CanonicalStage
 
 Point3Q = tuple[int, int, int]
@@ -28,6 +29,7 @@ class CanonicalCondition:
     seed_hex: str
     primitive_count: int
     candidate_count: int
+    change_kind: str
 
 
 @dataclass(frozen=True)
@@ -83,30 +85,22 @@ def _difference(left, right):
     return set_precision(left.difference(right), grid_size=1.0, mode="valid_output")
 
 
-def _addition_slices(source: CanonicalStage, target: CanonicalStage):
+def _delta_slices(positive: CanonicalStage, negative: CanonicalStage):
     heights = sorted(
         {
             value
-            for stage in (source, target)
+            for stage in (positive, negative)
             for layer in stage.layers
             for value in (layer.min_height_q, layer.max_height_q)
         }
     )
     slices = []
     for lower_q, upper_q in zip(heights, heights[1:]):
-        target_geometry = _union_stage_at_height(target, lower_q, upper_q)
-        source_geometry = _union_stage_at_height(source, lower_q, upper_q)
-        addition = _difference(target_geometry, source_geometry)
-        removal = _difference(source_geometry, target_geometry)
-        if removal is not None and not removal.is_empty and removal.area > 0:
-            raise CanonicalizationError(
-                "E_CONSTRUCTION_REMOVAL",
-                "condition 输入包含 removal solid",
-                lower_q=lower_q,
-                upper_q=upper_q,
-            )
-        if addition is not None and not addition.is_empty and addition.area > 0:
-            slices.append((lower_q, upper_q, addition))
+        positive_geometry = _union_stage_at_height(positive, lower_q, upper_q)
+        negative_geometry = _union_stage_at_height(negative, lower_q, upper_q)
+        delta = _difference(positive_geometry, negative_geometry)
+        if delta is not None and not delta.is_empty and delta.area > 0:
+            slices.append((lower_q, upper_q, delta))
     return tuple(slices)
 
 
@@ -122,25 +116,48 @@ def _horizontal_primitives(y_q: int, geometry, face: str) -> list[_HorizontalPri
     return output
 
 
-def _surface_primitives(source: CanonicalStage, target: CanonicalStage) -> tuple[SurfacePrimitive, ...]:
-    slices = _addition_slices(source, target)
+def _surface_primitives(
+    positive: CanonicalStage,
+    negative: CanonicalStage,
+) -> tuple[SurfacePrimitive, ...]:
+    slices = _delta_slices(positive, negative)
     if not slices:
-        raise CanonicalizationError("E_CONDITION_EMPTY", "source/target 没有 addition surface")
+        raise CanonicalizationError(
+            "E_CONDITION_EMPTY", "source/target 没有 directional delta surface"
+        )
     primitives: list[SurfacePrimitive] = []
     for index, (lower_q, upper_q, geometry) in enumerate(slices):
-        below = slices[index - 1][2] if index > 0 and slices[index - 1][1] == lower_q else None
-        above = slices[index + 1][2] if index + 1 < len(slices) and slices[index + 1][0] == upper_q else None
-        primitives.extend(_horizontal_primitives(lower_q, _difference(geometry, below), "bottom"))
-        primitives.extend(_horizontal_primitives(upper_q, _difference(geometry, above), "top"))
+        below = (
+            slices[index - 1][2]
+            if index > 0 and slices[index - 1][1] == lower_q
+            else None
+        )
+        above = (
+            slices[index + 1][2]
+            if index + 1 < len(slices) and slices[index + 1][0] == upper_q
+            else None
+        )
+        primitives.extend(
+            _horizontal_primitives(lower_q, _difference(geometry, below), "bottom")
+        )
+        primitives.extend(
+            _horizontal_primitives(upper_q, _difference(geometry, above), "top")
+        )
 
         for polygon_index, polygon in enumerate(_polygons(geometry)):
             rings = (polygon.exterior, *polygon.interiors)
             for ring_index, ring in enumerate(rings):
-                coordinates = tuple((int(round(x)), int(round(z))) for x, z in ring.coords)
-                for segment_index, (start, end) in enumerate(zip(coordinates, coordinates[1:])):
+                coordinates = tuple(
+                    (int(round(x)), int(round(z))) for x, z in ring.coords
+                )
+                for segment_index, (start, end) in enumerate(
+                    zip(coordinates, coordinates[1:])
+                ):
                     if start == end:
                         continue
-                    length_q = isqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2)
+                    length_q = isqrt(
+                        (end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2
+                    )
                     weight2 = 2 * length_q * (upper_q - lower_q)
                     if weight2 <= 0:
                         continue
@@ -155,7 +172,9 @@ def _surface_primitives(source: CanonicalStage, target: CanonicalStage) -> tuple
                         segment_index,
                     )
                     primitives.append(
-                        _VerticalPrimitive(lower_q, upper_q, start, end, descriptor, weight2)
+                        _VerticalPrimitive(
+                            lower_q, upper_q, start, end, descriptor, weight2
+                        )
                     )
     return tuple(sorted(primitives, key=lambda primitive: primitive.descriptor))
 
@@ -163,7 +182,9 @@ def _surface_primitives(source: CanonicalStage, target: CanonicalStage) -> tuple
 def _largest_remainder(weights: tuple[int, ...], total: int) -> tuple[int, ...]:
     weight_sum = sum(weights)
     if weight_sum <= 0:
-        raise CanonicalizationError("E_CONDITION_SAMPLING", "condition surface 总面积为零")
+        raise CanonicalizationError(
+            "E_CONDITION_SAMPLING", "condition surface 总面积为零"
+        )
     counts = [(total * weight) // weight_sum for weight in weights]
     remainders = [(total * weight) % weight_sum for weight in weights]
     remaining = total - sum(counts)
@@ -250,11 +271,49 @@ def build_canonical_condition(
     source: CanonicalStage,
     target: CanonicalStage,
     config: ConditionConfig,
+    *,
+    volume_tolerance_q3: int = 0,
 ) -> CanonicalCondition:
-    seed_hex = hashlib.sha256(
-        f"{source.stage_hash}\0{target.stage_hash}\0{config.config_hash}".encode("utf-8")
-    ).hexdigest()
-    primitives = _surface_primitives(source, target)
+    change = classify_stage_change(
+        source,
+        target,
+        volume_tolerance_q3=volume_tolerance_q3,
+    )
+    if change.change_kind == "noop":
+        raise CanonicalizationError("E_CONDITION_EMPTY", "source/target 没有实体变化")
+    if config.surface_mode == "addition_exterior":
+        if change.change_kind != "construction":
+            raise CanonicalizationError(
+                "E_CONSTRUCTION_REMOVAL",
+                "addition-only condition 输入包含 removal solid",
+                change_kind=change.change_kind,
+                added_volume2_q3=change.added_volume2_q3,
+                removed_volume2_q3=change.removed_volume2_q3,
+            )
+        positive, negative = target, source
+        seed_material = (
+            f"{source.stage_hash}\0{target.stage_hash}\0{config.config_hash}"
+        )
+    else:
+        if change.change_kind == "mixed":
+            raise CanonicalizationError(
+                "E_MIXED_CHANGE_UNSUPPORTED",
+                "同一 transition 同时新增和删除体积，不能作为单调双向样本",
+                added_volume2_q3=change.added_volume2_q3,
+                removed_volume2_q3=change.removed_volume2_q3,
+            )
+        positive, negative = (
+            (target, source)
+            if change.change_kind == "construction"
+            else (source, target)
+        )
+        unordered_stage_hashes = sorted((source.stage_hash, target.stage_hash))
+        seed_material = (
+            f"{unordered_stage_hashes[0]}\0{unordered_stage_hashes[1]}"
+            f"\0{config.config_hash}"
+        )
+    seed_hex = hashlib.sha256(seed_material.encode("utf-8")).hexdigest()
+    primitives = _surface_primitives(positive, negative)
     requested_candidates = config.point_count * config.candidate_multiplier
     allocations = _largest_remainder(
         tuple(primitive.weight2_q2 for primitive in primitives),
@@ -278,12 +337,22 @@ def build_canonical_condition(
         points = ordered_candidates
     else:
         candidate_array = np.asarray(ordered_candidates, dtype=np.float64)
-        indices = fpsample.fps_sampling(candidate_array, config.point_count, start_idx=0)
+        indices = fpsample.fps_sampling(
+            candidate_array, config.point_count, start_idx=0
+        )
         points = tuple(sorted(ordered_candidates[int(index)] for index in indices))
-    condition_hash = canonical_hash(
-        {
-            "condition_config_hash": config.config_hash,
-            "points_q": points,
-        }
+    hash_payload = {
+        "condition_config_hash": config.config_hash,
+        "points_q": points,
+    }
+    if config.surface_mode == "directional_delta_exterior":
+        hash_payload["change_kind"] = change.change_kind
+    condition_hash = canonical_hash(hash_payload)
+    return CanonicalCondition(
+        points,
+        condition_hash,
+        seed_hex,
+        len(primitives),
+        len(ordered_candidates),
+        change.change_kind,
     )
-    return CanonicalCondition(points, condition_hash, seed_hex, len(primitives), len(ordered_candidates))

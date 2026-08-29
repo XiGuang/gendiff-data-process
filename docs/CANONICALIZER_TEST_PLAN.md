@@ -1,11 +1,12 @@
 # 统一规范化器 v1 测试计划
 
-状态：Phase 2A 到 2E candidate 验收通过；100-building pilot 已授权，等待 clean commit；
-bounded overfit 和训练仍未授权
+状态：Phase 2A 到 2E candidate 验收通过；construction-only 100-building pilot 已执行并
+FAIL；双向单调 candidate 已实现并等待 clean commit/pilot；bounded overfit 和训练未授权
 
 依据：`docs/handoff/GenDiff_unified_canonicalizer_spec_v1.md`、
 `docs/TRAINING_CONSUMER_AUDIT.md`、
-`catalog/training_consumer_manifest.yaml`
+`catalog/training_consumer_manifest.yaml`、
+`docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md`
 
 实现边界和已冻结决策见 `docs/CANONICALIZER_PHASE2_DECISIONS.md`。
 
@@ -24,8 +25,10 @@ raw building stages
 Phase 1 没有创建 canonicalizer。Phase 2A 到 2E 已在本仓库实现 candidate core、
 tracked 小 fixture、area-v2 adapter 和临时 packed loader smoke；仍不修改
 `/mnt/d/projects/GenDiff`、不复制真实大数据，也不训练。用户后续批准了四项 release
-合同和最多 100-building pilot；冻结内容见 `docs/CANONICALIZER_PILOT_CONTRACT.md`。
-Forward 和 bounded overfit 测试仍为 `planned`。
+合同和最多 100-building pilot；历史冻结内容见 `docs/CANONICALIZER_PILOT_CONTRACT.md`。
+用户随后确认 demolition 也是业务目标，双向扩展见
+`docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md`。Forward 和 bounded overfit 测试仍为
+`planned`。
 
 ## 固定语义
 
@@ -38,8 +41,9 @@ Forward 和 bounded overfit 测试仍为 `planned`。
   lexicographic minimum。
 - canonical stage 是 raw extruded solids union 的确定性无重叠 slab decomposition；
   raw proxy ID、raw point ID、输入顺序和路径不得进入 stage hash。
-- construction-only 必须满足 source solid 是 target solid 的子集；hole、自交、删除体积、
-  容量超限和 ambiguity 按规范 hard fail。
+- `construction_only` 历史配置要求 source solid 是 target solid 的子集；
+  `bidirectional_monotonic` 接受纯新增和纯删除，并从每个单调 pair 生成两个方向。
+  同时新增和删除的 `mixed`、hole、自交、容量超限和 ambiguity 继续失败关闭。
 - layer matching 是 deterministic global optimum；point matching 是 cyclic
   order-preserving alignment；无法可靠匹配时固定 delete-then-insert 并给 warning。
 - direct pair edit 从全 sequence lineage 比较两端生成，不拼接中间 edit。
@@ -164,7 +168,7 @@ SHA256 在复制时写入 fixture manifest。
 | `building_0299` | 33-point layer | profile max 32 时 hard fail，不截断 |
 | `building_1500` | 真实边界案例 | 经过审阅的确定性结果 |
 | `building_0006` | raw overlap | union 等价并给 overlap warning |
-| `building_0007` | construction 体积回退 | `E_CONSTRUCTION_REMOVAL` |
+| `building_0007` | 包含 mixed/删除的回退案例 | 旧配置为 `E_CONSTRUCTION_REMOVAL`；双向配置不得把 mixed 当 demolition |
 
 这些路径来自
 `docs/handoff/GenDiff_unified_canonicalizer_spec_v1.md:723` 和现有 server audit；Phase 1
@@ -181,10 +185,15 @@ SHA256 在复制时写入 fixture manifest。
   `/mnt/d/projects/GenDiff/craftsman/data/packed_area_edit_v2_data_module.py`，临时 release
   含三个互不相同的 building 和 split shard。
 - 测试只写系统临时目录；没有写 GenDiff checkout、legacy data 或正式 output。
-- 5-building 临时 preflight 共选择 15 个 transition 槽位，其中 12 个 emitted pair 已通过
-  packed 和真实 loader 全量读取，另 3 个槽位因 `building_0004` construction removal
-  计为 explicit failures；整体按门槛标为 FAIL。正式 100-building pilot、
-  forward、1501-building acceptance 和训练均未执行。
+- construction-only 正式 100-building pilot 已执行：60 栋成功、39 个
+  `E_CONSTRUCTION_REMOVAL`、1 个 `E_HOLE_UNSUPPORTED`，122 个 emitted sample 被真实
+  loader 全量读取；generation/overall 为 FAIL。
+- 双向 candidate 的常规 discover 为 60 passed、0 failed、1 个显式路径 loader suite
+  skipped；另以 `GENDIFF_REPO=/mnt/d/projects/GenDiff` 执行真实 loader smoke 2/2 通过，
+  覆盖 demolition `DELETE_LAYER` 和反向 construction。
+- 双向有界分类得到 187 construction、4 demolition、58 no-op、48 mixed；39 个原 removal
+  failure building 均含 mixed。双向正式 pilot、forward、1501-building acceptance 和训练
+  均未执行。
 
 ## 测试矩阵
 
@@ -231,7 +240,12 @@ SHA256 在复制时写入 fixture manifest。
 |---|---|---|---|
 | `VAL-C-001` | 合法 construction 增加 | 通过，removed volume 精确为 0 | blocking |
 | `VAL-C-002` | no-op | `W_NOOP_STAGE`，普通 pair manifest 不包含该 pair | blocking |
-| `VAL-C-003` | source 体积被删除 | `E_CONSTRUCTION_REMOVAL` | blocking |
+| `VAL-C-003` | source 体积被删除 + 旧配置 | `E_CONSTRUCTION_REMOVAL`，保持历史复现 | blocking |
+| `VAL-D-001` | 纯新增 pair + 双向配置 | 输出 construction 与反向 demolition，二者 round-trip | blocking |
+| `VAL-D-002` | 原始方向为纯删除 | 输出 demolition 与反向 construction，lineage 不重算 | blocking |
+| `VAL-D-003` | 同一步 added/removed 均非零 | 两个有向槽位均为 `E_MIXED_CHANGE_UNSUPPORTED` | blocking |
+| `VAL-D-004` | directional condition | construction=`target-source`，demolition=`source-target` | blocking |
+| `VAL-D-005` | 正反 condition | XYZ/seed 相同；`change_kind`、condition hash 和 pair hash 不同且自洽 | blocking |
 | `VAL-CAP-001` | 64 与 65 层 | 64 通过；65 报 `E_LAYER_CAPACITY`，无 slice | blocking |
 | `VAL-CAP-002` | 32 与 33 点 | 32 通过；33 报 `E_POINT_CAPACITY`，无 slice | blocking |
 | `VAL-CAP-003` | 兼容整数 ID 边界 | stride 上界前通过；越界报 `E_ID_OVERFLOW` | blocking |
@@ -251,7 +265,8 @@ adapter 是当前训练 consumer 的唯一兼容边界；core 不得为适配旧
 ### 映射合同
 
 1. 输入必须包含 reviewed `canonicalizer_version`、`geometry_version`、四类 config hash、
-   source/target stage hash、edit hash、condition hash 和 building-level split identity。
+   source/target stage hash、edit hash、condition hash、`change_kind`、`pair_hash` 和
+   building-level split identity。
 2. adapter 先按 grid 将 integer canonical geometry dequantize 到 world coordinates，再按
    frozen area/tile normalization stats 转为 float model coordinates。
 3. layer slot 按 current loader 规则明确分配：source-backed edit 使用 source slot，insert
@@ -262,8 +277,9 @@ adapter 是当前训练 consumer 的唯一兼容边界；core 不得为适配旧
    value 是 `[0,0]`。禁止 anchor、delta 或 `_safe_index()` clamp 修复坏输入。
 6. adapter 输出 `area_v2_absolute_target_coord_no_anchor`，packer 输出
    `area_v2_packed_v1`；错误 schema 必须 hard fail，不能只 warning。
-7. packed metadata 必须携带 canonical hashes、producer commit/diff hash、command/config、
-   runtime 与 validator report，loader smoke 必须校验这些字段。
+7. packed metadata 必须携带 canonical hashes、方向、producer commit/diff hash、
+   command/config、runtime 与 validator report；`pair_hash` 必须覆盖 source/target/edit/
+   condition hash 和方向，loader smoke 前必须校验。
 
 | 测试 ID | 测试样例 | 必需断言 | 门槛 |
 |---|---|---|---|
@@ -272,6 +288,7 @@ adapter 是当前训练 consumer 的唯一兼容边界；core 不得为适配旧
 | `ADP-I-001` | layer/point 输入排列 | slot/index target 确定且在范围内 | blocking |
 | `ADP-I-002` | max 32 时 index = 32 | target builder 前显式 capacity error；不 clamp 到 31 | blocking |
 | `ADP-H-001` | canonical metadata | 所有 version/config/source/target/edit/condition hash 经 pack 后保留 | blocking |
+| `ADP-H-002` | construction/demolition metadata | `change_kind` 与几何分类一致，`pair_hash` 可重算 | blocking |
 | `ADP-P-001` | 最小 loose dataset | pack → load 精确保留每个 action/index/value/mask | blocking |
 | `ADP-P-002` | edit schema 缺失或错误 | packer 和 loader 都失败，不产生仅 warning 的输出 | blocking |
 | `ADP-RT-001` | adapter 输出经过当前 applier | denormalize + canonicalize 等于 target hash | blocking |
@@ -361,9 +378,10 @@ GENDIFF_REPO=/mnt/d/projects/GenDiff \
   tests.canonicalization.test_packed_loader_smoke
 ```
 
-最多 100-building 的 pilot CLI 和跨 worker/hash-seed fingerprint validator 已实现；精确
-命令见 `docs/CANONICALIZER_PILOT_CONTRACT.md`。全数据 CLI 和 forward contract 仍未实现，
-不能从 unit/loader smoke 或 5-building preflight 推断已通过。
+最多 100-building 的 pilot CLI 和跨 worker/hash-seed fingerprint validator 已实现；历史
+命令见 `docs/CANONICALIZER_PILOT_CONTRACT.md`，双向配置、分类命令和核算规则见
+`docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md`。全数据 CLI 和 forward contract 仍未实现，
+不能从 unit/loader smoke 或 pilot partial output 推断已通过。
 
 bounded overfit 必须使用独立 config，例如
 `configs/canonicalizer_overfit_v1.yaml`，并记录 exact command、clean commit、config hash、
@@ -405,17 +423,19 @@ silent_drop_count: 0
 任何 `unknown` hash、dirty unrecorded diff、skipped blocking test、collision、round-trip
 failure 或 silent drop 都使 gate 失败。
 
-`catalog/canonicalizer_phase2_test_report.yaml` 如实记录 `dirty: true` 和
-`worktree_commit: unknown_uncommitted`，因此只表示 candidate 2A 到 2E 通过；它明确将
-pilot 标为已授权但等待 clean commit、release 标为 blocked，不满足本节的 clean release gate。
+历史结果保留在 `catalog/canonicalizer_phase2_test_report.yaml`；当前双向 candidate 使用
+`catalog/canonicalizer_bidirectional_test_report.yaml`，在提交前必须如实记录
+`dirty: true`、`worktree_commit: unknown_uncommitted` 和未执行正式 pilot，不能冒充 clean
+release 证据。
 
 ## 精确下一门槛
 
-2A 到 2E、四项冻结合同和黄金双路径审阅已完成。下一任务是完成所有 bounded gate，
-从 clean commit 构建带 SHA256 的 wheel，并执行已授权的 100-building versioned pilot。
-Pilot 验证通过后才可请求 bounded overfit 授权；若 pilot FAIL，必须先审阅完整失败清单，
-不得筛掉失败 building 后直接继续。Bounded overfit 通过后仍需再次 review，才可讨论
-bulk regeneration。
+2A 到 2E、四项冻结合同、黄金双路径审阅和 construction-only pilot 已完成。下一任务是
+完成双向 candidate 的 bounded gate，经审阅后从 clean commit 构建
+`gendiff-data-process==0.2.0` wheel，并执行最多同一 100 栋的双向 versioned pilot。
+Pilot 验证通过后才可请求 bounded overfit 授权；若因 mixed/hole 等 FAIL，必须先审阅完整
+失败清单，不得筛掉失败 pair/building 后直接继续。Bounded overfit 通过后仍需再次 review，
+才可讨论 bulk regeneration。
 
 本轮精确结果、环境、命令和阻塞项见 `docs/CANONICALIZER_PHASE2_REPORT.md` 与
 `catalog/canonicalizer_phase2_test_report.yaml`。

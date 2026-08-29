@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import unittest
 
 import yaml
@@ -11,15 +12,27 @@ from gendiff_data_process.canonicalization.adapters.area_v2 import (
 )
 from gendiff_data_process.canonicalization.config import load_bundle
 from gendiff_data_process.canonicalization.errors import CanonicalizationError
+from gendiff_data_process.canonicalization.packed_contract import (
+    canonical_pair_hash,
+    validate_packed_sample,
+)
 
-from tests.canonicalization.helpers import CONFIG_PATH, FIXTURE_ROOT, make_all_actions_sequence
+from tests.canonicalization.helpers import (
+    BIDIRECTIONAL_CONFIG_PATH,
+    CONFIG_PATH,
+    FIXTURE_ROOT,
+    make_all_actions_sequence,
+    make_layer_delete_sequence,
+)
 
 
 class AreaV2AdapterTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.bundle = load_bundle(CONFIG_PATH)
-        fixture = yaml.safe_load((FIXTURE_ROOT / "adapter/all_actions.yaml").read_text(encoding="utf-8"))
+        fixture = yaml.safe_load(
+            (FIXTURE_ROOT / "adapter/all_actions.yaml").read_text(encoding="utf-8")
+        )
         cls.normalization = AreaNormalizationStats(**fixture["normalization"])
         cls.sequence = make_all_actions_sequence(cls.bundle)
 
@@ -37,7 +50,9 @@ class AreaV2AdapterTests(unittest.TestCase):
         adapter = AreaV2Adapter(self.bundle, self.normalization)
         pair = self._adapt_pair(adapter)
         self.assertEqual(pair["pack_schema_version"], "area_v2_packed_v1")
-        self.assertEqual(pair["edit_schema_version"], "area_v2_absolute_target_coord_no_anchor")
+        self.assertEqual(
+            pair["edit_schema_version"], "area_v2_absolute_target_coord_no_anchor"
+        )
         actions = {
             point["action"]
             for layer in pair["sample"]["edit_object"]
@@ -55,9 +70,49 @@ class AreaV2AdapterTests(unittest.TestCase):
         adapter = AreaV2Adapter(self.bundle, self.normalization)
         pair = self._adapt_pair(adapter)
         metadata = pair["sample"]["canonical_metadata"]
-        self.assertEqual(metadata["edit_hash"], self.sequence.adjacent_edits[0].edit_hash)
-        self.assertEqual(metadata["canonicalizer_config_hash"], self.bundle.canonicalizer.canonicalizer_config_hash)
+        self.assertEqual(
+            metadata["edit_hash"], self.sequence.adjacent_edits[0].edit_hash
+        )
+        self.assertEqual(
+            metadata["canonicalizer_config_hash"],
+            self.bundle.canonicalizer.canonicalizer_config_hash,
+        )
         self.assertEqual(metadata["normalization_profile_id"], "fixture_explicit_v1")
+        self.assertEqual(metadata["pair_hash"], canonical_pair_hash(metadata))
+        self.assertEqual(metadata["change_kind"], "mixed")
+
+    def test_demolition_direction_is_explicit_in_packed_metadata(self) -> None:
+        bundle = load_bundle(BIDIRECTIONAL_CONFIG_PATH)
+        sequence = make_layer_delete_sequence(bundle)
+        adapter = AreaV2Adapter(bundle, self.normalization)
+        pair = adapter.adapt_pair(
+            sequence,
+            0,
+            [[0.0, 0.0, 0.0]] * bundle.condition_sampling.point_count,
+            condition_hash="fixture_demolition_condition_hash",
+            split="train",
+        )
+        metadata = pair["sample"]["canonical_metadata"]
+        self.assertEqual(metadata["change_kind"], "demolition")
+        self.assertIn(
+            "DELETE", {edit["action"] for edit in pair["sample"]["edit_object"]}
+        )
+        validate_packed_sample(pair["sample"])
+
+    def test_pair_hash_tampering_fails_but_legacy_v1_metadata_remains_readable(
+        self,
+    ) -> None:
+        pair = self._adapt_pair(AreaV2Adapter(self.bundle, self.normalization))
+        tampered = copy.deepcopy(pair["sample"])
+        tampered["canonical_metadata"]["pair_hash"] = "0" * 64
+        with self.assertRaises(CanonicalizationError) as caught:
+            validate_packed_sample(tampered)
+        self.assertEqual(caught.exception.code, "E_PACKED_CANONICAL_METADATA")
+
+        legacy = copy.deepcopy(pair["sample"])
+        legacy["canonical_metadata"].pop("change_kind")
+        legacy["canonical_metadata"].pop("pair_hash")
+        validate_packed_sample(legacy)
 
     def test_capacity_failure_happens_before_tensorization(self) -> None:
         adapter = AreaV2Adapter(

@@ -2,7 +2,8 @@
 
 日期：2026-08-29
 
-状态：**candidate 范围通过；pilot 已获授权但尚未执行，release 和训练门槛未通过。**
+状态：**candidate 范围通过；construction-only 100-building pilot 已执行并 FAIL，release
+和训练门槛未通过。**
 
 ## 结论
 
@@ -90,24 +91,35 @@ run 的关系仍为 `unknown`，不能称为正式 release environment。
 
 ## 阻塞项
 
-1. 当前 candidate 尚未形成 clean commit 和正式 wheel SHA256；因此已授权 pilot 还不能启动。
+1. Phase 2 candidate 已形成 clean commit
+   `ca2a1ecb1e851f56506de9437d8e3598d9bc6efe` 和 wheel SHA256
+   `5b0bf471de50ceee9663f1a815094dcb7db0316855047338920cf3c9e8993844`；第一轮 pilot
+   已启动并按 construction-only 合同 FAIL，不能据此提升 release。
 2. GenDiff 尚未固定本包的 wheel/Git commit，现有 loader 也不会原生强制 canonical metadata；
    pilot validator 只能在调用 loader 前执行合同检查。
-3. 正式 100-building pilot、forward contract、bounded overfit、训练和 bulk regeneration 均未运行。
+3. 双向合同的 clean commit/wheel/pilot、forward contract、bounded overfit、训练和 bulk
+   regeneration 均未运行。
 4. 历史 packed release 的 producer commit/command、dirty diff hash 和训练 Python/lock 仍为
    `unknown`；已观测 train/val/test alias 问题也未被本轮改写。
 
 ## 精确下一门槛
 
-先完成当前工作树的最终检查、显式暂存、提交和推送，并从该 clean commit 构建带 SHA256
-的 wheel；随后执行已授权的 100-building versioned pilot，输出 determinism、round-trip、
-capacity、collision、split 和 silent-drop 报告。Pilot FAIL 时停在失败审阅；PASS 后仍需另行
-授权 bounded overfit。在 bounded overfit PASS 前不得进行全量生成或训练。
+按 `docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md` 审阅纯施工/纯拆除双向扩展。经授权
+形成新 clean commit 后构建 `gendiff-data-process==0.2.0` wheel，并只重跑相同边界的
+100-building pilot，输出 direction、determinism、round-trip、capacity、collision、split 和
+silent-drop 报告。Pilot FAIL 时停在失败审阅；PASS 后仍需另行授权 bounded overfit。在
+bounded overfit PASS 前不得进行全量生成或训练。
 
 ## 后续授权更新
 
 用户于 2026-08-29 批准了建议的 normalization、building split、condition sampler 和
 package pin，并授权黄金 hash 审阅、提交推送和最多 100-building pilot。四项合同及黄金
 双路径审阅现记录在 `docs/CANONICALIZER_PILOT_CONTRACT.md`；本报告前文仍保留 2A 到 2E
-完成时的审计轨迹；上方“阻塞项”和“精确下一门槛”已按当前授权更新，不把尚未执行的
-正式 pilot 写成已通过。
+完成时的审计轨迹。construction-only 正式 pilot artifact 位于
+`/mnt/d/artifacts/gendiff-data-process/runs/canonicalizer_pilot_v1_ca2a1ecb1e85_b0001_b0100`：
+100 栋中 60 成功、39 个 `E_CONSTRUCTION_REMOVAL`、1 个 `E_HOLE_UNSUPPORTED`，122 个
+emitted sample 被真实 loader 全量读取，generation/overall 状态为 FAIL。
+
+用户随后明确任务还包括从完整到逐步拆除。该需求不篡改上述历史结果；新的
+`bidirectional_monotonic_v1` 设计、100-building transition 分类和 mixed 阻塞见
+`docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md`。

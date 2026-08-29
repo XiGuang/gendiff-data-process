@@ -15,7 +15,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import torch
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 from gendiff_data_process.canonicalization.collision import audit_supervision_collisions
 from gendiff_data_process.canonicalization.config import load_bundle
@@ -27,11 +27,16 @@ from gendiff_data_process.canonicalization.release_contracts import (
     building_uid_from_key,
     split_for_building_uid,
 )
-from gendiff_data_process.canonicalization.serialize import canonical_hash, canonical_value
+from gendiff_data_process.canonicalization.serialize import (
+    canonical_hash,
+    canonical_value,
+)
 
 
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="验证 canonicalizer pilot 与真实 GenDiff loader 合同")
+    parser = argparse.ArgumentParser(
+        description="验证 canonicalizer pilot 与真实 GenDiff loader 合同"
+    )
     parser.add_argument("--run-root", required=True)
     parser.add_argument("--gendiff-repo", required=True)
     parser.add_argument("--repository", default=str(REPO_ROOT))
@@ -79,26 +84,40 @@ def _tree_hash(root: Path) -> str:
 
 
 def _git(repository: Path, *args: str) -> str:
-    return subprocess.check_output(["git", "-C", str(repository), *args], text=True).strip()
+    return subprocess.check_output(
+        ["git", "-C", str(repository), *args], text=True
+    ).strip()
 
 
 def _validate_wheel(path: Path, expected_name: str, expected_version: str) -> dict:
     if _sha256(path) == "":
         raise ValueError("wheel hash 为空")
     with zipfile.ZipFile(path) as archive:
-        metadata_names = [name for name in archive.namelist() if name.endswith(".dist-info/METADATA")]
-        package_files = [name for name in archive.namelist() if name.startswith("gendiff_data_process/")]
+        metadata_names = [
+            name for name in archive.namelist() if name.endswith(".dist-info/METADATA")
+        ]
+        package_files = [
+            name
+            for name in archive.namelist()
+            if name.startswith("gendiff_data_process/")
+        ]
         if len(metadata_names) != 1 or not package_files:
             raise ValueError("wheel 缺少唯一 METADATA 或 package 文件")
         metadata = archive.read(metadata_names[0]).decode("utf-8")
-    fields = {}
+    fields: dict[str, str] = {}
     for line in metadata.splitlines():
         if ": " in line:
             key, value = line.split(": ", 1)
             fields.setdefault(key, value)
     if fields.get("Name") != expected_name or fields.get("Version") != expected_version:
-        raise ValueError(f"wheel identity 不匹配: {fields.get('Name')} {fields.get('Version')}")
-    return {"name": fields["Name"], "version": fields["Version"], "file_count": len(package_files)}
+        raise ValueError(
+            f"wheel identity 不匹配: {fields.get('Name')} {fields.get('Version')}"
+        )
+    return {
+        "name": fields["Name"],
+        "version": fields["Version"],
+        "file_count": len(package_files),
+    }
 
 
 def _fingerprint_checks(
@@ -144,19 +163,33 @@ def _fingerprint_checks(
             }
         )
     mismatch_count = sum(
-        record["fingerprint"] != generation["pilot_fingerprint"]
-        for record in records
+        record["fingerprint"] != generation["pilot_fingerprint"] for record in records
     )
     return {"runs": records, "mismatch_count": mismatch_count}
 
 
 def _validate_packed(run_root: Path, bundle) -> dict:
-    dataset_root = (run_root / "outputs" / "canonicalizer_pilot_v1").resolve()
     run_manifest = _load_yaml(run_root / "run.yaml")
+    dataset_root = Path(run_manifest["outputs"]["dataset_root"]).resolve()
+    expected_name = (
+        "canonicalizer_pilot_bidirectional_v1"
+        if bundle.validation_profile.mode == "bidirectional_monotonic"
+        else "canonicalizer_pilot_v1"
+    )
+    if dataset_root != (run_root / "outputs" / expected_name).resolve():
+        raise ValueError("packed dataset 路径与 task contract 不一致")
     profile = _load_yaml(run_root / "normalization_profile.yaml")
     meta = torch.load(dataset_root / "dataset_meta.pt", weights_only=False)
     validate_packed_release_meta(meta)
+    task_contract_id = (
+        "bidirectional_monotonic_v1"
+        if bundle.validation_profile.mode == "bidirectional_monotonic"
+        else "construction_only_v1"
+    )
     expected_contract = {
+        "task_contract_id": task_contract_id,
+        "validation_mode": bundle.validation_profile.mode,
+        "condition_surface_mode": bundle.condition_sampling.surface_mode,
         "canonicalizer_version": bundle.canonicalizer.canonicalizer_version,
         "geometry_version": bundle.canonicalizer.geometry_version,
         "geometry_config_hash": bundle.canonicalizer.geometry_config_hash,
@@ -174,11 +207,16 @@ def _validate_packed(run_root: Path, bundle) -> dict:
             raise ValueError(f"dataset contract 字段不匹配: {field}")
     if contract.get("producer_commit") != run_manifest["producer"]["commit"]:
         raise ValueError("dataset contract producer commit 不匹配")
-    if contract.get("package_wheel_sha256") != run_manifest["producer"]["package_wheel_sha256"]:
+    if (
+        contract.get("package_wheel_sha256")
+        != run_manifest["producer"]["package_wheel_sha256"]
+    ):
         raise ValueError("dataset contract wheel SHA256 不匹配")
     if contract.get("normalization_profile_hash") != canonical_hash(profile):
         raise ValueError("dataset contract normalization profile hash 不匹配")
-    if canonical_value(meta.get("producer")) != canonical_value(run_manifest["producer"]):
+    if canonical_value(meta.get("producer")) != canonical_value(
+        run_manifest["producer"]
+    ):
         raise ValueError("dataset meta producer 与 run manifest 不匹配")
     if Path(meta.get("states_path", "")).resolve() != dataset_root / "states.pt":
         raise ValueError("dataset meta states_path 越界或不匹配")
@@ -190,12 +228,16 @@ def _validate_packed(run_root: Path, bundle) -> dict:
     records = []
     split_uids: dict[str, set[str]] = {"train": set(), "val": set(), "test": set()}
     pair_names: set[str] = set()
-    counts = Counter()
+    counts: Counter[str] = Counter()
+    change_kind_counts: Counter[str] = Counter()
     for split in ("train", "val", "test"):
         index = torch.load(dataset_root / f"{split}_index.pt", weights_only=False)
         for shard_record in index.get("shards") or []:
             shard_path = Path(shard_record["path"]).resolve()
-            if not shard_path.is_relative_to(dataset_root) or shard_record.get("split") != split:
+            if (
+                not shard_path.is_relative_to(dataset_root)
+                or shard_record.get("split") != split
+            ):
                 raise ValueError(f"{split} shard 路径越界或 split 不匹配")
             shard = torch.load(shard_path, weights_only=False)
             if int(shard.get("sample_count", -1)) != len(shard.get("samples") or []):
@@ -203,23 +245,39 @@ def _validate_packed(run_root: Path, bundle) -> dict:
             for sample in shard.get("samples") or []:
                 validate_packed_sample(sample)
                 metadata = sample["canonical_metadata"]
+                if (
+                    bundle.validation_profile.mode == "bidirectional_monotonic"
+                    and not all(
+                        metadata.get(field) for field in ("change_kind", "pair_hash")
+                    )
+                ):
+                    raise ValueError("双向 sample 缺少 change_kind 或 pair_hash")
                 for field, expected in expected_contract.items():
                     if metadata.get(field) != expected:
-                        raise ValueError(f"sample canonical metadata 字段不匹配: {field}")
+                        raise ValueError(
+                            f"sample canonical metadata 字段不匹配: {field}"
+                        )
                 if metadata["split"] != split:
                     raise ValueError("sample split metadata 与 index 不一致")
-                if split_for_building_uid(metadata["building_uid"], bundle.split) != split:
+                if (
+                    split_for_building_uid(metadata["building_uid"], bundle.split)
+                    != split
+                ):
                     raise ValueError("sample split 与冻结 building split 算法不一致")
                 condition = sample["condition"]
                 if tuple(condition.shape) != (bundle.condition_sampling.point_count, 3):
-                    raise ValueError(f"condition shape 不匹配: {tuple(condition.shape)}")
+                    raise ValueError(
+                        f"condition shape 不匹配: {tuple(condition.shape)}"
+                    )
                 if not torch.isfinite(condition).all():
                     raise ValueError("condition 包含 NaN/Inf")
                 if sample["pair_name"] in pair_names:
                     raise ValueError("packed pair_name 重复")
                 source_index = int(sample.get("source_state_index", -1))
                 target_index = int(sample.get("target_state_index", -1))
-                if not 0 <= source_index < len(states) or not 0 <= target_index < len(states):
+                if not 0 <= source_index < len(states) or not 0 <= target_index < len(
+                    states
+                ):
                     raise ValueError("sample state index 越界")
                 source_state = states[source_index]
                 target_state = states[target_index]
@@ -244,6 +302,7 @@ def _validate_packed(run_root: Path, bundle) -> dict:
                 split_uids[split].add(metadata["building_uid"])
                 records.append(metadata)
                 counts[split] += 1
+                change_kind_counts[metadata["change_kind"]] += 1
     overlaps = {
         "train_val": len(split_uids["train"] & split_uids["val"]),
         "train_test": len(split_uids["train"] & split_uids["test"]),
@@ -252,7 +311,9 @@ def _validate_packed(run_root: Path, bundle) -> dict:
     if any(overlaps.values()):
         raise ValueError(f"building split 泄漏: {overlaps}")
     collision = audit_supervision_collisions(records)
-    observed_counts = {split: int(counts.get(split, 0)) for split in ("train", "val", "test")}
+    observed_counts = {
+        split: int(counts.get(split, 0)) for split in ("train", "val", "test")
+    }
     expected_counts = {
         split: int(meta["split_sample_counts"].get(split, 0))
         for split in ("train", "val", "test")
@@ -262,17 +323,23 @@ def _validate_packed(run_root: Path, bundle) -> dict:
     return {
         "sample_counts": observed_counts,
         "state_count": len(states),
-        "split_building_counts": {split: len(uids) for split, uids in split_uids.items()},
+        "split_building_counts": {
+            split: len(uids) for split, uids in split_uids.items()
+        },
         "split_overlap": overlaps,
+        "change_kind_counts": dict(change_kind_counts),
         "collision_report": canonical_value(collision),
     }
 
 
 def _validate_real_loader(run_root: Path, gendiff_repo: Path, bundle) -> dict:
     sys.path.insert(0, str(gendiff_repo))
-    from craftsman.data.packed_area_edit_v2_data_module import PackedAreaEditV2DataModule
+    from craftsman.data.packed_area_edit_v2_data_module import (
+        PackedAreaEditV2DataModule,
+    )
 
-    dataset_root = run_root / "outputs" / "canonicalizer_pilot_v1"
+    run_manifest = _load_yaml(run_root / "run.yaml")
+    dataset_root = Path(run_manifest["outputs"]["dataset_root"]).resolve()
     module = PackedAreaEditV2DataModule(
         {
             "dataset_folder": str(dataset_root),
@@ -337,8 +404,14 @@ def main() -> int:
             or actual_remote != run_manifest["producer"]["repository_remote"]
             or status
         ):
-            raise ValueError("validator 要求 producer commit/remote 一致且 worktree clean")
-        checks["git"] = {"commit": actual_commit, "remote": actual_remote, "clean": True}
+            raise ValueError(
+                "validator 要求 producer commit/remote 一致且 worktree clean"
+            )
+        checks["git"] = {
+            "commit": actual_commit,
+            "remote": actual_remote,
+            "clean": True,
+        }
     except Exception as exc:
         failures.append(f"git: {exc}")
 
@@ -363,7 +436,10 @@ def main() -> int:
         }
         if actual_hashes != run_manifest["config_hashes"]:
             raise ValueError("run config 子树 hash 不匹配")
-        checks["config"] = {"sha256": expected_config_hash, "config_hashes": actual_hashes}
+        checks["config"] = {
+            "sha256": expected_config_hash,
+            "config_hashes": actual_hashes,
+        }
     except Exception as exc:
         failures.append(f"config: {exc}")
 
@@ -419,16 +495,18 @@ def main() -> int:
         profile = _load_yaml(run_root / "normalization_profile.yaml")
         source_manifest = _load_yaml(run_root / "source_manifest.yaml")
         failed_keys = {
-            item["building_key"]
-            for item in generation["building_results"]["failures"]
+            item["building_key"] for item in generation["building_results"]["failures"]
         }
         expected_train_uids = sorted(
             building["building_uid"]
             for building in source_manifest["buildings"]
-            if building["split"] == "train" and building["building_key"] not in failed_keys
+            if building["split"] == "train"
+            and building["building_key"] not in failed_keys
         )
         if sorted(profile["train_building_uids"]) != expected_train_uids:
-            raise ValueError("normalization profile 含非 train building 或遗漏成功 train building")
+            raise ValueError(
+                "normalization profile 含非 train building 或遗漏成功 train building"
+            )
         checks["normalization_train_only"] = {
             "train_building_count": len(expected_train_uids),
             "profile_id": profile["profile_id"],
@@ -437,24 +515,33 @@ def main() -> int:
         failures.append(f"normalization: {exc}")
 
     try:
-        checks["determinism"] = _fingerprint_checks(
+        determinism_check = _fingerprint_checks(
             repository,
             run_manifest,
             generation,
             args.hash_seed_workers,
         )
-        if checks["determinism"]["mismatch_count"]:
+        if determinism_check["mismatch_count"]:
             raise ValueError("不同 Python hash seed/worker 的 fingerprint 不一致")
+        checks["determinism"] = determinism_check
     except Exception as exc:
         failures.append(f"determinism: {exc}")
 
     try:
-        checks["packed"] = _validate_packed(run_root, bundle)
+        packed_check = _validate_packed(run_root, bundle)
+        if (
+            packed_check["change_kind_counts"]
+            != generation["pair_results"]["change_kind_counts"]
+        ):
+            raise ValueError("packed change_kind 计数与 generation report 不一致")
+        checks["packed"] = packed_check
     except Exception as exc:
         failures.append(f"packed: {exc}")
 
     try:
-        checks["real_gendiff_loader"] = _validate_real_loader(run_root, gendiff_repo, bundle)
+        checks["real_gendiff_loader"] = _validate_real_loader(
+            run_root, gendiff_repo, bundle
+        )
     except Exception as exc:
         failures.append(f"real_gendiff_loader: {type(exc).__name__}: {exc}")
 
@@ -469,7 +556,9 @@ def main() -> int:
     }
     _write_yaml(run_root / "reports" / "validation_report.yaml", report)
     run_manifest["status"] = "pass" if passed else "fail"
-    run_manifest["outputs"]["validation_report"] = str(run_root / "reports" / "validation_report.yaml")
+    run_manifest["outputs"]["validation_report"] = str(
+        run_root / "reports" / "validation_report.yaml"
+    )
     _write_yaml(run_root / "run.yaml", run_manifest)
     print(json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2))
     return 0 if passed else 2

@@ -17,13 +17,19 @@
   已增加有版本的 `canonical_edit_v3 -> area_v2_absolute_target_coord_no_anchor`
   candidate adapter，但尚未完成旧 producer 迁移、GenDiff 集成或 pilot；原有
   normalization/schema 差异和 12 项审计 mismatch 仍阻塞正式 producer-to-consumer 结论。
-- Canonical edit 唯一性已在 synthetic、七个裁剪黄金案例和 5-building preflight 中做
-  有界测量；完整 100-building pilot 和全数据分布仍未测量。
-- Canonical candidate 尚无全数据集 round-trip、collision、ambiguity 或
-  duplicate-key 报告。
-- Phase 2A 到 2E 及用户批准的 normalization/split/condition/package 合同已有实现和
-  小型 preflight，但不能替代正式 100-building pilot。冻结算法见
-  `docs/CANONICALIZER_PILOT_CONTRACT.md`。
+- Canonical edit 唯一性已在 synthetic、七个裁剪黄金案例和 construction-only
+  100-building pilot 中做有界测量；该 pilot 的 122 emitted pair 均通过 round-trip、
+  collision、determinism 和真实 loader 检查，但 generation 因 40 栋 hard failure 标为
+  FAIL。全数据分布仍未测量。
+- 对同一 100 栋做的只读 transition 分类得到 187 个纯新增、4 个纯删除、58 个 no-op、
+  48 个 mixed，另有 `building_0032` 的 hole。原 39 个 removal failure building 全都包含
+  mixed；不能通过把所有 removal 视为 demolition 关闭问题。证据和命令见
+  `docs/CANONICALIZER_BIDIRECTIONAL_CONTRACT.md`。
+- 双向 candidate 已实现纯 construction/demolition 的正反 pair、方向化 condition、
+  `change_kind`/`pair_hash` 和 pair 级失败核算，但 clean commit/wheel 与正式双向 pilot
+  尚未生成。48 个 mixed transition 的业务语义和修复来源仍为 `unknown`。
+- GenDiff 当前 loader 不把 `change_kind` 作为独立模型输入；XYZ + source 是否足以稳定
+  区分施工和拆除仍为 `unknown`，需要后续训练实验，当前未授权。
 - `/mnt/d/anaconda3/envs/gendiff/bin/python` 可运行 bounded canonicalizer、wheel build 和
   loader preflight，但它与历史训练环境的关系仍为 `unknown`，不能据此重建历史 run。
 

@@ -19,6 +19,7 @@ from gendiff_data_process.canonicalization.pilot import (
     pilot_fingerprint,
     process_pilot_tasks,
 )
+from gendiff_data_process.canonicalization.solid_partition import classify_stage_change
 
 
 def _indices(value: str) -> tuple[int, ...]:
@@ -29,13 +30,17 @@ def _indices(value: str) -> tuple[int, ...]:
 
 
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="构造最多 100-building 的 canonicalizer pilot")
+    parser = argparse.ArgumentParser(
+        description="构造最多 100-building 的 canonicalizer pilot"
+    )
     parser.add_argument("--dataset-root", required=True)
     parser.add_argument("--config", required=True)
     parser.add_argument("--building-start", type=int, default=1)
     parser.add_argument("--building-count", type=int, default=100)
     parser.add_argument("--stage-indices", type=_indices, default=(0, 1, 2, 3))
-    parser.add_argument("--workers", type=int, default=1, help="fingerprint-only 使用的 worker 数")
+    parser.add_argument(
+        "--workers", type=int, default=1, help="fingerprint-only 使用的 worker 数"
+    )
     parser.add_argument("--fingerprint-only", action="store_true")
     parser.add_argument("--run-root")
     parser.add_argument("--repository", default=str(REPO_ROOT))
@@ -46,7 +51,9 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _git(repository: Path, *args: str) -> str:
-    return subprocess.check_output(["git", "-C", str(repository), *args], text=True).strip()
+    return subprocess.check_output(
+        ["git", "-C", str(repository), *args], text=True
+    ).strip()
 
 
 def main() -> int:
@@ -63,14 +70,37 @@ def main() -> int:
     if args.fingerprint_only:
         results = process_pilot_tasks(tasks, args.workers)
         errors = Counter(result.error_code for result in results if result.error_code)
+        pair_errors = Counter(
+            failure.error_code for result in results for failure in result.pair_failures
+        )
+        change_kinds = Counter(
+            pair.change_kind for result in results for pair in result.pairs
+        )
+        source_transitions = Counter(
+            classify_stage_change(
+                source,
+                target,
+                volume_tolerance_q3=bundle.validation_profile.removed_volume_tolerance_q3,
+            ).change_kind
+            for result in results
+            if result.sequence is not None
+            for source, target in zip(
+                result.sequence.stages, result.sequence.stages[1:]
+            )
+        )
         print(
             json.dumps(
                 {
                     "fingerprint": pilot_fingerprint(results),
                     "workers": args.workers,
                     "building_count": len(results),
-                    "successful_buildings": sum(result.sequence is not None for result in results),
+                    "successful_buildings": sum(
+                        result.sequence is not None for result in results
+                    ),
                     "errors_by_code": dict(errors),
+                    "pair_errors_by_code": dict(pair_errors),
+                    "change_kind_counts": dict(change_kinds),
+                    "source_transition_counts": dict(source_transitions),
                 },
                 ensure_ascii=False,
                 sort_keys=True,
@@ -90,7 +120,9 @@ def main() -> int:
     repository = Path(args.repository).resolve()
     actual_commit = _git(repository, "rev-parse", "HEAD")
     if actual_commit != args.producer_commit:
-        raise SystemExit(f"producer commit 不匹配: actual={actual_commit} expected={args.producer_commit}")
+        raise SystemExit(
+            f"producer commit 不匹配: actual={actual_commit} expected={args.producer_commit}"
+        )
     status = _git(repository, "status", "--porcelain=v1", "--untracked-files=all")
     if status:
         raise SystemExit("pilot 必须从 clean worktree 运行")

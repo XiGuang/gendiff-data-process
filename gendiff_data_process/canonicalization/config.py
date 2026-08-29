@@ -157,12 +157,20 @@ class CanonicalizerBundle:
 def _construct(mapping: Mapping[str, Any]) -> CanonicalizerBundle:
     canonicalizer = dict(mapping.get("canonicalizer") or {})
     canonicalizer["polygon"] = PolygonConfig(**dict(canonicalizer.get("polygon") or {}))
-    canonicalizer["layer_matching"] = LayerMatchingConfig(**dict(canonicalizer.get("layer_matching") or {}))
-    canonicalizer["point_matching"] = PointMatchingConfig(**dict(canonicalizer.get("point_matching") or {}))
+    canonicalizer["layer_matching"] = LayerMatchingConfig(
+        **dict(canonicalizer.get("layer_matching") or {})
+    )
+    canonicalizer["point_matching"] = PointMatchingConfig(
+        **dict(canonicalizer.get("point_matching") or {})
+    )
     bundle = CanonicalizerBundle(
         canonicalizer=CanonicalizerConfig(**canonicalizer),
-        validation_profile=ValidationProfile(**dict(mapping.get("validation_profile") or {})),
-        condition_sampling=ConditionConfig(**dict(mapping.get("condition_sampling") or {})),
+        validation_profile=ValidationProfile(
+            **dict(mapping.get("validation_profile") or {})
+        ),
+        condition_sampling=ConditionConfig(
+            **dict(mapping.get("condition_sampling") or {})
+        ),
         normalization=NormalizationConfig(**dict(mapping.get("normalization") or {})),
         split=SplitConfig(**dict(mapping.get("split") or {})),
         package=PackageConfig(**dict(mapping.get("package") or {})),
@@ -190,7 +198,9 @@ def validate_bundle(bundle: CanonicalizerBundle) -> None:
     if cfg.polygon.multipolygon_policy != "split":
         raise ValueError("canonicalizer_v1 的 MultiPolygon 策略必须是 split")
     if cfg.polygon.raw_overlap_policy != "union_with_warning":
-        raise ValueError("canonicalizer_v1 的 raw overlap 策略必须是 union_with_warning")
+        raise ValueError(
+            "canonicalizer_v1 的 raw overlap 策略必须是 union_with_warning"
+        )
     matching = cfg.layer_matching
     if matching.metric_scale <= 0:
         raise ValueError("layer matching metric_scale 必须为正数")
@@ -206,18 +216,32 @@ def validate_bundle(bundle: CanonicalizerBundle) -> None:
         raise ValueError("canonicalizer_v1 只支持 delete_then_insert fallback")
 
     profile = bundle.validation_profile
-    if profile.mode != "construction_only":
-        raise ValueError("canonicalizer_v1 当前只支持 construction_only profile")
+    if profile.mode not in {"construction_only", "bidirectional_monotonic"}:
+        raise ValueError(
+            "validation profile 只支持 construction_only 或 bidirectional_monotonic"
+        )
     if profile.removed_volume_tolerance_q3 < 0:
         raise ValueError("removed volume tolerance 不能为负数")
-    if min(profile.max_layers, profile.max_points_per_layer, profile.max_buildings_per_tile) <= 0:
+    if (
+        min(
+            profile.max_layers,
+            profile.max_points_per_layer,
+            profile.max_buildings_per_tile,
+        )
+        <= 0
+    ):
         raise ValueError("capacity 必须为正数")
     if profile.overflow_policy != "error":
         raise ValueError("canonicalizer_v1 的 overflow policy 必须是 error")
 
     condition = bundle.condition_sampling
-    if condition.surface_mode != "addition_exterior":
-        raise ValueError("canonicalizer_v1 只支持 addition_exterior condition")
+    if condition.surface_mode not in {
+        "addition_exterior",
+        "directional_delta_exterior",
+    }:
+        raise ValueError(
+            "condition 只支持 addition_exterior 或 directional_delta_exterior"
+        )
     if condition.point_count <= 0 or condition.candidate_multiplier < 1:
         raise ValueError("condition point_count 和 candidate_multiplier 必须为正数")
     if condition.sampler != "deterministic_stratified_fps":
@@ -226,10 +250,29 @@ def validate_bundle(bundle: CanonicalizerBundle) -> None:
         raise ValueError("condition allocation 必须是 largest_remainder")
     if condition.low_discrepancy_sequence != "halton_2_3":
         raise ValueError("condition 低差异序列必须是 halton_2_3")
-    if condition.fps_start != "lexicographic_minimum" or condition.final_order != "lexicographic_xyz":
+    if (
+        condition.fps_start != "lexicographic_minimum"
+        or condition.final_order != "lexicographic_xyz"
+    ):
         raise ValueError("condition FPS 起点和最终排序必须使用字典序合同")
-    if condition.seed_material != "source_target_condition_config_hash":
-        raise ValueError("condition seed material 与 v1 合同不一致")
+    expected_seed_material = {
+        "addition_exterior": "source_target_condition_config_hash",
+        "directional_delta_exterior": "unordered_stage_pair_condition_config_hash",
+    }[condition.surface_mode]
+    if condition.seed_material != expected_seed_material:
+        raise ValueError("condition seed material 与 surface mode 合同不一致")
+    if (
+        profile.mode == "construction_only"
+        and condition.surface_mode != "addition_exterior"
+    ):
+        raise ValueError("construction_only 必须使用 addition_exterior condition")
+    if (
+        profile.mode == "bidirectional_monotonic"
+        and condition.surface_mode != "directional_delta_exterior"
+    ):
+        raise ValueError(
+            "bidirectional_monotonic 必须使用 directional_delta_exterior condition"
+        )
 
     normalization = bundle.normalization
     if (
@@ -252,7 +295,10 @@ def validate_bundle(bundle: CanonicalizerBundle) -> None:
         raise ValueError("split threshold 必须满足 0 < train < validation < modulus")
 
     package = bundle.package
-    if package.pin_mode != "git_commit_and_wheel_sha256" or package.source_copy_policy != "forbidden":
+    if (
+        package.pin_mode != "git_commit_and_wheel_sha256"
+        or package.source_copy_policy != "forbidden"
+    ):
         raise ValueError("package 必须按 commit+wheel SHA256 固定并禁止复制源码")
     if not package.distribution_name or not package.import_name or not package.version:
         raise ValueError("package identity 字段不能为空")
@@ -260,6 +306,9 @@ def validate_bundle(bundle: CanonicalizerBundle) -> None:
 
 def load_bundle(path: str | Path) -> CanonicalizerBundle:
     mapping = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
-    if not isinstance(mapping, Mapping) or mapping.get("schema_version") != "canonicalizer_bundle_v1":
+    if (
+        not isinstance(mapping, Mapping)
+        or mapping.get("schema_version") != "canonicalizer_bundle_v1"
+    ):
         raise ValueError("配置必须使用 canonicalizer_bundle_v1 schema")
     return _construct(mapping)
